@@ -1,0 +1,546 @@
+# Aplikacja do zarządzania budżetem domowym
+
+## 1. Cel aplikacji
+
+Aplikacja ma umożliwiać proste i szybkie zarządzanie budżetem gospodarstwa domowego.
+
+Głównym celem jest:
+
+* kontrolowanie dochodów i wydatków,
+* obserwowanie, gdzie trafiają pieniądze,
+* planowanie miesięcznego budżetu,
+* widzenie, ile zostaje w danym miesiącu,
+* realizowanie celów finansowych,
+* szybkie wykrywanie problemów i odchyleń od założonego budżetu.
+
+Aplikacja powinna być **prosta w codziennym użyciu**. Rejestracja pojedynczego wydatku powinna zajmować możliwie mało czasu.
+
+Poniższy opis obejmuje docelowy kształt aplikacji. Pierwsza wersja jest węższa. Kolejność budowy jest w sekcji 22.
+
+---
+
+# 2. Główne zasady UX
+
+### Minimalna liczba czynności
+
+Dodanie typowego wydatku powinno wymagać przede wszystkim:
+
+> kwota → kategoria → zapisz
+
+Data powinna być domyślnie ustawiana na bieżącą.
+
+Pozostałe informacje są opcjonalne.
+
+### Szybkie ponawianie
+
+Aplikacja powinna ułatwiać ponowne dodanie podobnego wydatku, np.:
+
+> +50 zł → Paliwo
+
+> +120 zł → Zakupy spożywcze
+
+### Opcjonalność szczegółów
+
+Użytkownik nie powinien być zmuszany do podawania:
+
+* osoby,
+* opisu,
+* dodatkowych informacji,
+* szczegółowej podkategorii.
+
+Im więcej informacji użytkownik chce zapisać, tym dokładniejsza może być analiza, ale podstawowy proces ma pozostać bardzo szybki.
+
+---
+
+# 3. Gospodarstwo domowe
+
+Aplikacja obsługuje budżet gospodarstwa domowego niezależnie od jego rodzaju.
+
+Przykłady:
+
+* mieszkanie,
+* dom jednorodzinny,
+* osoba mieszkająca samodzielnie,
+* para,
+* rodzina z dziećmi.
+
+Użytkownik może dostosować kategorie do własnej sytuacji.
+
+### Konto i właściciel danych
+
+Przy pierwszym uruchomieniu powstaje gospodarstwo i jedno konto.
+
+Wydatki i dochody należą do tego gospodarstwa. Ekran miesiąca pokazuje całość gospodarstwa, nie prywatny wycinek konta.
+
+Drugie konto, na przykład partnera, dochodzi później do tego samego gospodarstwa. Do tego czasu jedna osoba wpisuje wszystkie kwoty.
+
+Osoba bez konta, na przykład dziecko, nie jest loginem. To etykieta przy wydatku, opisana w sekcji 5.
+
+---
+
+# 4. Kategorie wydatków
+
+Aplikacja posiada domyślny zestaw kategorii, np.:
+
+* mieszkanie/dom,
+* żywność,
+* samochód,
+* transport,
+* dzieci,
+* zdrowie,
+* rozrywka,
+* subskrypcje,
+* ubrania,
+* zakupy,
+* kredyty,
+* ubezpieczenia,
+* inne.
+
+Kategorie mogą być przez użytkownika:
+
+* dodawane,
+* usuwane,
+* zmieniane,
+* porządkowane,
+* dzielone na podkategorie.
+
+Podkategorie nie wchodzą do pierwszej wersji. Na start wystarczą kategorie główne.
+
+Przykład:
+
+> Samochód → paliwo
+> Samochód → serwis
+> Samochód → ubezpieczenie
+
+lub:
+
+> Dom → ogrzewanie
+> Dom → prąd
+> Dom → ogród
+
+System nie powinien zakładać z góry, jaki typ gospodarstwa ma użytkownik.
+
+---
+
+# 5. Rejestracja wydatków
+
+Podstawowy proces:
+
+1. użytkownik wybiera „Dodaj wydatek”,
+2. podaje kwotę,
+3. wybiera kategorię,
+4. zapisuje.
+
+Opcjonalnie może wskazać:
+
+* osobę,
+* podkategorię,
+* opis,
+* datę inną niż bieżąca.
+
+### Przypisanie do osoby
+
+Osoba jest opcjonalną etykietą przy wydatku, nie osobnym kontem ani budżetem.
+
+Przykładowe wartości:
+
+* wspólne,
+* imię konkretnej osoby,
+* dziecko.
+
+Puste pole znaczy „nieoznaczone”. Nie oznacza automatycznie wydatku wspólnego.
+
+Etykieta służy do filtra w historii i do szybkiego ponowienia podobnego wydatku. Nie tworzy osobnych limitów, osobnych dochodów ani rozliczenia „kto komu ile”.
+
+Jeden paragon to jeden wydatek z jedną etykietą. Dzielenie jednej kwoty na kilka osób należy do późniejszego, rozbudowanego podziału budżetów.
+
+Przykład:
+
+> Zakupy spożywcze — 250 zł — wspólne
+
+> Kieszonkowe — 100 zł — dziecko
+
+---
+
+# 6. Dochody
+
+Możliwość rejestrowania dochodów, np.:
+
+* wynagrodzenie,
+* działalność,
+* świadczenia,
+* wynajem,
+* inne.
+
+Dochód może być:
+
+* jednorazowy,
+* cykliczny.
+
+W pierwszej wersji wystarcza dochód jednorazowy. Dochód cykliczny dochodzi razem z wydatkami cyklicznymi.
+
+Użytkownik może posiadać wiele źródeł dochodu.
+
+---
+
+# 7. Wydatki cykliczne
+
+Możliwość definiowania regularnych wydatków, np.:
+
+* czynsz,
+* rata kredytu,
+* internet,
+* telefon,
+* subskrypcja,
+* ubezpieczenie.
+
+Użytkownik określa kwotę i częstotliwość.
+
+Aplikacja uwzględnia je automatycznie w przyszłych okresach budżetowych.
+
+---
+
+# 8. Wydatki nieregularne
+
+Aplikacja powinna umożliwiać uwzględnienie kosztów występujących rzadziej niż raz w miesiącu, np.:
+
+* ubezpieczenie samochodu,
+* przegląd,
+* remont,
+* zakup opału,
+* większe zakupy.
+
+Pozwala to analizować **koszt utrzymania** gospodarstwa, a nie tylko wydatki występujące w danym miesiącu.
+
+Dopóki nie ma osobnej obsługi tych kosztów, płatność zapisuje się jak zwykły wydatek w miesiącu zapłaty i zmniejsza kwotę, która zostaje. Późniejsze rozłożenie na kolejne miesiące zmienia tylko koszt utrzymania, nie saldo miesiąca.
+
+---
+
+# 9. Budżet miesięczny
+
+Użytkownik może określić planowany budżet miesięczny.
+
+Aplikacja pokazuje:
+
+* dochody,
+* planowane wydatki,
+* rzeczywiste wydatki,
+* przewidywane zostaje,
+* zostaje.
+
+### Trzy osobne liczby
+
+Te same pieniądze nie powinny występować pod jedną nazwą „oszczędności”.
+
+| Nazwa | Znaczenie |
+|---|---|
+| **Zostaje** | dochody minus wydatki w tym miesiącu |
+| **Na cel** | kwota świadomie przeniesiona na poduszkę, wakacje albo remont |
+| **Koszt utrzymania** | wydatki miesiąca plus udział kosztów płaconych rzadziej niż raz w miesiącu |
+
+Reguły:
+
+* **Zostaje** to różnica miesiąca. Nie oznacza, że pieniądze zostały odłożone.
+* Cel zasila się ruchem „przenieś na cel”, a nie kolejnym wydatkiem. Inaczej ta sama kwota znika z miesiąca i jeszcze raz pojawia się jako oszczędność.
+* **Koszt utrzymania** jest osobnym wierszem. Nie zastępuje salda miesiąca.
+* **Przewidywane zostaje** to dochody minus wydatki już zapisane i te jeszcze zaplanowane. Nie miesza się z kwotami leżącymi na celu.
+
+Możliwe jest określenie limitów dla poszczególnych kategorii.
+
+Przykład:
+
+> Żywność: 1 500 zł
+> Samochód: 1 000 zł
+> Rozrywka: 500 zł
+
+---
+
+# 10. Kontrola realizacji budżetu
+
+Dla każdej kategorii aplikacja pokazuje:
+
+* wykorzystany budżet,
+* pozostałą kwotę,
+* procent wykorzystania,
+* ewentualne przekroczenie.
+
+Przykład:
+
+> Żywność
+> 1 280 / 1 500 zł
+> Pozostało: 220 zł
+
+---
+
+# 11. Prognoza końca miesiąca
+
+Aplikacja może na podstawie dotychczasowych wydatków pokazywać przewidywany wynik miesiąca.
+
+Przykład:
+
+> Budżet żywności: 1 500 zł
+> Wydano: 1 100 zł
+> Przewidywane wydatki: 1 620 zł
+
+Osobno aplikacja może pokazać przewidywane zostaje: dochody minus wydatki już zapisane i te jeszcze zaplanowane.
+
+Dzięki temu użytkownik może zareagować zanim nastąpi przekroczenie budżetu.
+
+---
+
+# 12. Dashboard
+
+Główny ekran powinien w prosty sposób przedstawiać aktualną sytuację finansową.
+
+Przykładowe informacje:
+
+> Dochody: 12 500 zł
+> Wydatki: 8 200 zł
+> Zostaje: 4 300 zł
+
+4 300 zł zostaje w tym miesiącu. Nie oznacza to jeszcze pieniędzy odłożonych na cel.
+
+oraz, w miarę dochodzenia kolejnych funkcji:
+
+* największe kategorie wydatków,
+* realizacja budżetu,
+* kwoty odłożone na cele,
+* koszt utrzymania,
+* najbliższe zaplanowane wydatki,
+* najważniejsze ostrzeżenia.
+
+W pierwszej wersji dashboard pokazuje dochody, wydatki i zostaje.
+
+Dashboard powinien pozwalać szybko odpowiedzieć na pytanie:
+
+> **„Jak wygląda mój budżet w tym miesiącu?”**
+
+---
+
+# 13. Historia i analiza wydatków
+
+Użytkownik może przeglądać wydatki według:
+
+* miesiąca,
+* kategorii,
+* osoby (filtra po etykiecie, gdy etykieta jest już dostępna),
+* zakresu dat.
+
+Aplikacja pokazuje również podstawowe trendy, np.:
+
+> Średnie wydatki na żywność: 1 420 zł/mies.
+
+> Wydatki na samochód w tym roku: 12 400 zł.
+
+---
+
+# 14. Porównanie okresów
+
+Możliwość porównania:
+
+* bieżącego miesiąca z poprzednim,
+* miesięcy między sobą,
+* bieżącego roku z poprzednim.
+
+Przykład:
+
+> Wydatki na żywność: +12%
+> Wydatki na transport: -8%
+> Wydatki na rozrywkę: +24%
+
+---
+
+# 15. Cele oszczędnościowe
+
+Użytkownik może definiować cele finansowe.
+
+Przykłady:
+
+### Poduszka finansowa
+
+Cel: 30 000 zł
+
+### Wakacje
+
+Cel: 8 000 zł
+
+### Remont
+
+Cel: 20 000 zł
+
+Dla każdego celu aplikacja pokazuje:
+
+* aktualnie zgromadzoną kwotę,
+* kwotę pozostałą do celu,
+* postęp,
+* planowany termin osiągnięcia celu.
+
+Cel zasila się ruchem „przenieś na cel”. Nie jest to wydatek kategorii.
+
+---
+
+# 16. Automatyczne planowanie oszczędzania
+
+Dla celu określonego kwotą i terminem aplikacja wylicza wymaganą miesięczną kwotę oszczędzania.
+
+Przykład:
+
+> Cel: 6 000 zł
+> Termin: 30.06.2027
+> Wymagane oszczędzanie: 750 zł/mies.
+
+---
+
+# 17. Alerty i ostrzeżenia
+
+Aplikacja informuje użytkownika o istotnych sytuacjach.
+
+Przykłady:
+
+> ⚠️ Przekroczono budżet kategorii „Rozrywka”.
+
+> ⚠️ Wydatki na żywność są już na poziomie 90% miesięcznego limitu.
+
+> ⚠️ Przy obecnym tempie wydatków miesięczny budżet zostanie przekroczony.
+
+Alerty powinny być ograniczone do sytuacji rzeczywiście istotnych, aby użytkownik nie był zasypywany powiadomieniami.
+
+---
+
+# 18. Kondycja budżetu
+
+Aplikacja może prezentować uproszczony wskaźnik kondycji budżetu.
+
+Uwzględniane mogą być m.in.:
+
+* realizacja budżetu,
+* ile zostaje w miesiącu,
+* udział kosztów stałych,
+* realizacja celów,
+* przekroczenia budżetu.
+
+Przykład:
+
+> **Kondycja budżetu: 82/100**
+
+Wskaźnik ma charakter informacyjny i nie stanowi profesjonalnej porady finansowej.
+
+---
+
+# 19. Analiza możliwości oszczędzania
+
+Użytkownik może określić:
+
+> Chcę, żeby na koniec miesiąca zostawało o 1 000 zł więcej.
+
+Aplikacja analizuje wydatki i wskazuje potencjalne obszary ograniczenia kosztów.
+
+Przykład:
+
+> Możliwe ograniczenia:
+>
+> Subskrypcje: 100 zł
+> Rozrywka: 250 zł
+> Restauracje: 300 zł
+> Zakupy: 200 zł
+> Pozostałe: 150 zł
+>
+> Potencjalna oszczędność: 1 000 zł/mies.
+
+Ta analiza nie wchodzi do pierwszej wersji. Gdy się pojawi, sugestie powinny wynikać z prostych, zdefiniowanych reguł, a nie z AI.
+
+---
+
+# 20. Priorytety wydatków
+
+Wydatki mogą być oznaczone jako:
+
+* konieczne,
+* opcjonalne.
+
+Opcjonalnie można stosować bardziej szczegółowy podział, np.:
+
+* niezbędne,
+* ważne,
+* opcjonalne.
+
+Pozwala to później analizować, które wydatki można ograniczyć.
+
+---
+
+# 21. Zasada prostoty
+
+Najważniejszą cechą aplikacji jest **niski koszt obsługi po stronie użytkownika**.
+
+Aplikacja nie powinna zmuszać użytkownika do prowadzenia skomplikowanej księgowości.
+
+Preferowany model:
+
+> **Dodaj kwotę → wybierz kategorię → gotowe.**
+
+Szczegółowe informacje mają być dostępne dla użytkownika, który chce prowadzić dokładniejszą analizę, ale nie mogą być wymagane przy każdym wydatku.
+
+---
+
+# 22. Kolejność budowy
+
+Punkty 2–21 opisują kierunek aplikacji. Nie wchodzą wszystkie do pierwszej wersji.
+
+### Pierwsza wersja
+
+* przy pierwszym uruchomieniu: gospodarstwo i jedno konto,
+* wydatki i dochody należą do tego gospodarstwa,
+* wydatek: kwota, kategoria, data (domyślnie dziś), opcjonalnie opis,
+* domyślne kategorie oraz ich dodawanie, usuwanie, zmiana i porządkowanie, bez podkategorii,
+* dochód jednorazowy,
+* jeden ekran miesiąca dla całego gospodarstwa: dochody, wydatki, zostaje.
+
+To wystarcza, żeby odpowiedzieć na pytanie „jak wygląda ten miesiąc?”.
+
+### Zaraz potem
+
+* drugie konto w tym samym gospodarstwie, ze wspólnym widokiem miesiąca,
+* osoby gospodarstwa jako etykieta przy wydatku; osoba nie musi mieć konta,
+* wydatki cykliczne i dochód cykliczny,
+* limity kategorii i pasek wykorzystania,
+* historia z filtrem miesiąca i kategorii,
+* szybkie ponowienie ostatniego wydatku.
+
+### Później
+
+* koszty rzadsze niż raz w miesiącu i ich rozłożenie na koszt utrzymania,
+* prognoza końca miesiąca,
+* cele, ruch „przenieś na cel” i wymagana kwota miesięczna,
+* porównanie okresów, alerty, kondycja budżetu, sugestie ograniczenia wydatków,
+* filtr historii po osobie,
+* podkategorie,
+* priorytet wydatku: konieczne albo opcjonalne.
+
+### Poza tym kierunkiem, na kolejne wersje
+
+* funkcje AI i asystent finansowy,
+* automatyczna analiza „co jeśli?”,
+* wspólne i osobiste budżety z rozbudowanym podziałem, w tym dzielenie jednego paragonu na kilka osób,
+* automatyczne reguły kategoryzowania,
+* import transakcji z banków,
+* zaawansowana automatyzacja kategoryzacji,
+* zaawansowane moduły analizy samochodu,
+* zaawansowane moduły analizy domu.
+
+---
+
+# 23. Kierunek rozwoju
+
+Docelowo aplikacja może zostać rozszerzona o warstwę AI, która będzie analizowała dane użytkownika i odpowiadała na pytania dotyczące jego budżetu.
+
+Przykłady przyszłych możliwości:
+
+> „Dlaczego w tym miesiącu wydaję więcej?”
+
+> „Jak mogę zaoszczędzić dodatkowe 1 000 zł?”
+
+> „Które wydatki mogę ograniczyć bez zmniejszania wydatków na dzieci?”
+
+> „Jak zmieni się mój budżet, jeśli rata kredytu wzrośnie o 500 zł?”
+
+AI jest jednak **przyszłym rozszerzeniem**, a nie elementem MVP.

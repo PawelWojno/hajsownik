@@ -1,0 +1,27 @@
+{
+  "env": {
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git status *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)",
+      "Bash(git stash *)",
+      "Read",
+      "Edit",
+      "Write"
+    ],
+    "ask": ["Bash(curl *)", "Bash(wget *)", "Bash(git push *)", "Bash(git push)"],
+    "deny": ["Bash(rm -rf *)", "Read(./.env)", "Read(./.dev.vars)"]
+  }
+}
