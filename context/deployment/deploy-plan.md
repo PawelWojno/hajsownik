@@ -35,6 +35,17 @@ gh secret set CLOUDFLARE_API_TOKEN --repo PawelWojno/hajsownik
 gh variable set CLOUDFLARE_ACCOUNT_ID --repo PawelWojno/hajsownik --body "d509512d3acdca34d35f6677a83a9f0b"
 ```
 
+## Grading/certification access (added after initial plan)
+
+For the course certification review, graders need to sign in without going through email confirmation themselves. **Decision: `Confirm email` stays ON for production** (per Gate B / PRD FR-001 — do not disable it globally, that would let anyone reset a password on an email they don't control). Instead:
+
+**Gate F — Demo account for graders** (Supabase dashboard, manual, by the user):
+1. Production project → Authentication → Users → Add user.
+2. Set an email + password, enable **"Auto Confirm User"** if offered (or confirm the email manually afterward from the Users list).
+3. Share these credentials with graders alongside the production URL — they sign in directly, skipping `/auth/signup` and the confirmation step entirely.
+
+This was considered against disabling `Confirm email` globally and rejected: a global toggle would weaken the account-takeover protection FR-001 was written for, for every real user, not just graders.
+
 ## First-deploy verification
 
 App today: `/`, `/auth/signin`, `/auth/signup`, `/auth/confirm-email`, `/dashboard` — all SSR/non-prerendered (`output: "server"`, no `prerender = true` anywhere), so the `nodejs_compat` `[object Object]` risk from `infrastructure.md` applies to every route today.
