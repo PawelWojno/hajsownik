@@ -245,8 +245,8 @@ No existing data to backfill — production Supabase currently has zero users, a
 ### Phase 3: RLS isolation test
 
 #### Automated
-- [x] 3.1 `npx supabase test db` passes
-- [x] 3.2 `npm run smoke` still passes
-- [x] 3.3 Both users' SELECT assertions (households + household_members, own-only) pass as `authenticated`, not `postgres`
-- [x] 3.4 `throws_ok` confirms `authenticated` cannot INSERT into `households`
-- [x] 3.5 `UPDATE`/`DELETE` against the other household affect 0 rows (`is` on `RETURNING` count, not `throws_ok`)
+- [x] 3.1 `npx supabase test db` passes — 74492bd
+- [x] 3.2 `npm run smoke` still passes — 74492bd
+- [x] 3.3 Both users' SELECT assertions (households + household_members, own-only) pass as `authenticated`, not `postgres` — 74492bd
+- [x] 3.4 `throws_ok` confirms `authenticated` cannot INSERT into `households` — 74492bd
+- [x] 3.5 `UPDATE`/`DELETE` against the other household affect 0 rows (`is` on `RETURNING` count, not `throws_ok`) — 74492bd
