@@ -33,3 +33,5 @@ CLAUDE.local.md
 # Skill junctions into .agents/skills (source of truth lives there)
 .claude/skills/10x-cli-guide
 .claude/skills/10x-cli-setup
+# Supabase Studio saved queries (local scratch)
+supabase/snippets/
