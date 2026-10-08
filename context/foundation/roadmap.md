@@ -41,7 +41,7 @@ Today, a household budget lives "in someone's head" — there's no reliable, low
 
 | ID   | Change ID                   | Outcome (user can …)                                              | Prerequisites  | PRD refs                     | Status   |
 | ---- | ---------------------------- | ------------------------------------------------------------------- | -------------- | ----------------------------- | -------- |
-| F-01 | household-foundation         | (foundation) signup creates a household; RLS scopes all data to it | —              | FR-001, FR-002, Access Control, NFR | in-progress |
+| F-01 | household-foundation         | (foundation) signup creates a household; RLS scopes all data to it | —              | FR-001, FR-002, Access Control, NFR | done |
 | S-01 | first-expense-and-income      | add an expense and an income entry, see "zostaje" update on month screen | F-01           | US-01, FR-004, FR-006, FR-012, FR-013 | proposed |
 | S-02 | category-management           | add/remove/archive/rename/reorder categories                       | S-01           | FR-007, FR-008, FR-009, FR-010, FR-011 | proposed |
 | S-03 | password-reset                 | reset their password by email if locked out                        | —              | FR-003                        | ready    |
@@ -85,7 +85,7 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** This is the single gating foundation — every downstream domain table inherits whatever isolation pattern is established here. Sequenced first, alone, specifically so household isolation gets scrutiny before the pattern is replicated across tables.
-- **Status:** in-progress
+- **Status:** done
 - **GitHub:** #1
 
 ## Slices
@@ -205,4 +205,4 @@ No cross-slice open questions at this time — the PRD carried zero open questio
 
 ## Done
 
-(empty — nothing archived yet)
+- **F-01: (foundation) Signup extends to create a household row linked to the account (completing FR-001; FR-002/login is already satisfied by Baseline). A minimal Postgres schema + Row-Level-Security policy pattern exists so every future domain table is scoped to the caller's household by construction.** — Archived 2026-10-08 → `context/archive/2026-10-08-household-foundation/`. Lesson: —.
