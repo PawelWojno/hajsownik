@@ -161,6 +161,8 @@ need a CORS preflight, so no extra CSRF token is required.
 **File**: `src/pages/api/auth/signin.ts`
 
 **Intent**: Redirect to `/dashboard` instead of `/` so a returning user lands on the month screen.
+Added during implementation (user request): `src/middleware.ts` also redirects a signed-in user who opens `/`, `/auth/signin`
+or `/auth/signup` (exact paths) to `/dashboard`, so the month screen is the home of a signed-in user.
 
 ### Success Criteria
 
@@ -325,26 +327,26 @@ Backfill of default categories for existing households is part of the migration;
 
 #### Automated
 
-- [x] 1.1 Migration applies on a clean DB: `npx supabase db reset`
-- [x] 1.2 pgTAP suites pass: `npx supabase test db`
+- [x] 1.1 Migration applies on a clean DB: `npx supabase db reset` — ea8ac6f
+- [x] 1.2 pgTAP suites pass: `npx supabase test db` — ea8ac6f
 
 #### Manual
 
-- [x] 1.3 New household has 12 categories in the expected order
-- [x] 1.4 Backfill gives an existing household the 12 categories
+- [x] 1.3 New household has 12 categories in the expected order — ea8ac6f
+- [x] 1.4 Backfill gives an existing household the 12 categories — ea8ac6f
 
 ### Phase 2: Money/date helpers and API endpoints
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Type check passes: `npx astro check`
-- [ ] 2.3 Build passes: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 Type check passes: `npx astro check`
+- [x] 2.3 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.4 Valid POST returns 200 with updated sums; invalid inputs and no session are rejected
-- [ ] 2.5 Entry around the Warsaw month boundary lands in the correct month
+- [x] 2.4 Valid POST returns 200 with updated sums; invalid inputs and no session are rejected
+- [x] 2.5 Entry around the Warsaw month boundary lands in the correct month
 
 ### Phase 3: Month screen with slide-in panel
 
