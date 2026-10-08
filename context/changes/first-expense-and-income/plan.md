@@ -339,14 +339,14 @@ Backfill of default categories for existing households is part of the migration;
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Type check passes: `npx astro check`
-- [x] 2.3 Build passes: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint` — edd80cf
+- [x] 2.2 Type check passes: `npx astro check` — edd80cf
+- [x] 2.3 Build passes: `npm run build` — edd80cf
 
 #### Manual
 
-- [x] 2.4 Valid POST returns 200 with updated sums; invalid inputs and no session are rejected
-- [x] 2.5 Entry around the Warsaw month boundary lands in the correct month
+- [x] 2.4 Valid POST returns 200 with updated sums; invalid inputs and no session are rejected — edd80cf
+- [x] 2.5 Entry around the Warsaw month boundary lands in the correct month — edd80cf
 
 ### Phase 3: Month screen with slide-in panel
 
