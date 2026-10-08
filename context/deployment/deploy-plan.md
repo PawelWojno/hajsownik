@@ -40,6 +40,7 @@ gh variable set CLOUDFLARE_ACCOUNT_ID --repo PawelWojno/hajsownik --body "d50951
 For the course certification review, graders need to sign in without going through email confirmation themselves. **Decision: `Confirm email` stays ON for production** (per Gate B / PRD FR-001 — do not disable it globally, that would let anyone reset a password on an email they don't control). Instead:
 
 **Gate F — Demo account for graders** (Supabase dashboard, manual, by the user):
+0. **Prerequisite**: the household-foundation migration must already be pushed to this production project (`npx supabase link` + `npx supabase db push` — see `context/changes/household-foundation/plan.md`). The signup trigger that gives every new user a household fires on insert into `auth.users` regardless of how the row is created — including this dashboard flow — but only once that migration is live. A demo user created before the push gets no household.
 1. Production project → Authentication → Users → Add user.
 2. Set an email + password, enable **"Auto Confirm User"** if offered (or confirm the email manually afterward from the Users list).
 3. Share these credentials with graders alongside the production URL — they sign in directly, skipping `/auth/signup` and the confirmation step entirely.

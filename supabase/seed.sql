@@ -1,0 +1,1 @@
+-- Intentionally empty: config.toml enables [db.seed] and `supabase db reset` fails if this file is missing.
