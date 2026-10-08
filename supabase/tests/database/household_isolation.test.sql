@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(14);
+select plan(16);
 
 -- Fixture: two real signups (exercises the on_auth_user_created trigger).
 -- User A supplies a household name; user B supplies none, so the trigger falls back to 'Mój dom'.
@@ -43,7 +43,7 @@ select is_empty(
 select throws_ok(
   $$ insert into public.households (name) values ('hacked') $$,
   '42501',
-  'new row violates row-level security policy for table "households"',
+  null,
   'A cannot INSERT into households'
 );
 with upd as (
@@ -74,7 +74,7 @@ select is_empty(
 select throws_ok(
   $$ insert into public.households (name) values ('hacked') $$,
   '42501',
-  'new row violates row-level security policy for table "households"',
+  null,
   'B cannot INSERT into households'
 );
 with upd as (
@@ -89,6 +89,14 @@ with del as (
   returning 1
 )
 select is((select count(*) from del), 0::bigint, 'B DELETE on membership of A matches zero rows');
+
+reset role;
+
+-- ===== As anon (no session) =====
+set local role anon;
+
+select is((select count(*) from public.households), 0::bigint, 'anon sees no households');
+select is((select count(*) from public.household_members), 0::bigint, 'anon sees no memberships');
 
 reset role;
 
