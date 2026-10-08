@@ -231,22 +231,22 @@ No existing data to backfill — production Supabase currently has zero users, a
 ### Phase 2: Wire the household name into sign-up
 
 #### Automated
-- [x] 2.1 `npm run lint` passes
-- [x] 2.2 `npx astro check` passes
-- [x] 2.3 `npm run build` succeeds
+- [x] 2.1 `npm run lint` passes — 72cbb81
+- [x] 2.2 `npx astro check` passes — 72cbb81
+- [x] 2.3 `npm run build` succeeds — 72cbb81
 
 #### Manual
-- [x] 2.4 Household-name field pre-filled, editable, visible at /auth/signup
-- [x] 2.5 Empty household-name blocks submission client-side
-- [x] 2.6 Custom household name persists correctly to households.name
-- [x] 2.7 A direct POST to /api/auth/signup with an empty or >100-char householdName (bypassing the UI) redirects to /auth/signup?error=..., not passed through to Supabase
-- [x] 2.8 scripts/smoke.mjs sends householdName and its "signup creates account" step still passes
+- [x] 2.4 Household-name field pre-filled, editable, visible at /auth/signup — 72cbb81
+- [x] 2.5 Empty household-name blocks submission client-side — 72cbb81
+- [x] 2.6 Custom household name persists correctly to households.name — 72cbb81
+- [x] 2.7 A direct POST to /api/auth/signup with an empty or >100-char householdName (bypassing the UI) redirects to /auth/signup?error=..., not passed through to Supabase — 72cbb81
+- [x] 2.8 scripts/smoke.mjs sends householdName and its "signup creates account" step still passes — 72cbb81
 
 ### Phase 3: RLS isolation test
 
 #### Automated
-- [ ] 3.1 `npx supabase test db` passes
-- [ ] 3.2 `npm run smoke` still passes
-- [ ] 3.3 Both users' SELECT assertions (households + household_members, own-only) pass as `authenticated`, not `postgres`
-- [ ] 3.4 `throws_ok` confirms `authenticated` cannot INSERT into `households`
-- [ ] 3.5 `UPDATE`/`DELETE` against the other household affect 0 rows (`is` on `RETURNING` count, not `throws_ok`)
+- [x] 3.1 `npx supabase test db` passes
+- [x] 3.2 `npm run smoke` still passes
+- [x] 3.3 Both users' SELECT assertions (households + household_members, own-only) pass as `authenticated`, not `postgres`
+- [x] 3.4 `throws_ok` confirms `authenticated` cannot INSERT into `households`
+- [x] 3.5 `UPDATE`/`DELETE` against the other household affect 0 rows (`is` on `RETURNING` count, not `throws_ok`)
