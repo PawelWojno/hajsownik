@@ -220,27 +220,27 @@ No existing data to backfill — production Supabase currently has zero users, a
 ### Phase 1: Schema, RLS, and signup trigger
 
 #### Automated
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset`
-- [x] 1.2 `npx supabase db lint` reports no new warnings
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset` — 6421b8c
+- [x] 1.2 `npx supabase db lint` reports no new warnings — 6421b8c
 
 #### Manual
-- [x] 1.3 New signup creates exactly one households + household_members row with correct name
-- [x] 1.4 Second user's RLS-governed query returns zero rows from first user's household
-- [x] 1.5 Migration pushed to production Supabase (`supabase db push`) before Gate F demo account creation
+- [x] 1.3 New signup creates exactly one households + household_members row with correct name — 6421b8c
+- [x] 1.4 Second user's RLS-governed query returns zero rows from first user's household — 6421b8c
+- [x] 1.5 Migration pushed to production Supabase (`supabase db push`) before Gate F demo account creation — 6421b8c
 
 ### Phase 2: Wire the household name into sign-up
 
 #### Automated
-- [ ] 2.1 `npm run lint` passes
-- [ ] 2.2 `npx astro check` passes
-- [ ] 2.3 `npm run build` succeeds
+- [x] 2.1 `npm run lint` passes
+- [x] 2.2 `npx astro check` passes
+- [x] 2.3 `npm run build` succeeds
 
 #### Manual
-- [ ] 2.4 Household-name field pre-filled, editable, visible at /auth/signup
-- [ ] 2.5 Empty household-name blocks submission client-side
-- [ ] 2.6 Custom household name persists correctly to households.name
-- [ ] 2.7 A direct POST to /api/auth/signup with an empty or >100-char householdName (bypassing the UI) redirects to /auth/signup?error=..., not passed through to Supabase
-- [ ] 2.8 scripts/smoke.mjs sends householdName and its "signup creates account" step still passes
+- [x] 2.4 Household-name field pre-filled, editable, visible at /auth/signup
+- [x] 2.5 Empty household-name blocks submission client-side
+- [x] 2.6 Custom household name persists correctly to households.name
+- [x] 2.7 A direct POST to /api/auth/signup with an empty or >100-char householdName (bypassing the UI) redirects to /auth/signup?error=..., not passed through to Supabase
+- [x] 2.8 scripts/smoke.mjs sends householdName and its "signup creates account" step still passes
 
 ### Phase 3: RLS isolation test
 

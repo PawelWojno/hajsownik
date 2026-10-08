@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Mail, Lock, UserPlus } from "lucide-react";
+import { Mail, Lock, UserPlus, House } from "lucide-react";
 import { FormField } from "@/components/auth/FormField";
 import { PasswordToggle } from "@/components/auth/PasswordToggle";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { ServerError } from "@/components/auth/ServerError";
 
 const MIN_PASSWORD_LENGTH = 6;
+const MAX_HOUSEHOLD_NAME_LENGTH = 100;
 
 interface Props {
   serverError?: string | null;
@@ -15,9 +16,15 @@ export default function SignUpForm({ serverError }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [householdName, setHouseholdName] = useState("Mój dom");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+    householdName?: string;
+  }>({});
 
   function validate() {
     const next: typeof errors = {};
@@ -38,6 +45,12 @@ export default function SignUpForm({ serverError }: Props) {
       next.confirmPassword = "Please confirm your password";
     } else if (password !== confirmPassword) {
       next.confirmPassword = "Passwords do not match";
+    }
+
+    if (!householdName.trim()) {
+      next.householdName = "Household name is required";
+    } else if (householdName.trim().length > MAX_HOUSEHOLD_NAME_LENGTH) {
+      next.householdName = `Household name must be at most ${MAX_HOUSEHOLD_NAME_LENGTH} characters`;
     }
 
     setErrors(next);
@@ -122,6 +135,20 @@ export default function SignUpForm({ serverError }: Props) {
             }}
           />
         }
+      />
+
+      <FormField
+        id="householdName"
+        name="householdName"
+        label="Household name"
+        value={householdName}
+        onChange={(v) => {
+          setHouseholdName(v);
+          clearError("householdName");
+        }}
+        placeholder="Mój dom"
+        error={errors.householdName}
+        icon={<House className="size-4" />}
       />
 
       <ServerError message={serverError} />
