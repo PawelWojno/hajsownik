@@ -42,7 +42,7 @@ Today, a household budget lives "in someone's head" — there's no reliable, low
 | ID   | Change ID                   | Outcome (user can …)                                              | Prerequisites  | PRD refs                     | Status   |
 | ---- | ---------------------------- | ------------------------------------------------------------------- | -------------- | ----------------------------- | -------- |
 | F-01 | household-foundation         | (foundation) signup creates a household; RLS scopes all data to it | —              | FR-001, FR-002, Access Control, NFR | done |
-| S-01 | first-expense-and-income      | add an expense and an income entry, see "zostaje" update on month screen | F-01           | US-01, FR-004, FR-006, FR-012, FR-013 | proposed |
+| S-01 | first-expense-and-income      | add an expense and an income entry, see "zostaje" update on month screen | F-01           | US-01, FR-004, FR-006, FR-012, FR-013 | in-progress |
 | S-02 | category-management           | add/remove/archive/rename/reorder categories                       | S-01           | FR-007, FR-008, FR-009, FR-010, FR-011 | proposed |
 | S-03 | password-reset                 | reset their password by email if locked out                        | —              | FR-003                        | ready    |
 | S-04 | recurring-expenses              | define/edit/stop a recurring expense over a fixed horizon          | S-01           | FR-014, FR-015                | proposed |
@@ -101,7 +101,7 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Unknowns:**
   - The exact default category list (PRD's Socratic note references "a long default list (12 categories)" but the FR text itself doesn't enumerate it) — Owner: user. Block: no (a reasonable default list can be drafted at plan time; this just needs confirmation before shipping, not before sequencing).
 - **Risk:** This is the broadest slice by design — it's the north star bundle (expense + income + month view) the user explicitly chose over the narrower expense-only version, so it carries more surface than its siblings.
-- **Status:** proposed
+- **Status:** in-progress
 - **GitHub:** #2
 
 ### S-02: Category management
@@ -198,6 +198,9 @@ No cross-slice open questions at this time — the PRD carried zero open questio
 - **Editing a household's name after creation (settings screen)** — Why parked: surfaced during `/10x-plan household-foundation` (F-01) planning, not in the PRD; the name is set once at signup for now — no FR or settings screen exists yet to revisit it.
 - **Personal display name for a user account (collected at signup, editable in settings)** — Why parked: surfaced after `/10x-plan household-foundation` (F-01) review, not in the PRD; signup collects only email, password and household name, and v1 has one account per household, so nothing yet needs to tell accounts apart. Becomes relevant with "Second account joining a household" / "Per-person label on an expense".
 - **Cleanup of an orphaned household when its last member's account is deleted** — Why parked: surfaced during `/10x-implement household-foundation` phase 2 — deleting a user cascades to `household_members` but leaves the `households` row behind. Rare in v1 (one account per household, deletion is manual in the dashboard); the right rule depends on the future multi-member design.
+- **Budget / usage bar on the month screen (e.g. "Budżet 68%")** — Why parked: surfaced during `/10x-plan first-expense-and-income` (S-01) from the user's month-screen sketch; per-category/monthly limits and usage bars are a PRD Non-Goal, so S-01 ships totals only. Revisit post-MVP together with budget limits.
+- **Timezone setting in settings** — Why parked: surfaced during `/10x-plan first-expense-and-income` (S-01); v1 hardcodes `Europe/Warsaw` for "today" and month boundaries because Workers run in UTC. A per-household timezone setting is post-MVP.
+- **Polish translation of the auth flow (sign-in, sign-up, confirm-email, forms, `/api/auth/*` messages)** — Why parked: surfaced during `/10x-plan-review first-expense-and-income` (S-01 makes everything outside auth Polish and sets `lang="pl"`); translating the auth files is a separate change. Promote to a slice (e.g. `polish-auth-ui`) if it should count toward M-1.
 
 ## Milestone History
 
