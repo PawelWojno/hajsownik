@@ -1,7 +1,7 @@
 ---
 change_id: first-expense-and-income
 title: First expense and income
-status: implemented
+status: impl_reviewed
 created: 2026-10-08
 updated: 2026-10-09
 archived_at: null
