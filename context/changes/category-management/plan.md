@@ -248,7 +248,7 @@ Migracja jest addytywna (kolumna nullable, nowy indeks, nowe polityki). Istniej�
 
 - [x] 1.1 Migracja stosuje się czysto: `npx supabase db reset` — f96cce1
 - [x] 1.2 Testy bazy przechodzą (w tym istniejące): `npx supabase test db` — f96cce1
-- [ ] 1.3 Job `smoke` w CI uruchamia `supabase test db` i jest zielony
+- [x] 1.3 Job `smoke` w CI uruchamia `supabase test db` i jest zielony
 
 #### Manual
 
@@ -281,4 +281,4 @@ Migracja jest addytywna (kolumna nullable, nowy indeks, nowe polityki). Istniej�
 - [x] 3.4 Użyta kategoria nie da się usunąć, pojawia się wskazówka o archiwizacji — bb83f44
 - [x] 3.5 Zmiana kolejności i nazwy widoczna w siatce na `/dashboard` — bb83f44
 - [x] 3.6 Menu „Ustawienia” działa; po wylogowaniu `/settings/categories` przekierowuje na logowanie — bb83f44
-- [ ] 3.7 Przed merge PR migracja jest wypchnięta na produkcję: `npx supabase db push`
+- [x] 3.7 Przed merge PR migracja jest wypchnięta na produkcję: `npx supabase db push`
