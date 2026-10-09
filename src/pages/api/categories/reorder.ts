@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { INVALID_REQUEST, SAVE_FAILED, UNAUTHORIZED, json } from "@/lib/http";
-import { categoryResponse, invalidRequest, readJson, reorderCategories } from "@/lib/services/categories";
+import { categoryResponse } from "@/lib/category-http";
+import { INVALID_REQUEST, SAVE_FAILED, UNAUTHORIZED, invalidRequest, json, readJson } from "@/lib/http";
+import { reorderCategories } from "@/lib/services/categories";
 import { createClient } from "@/lib/supabase";
 
 export const prerender = false;

@@ -1,12 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import { INVALID_REQUEST, SAVE_FAILED, json } from "@/lib/http";
 import type { ManagedCategory } from "@/types";
 
-const UNIQUE_VIOLATION = "23505";
-const FOREIGN_KEY_VIOLATION = "23503";
-const INVALID_PARAMETER = "22023";
-const NOT_FOUND = "not_found";
+/** Pseudo error code: the id matched no row visible to the caller (RLS hides foreign rows, it does not raise). */
+export const NOT_FOUND = "not_found";
 
 const categoryRows = z.array(z.object({ id: z.string(), name: z.string(), archived_at: z.string().nullable() }));
 
@@ -71,32 +68,3 @@ export async function reorderCategories(supabase: SupabaseClient, ids: string[])
   const { error } = await supabase.rpc("reorder_categories", { p_ids: ids });
   return error ? failed(error) : succeeded(supabase);
 }
-
-/** Maps a service result to the HTTP response shared by all category routes. */
-export function categoryResponse(result: CategoryResult): Response {
-  if (result.ok) return json({ categories: result.categories });
-
-  switch (result.code) {
-    case UNIQUE_VIOLATION:
-      return json({ error: "Kategoria o tej nazwie już istnieje" }, 400);
-    case FOREIGN_KEY_VIOLATION:
-      return json({ error: "Ta kategoria ma wydatki. Zarchiwizuj ją zamiast usuwać." }, 400);
-    case INVALID_PARAMETER:
-      return json({ error: "Lista kategorii zmieniła się. Odśwież stronę." }, 409);
-    case NOT_FOUND:
-      return json({ error: "Nie znaleziono kategorii" }, 404);
-    default:
-      return json({ error: SAVE_FAILED }, 500);
-  }
-}
-
-/** Parses the JSON body of a request; `undefined` means it was not valid JSON. */
-export async function readJson(request: Request): Promise<unknown> {
-  try {
-    return await request.json();
-  } catch {
-    return undefined;
-  }
-}
-
-export const invalidRequest = () => json({ error: INVALID_REQUEST }, 400);

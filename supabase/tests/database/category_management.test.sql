@@ -69,6 +69,8 @@ select throws_ok(
   null,
   'A cannot insert a category into household B (RLS with check)'
 );
+-- Guarded twice: the WITH CHECK of the update policy and the SELECT policy, which Postgres also applies to the new
+-- row of an UPDATE. Weakening only one of them leaves this test green.
 select throws_ok(
   $$ update public.categories set household_id = (select hid from ids where email = 'b@example.com')
      where name = 'Pupil' $$,

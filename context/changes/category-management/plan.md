@@ -179,7 +179,7 @@ Menu „Ustawienia”, strona zarządzania i zabezpieczenie trasy.
 
 **Intent**: Strona SSR ładuje wszystkie kategorie (z `archived_at`), wyspa obsługuje akcje i podmienia stan odpowiedzią API.
 
-**Contract**: sekcja „Aktywne” (↑/↓, zmiana nazwy inline, „Archiwizuj”, „Usuń”) i „Zarchiwizowane” (oznaczone, „Przywróć”, „Usuń”); formularz dodawania; widoczna informacja przy zmianie nazwy, że dotyczy też dawnych wydatków (FR-010); komunikaty błędów z API wyświetlane przy akcji; odpowiedź z `categories: null` lub 409 → `window.location.reload()`; ↑ na pierwszej i ↓ na ostatniej aktywnej pozycji wyłączone; React bez dyrektyw „use client”, `cn()` do klas, komponenty z `src/components/ui`.
+**Contract**: sekcja „Aktywne” (↑/↓, zmiana nazwy inline, „Archiwizuj”, „Usuń”) i „Zarchiwizowane” (oznaczone, „Przywróć”, „Usuń”); formularz dodawania; widoczna informacja przy zmianie nazwy, że dotyczy też dawnych wydatków (FR-010); komunikaty błędów z API wyświetlane przy akcji; odpowiedź z `categories: null` lub 409 → `window.location.reload()`; ↑ na pierwszej i ↓ na ostatniej aktywnej pozycji wyłączone; React bez dyrektyw „use client”, `cn()` do klas, komponenty z `src/components/ui`. *Addendum (impl-review F7):* „Usuń” prosi o drugie kliknięcie w wierszu („Na pewno? Tak, usuń / Anuluj”) zamiast `window.confirm`, bo zablokowany dialog przeglądarki po cichu blokuje akcję.
 
 #### 4. Smoke test
 
@@ -272,13 +272,13 @@ Migracja jest addytywna (kolumna nullable, nowy indeks, nowe polityki). Istniej�
 
 #### Automated
 
-- [x] 3.1 Lint, typy, build: `npm run lint && npx astro check && npm run build`
-- [x] 3.2 Smoke przechodzi na serwerze podglądu: `npm run smoke`
+- [x] 3.1 Lint, typy, build: `npm run lint && npx astro check && npm run build` — bb83f44
+- [x] 3.2 Smoke przechodzi na serwerze podglądu: `npm run smoke` — bb83f44
 
 #### Manual
 
-- [x] 3.3 Dodanie, zmiana nazwy, przesunięcie, archiwizacja, przywrócenie i usunięcie działają (mobile i desktop)
-- [x] 3.4 Użyta kategoria nie da się usunąć, pojawia się wskazówka o archiwizacji
-- [x] 3.5 Zmiana kolejności i nazwy widoczna w siatce na `/dashboard`
-- [x] 3.6 Menu „Ustawienia” działa; po wylogowaniu `/settings/categories` przekierowuje na logowanie
+- [x] 3.3 Dodanie, zmiana nazwy, przesunięcie, archiwizacja, przywrócenie i usunięcie działają (mobile i desktop) — bb83f44
+- [x] 3.4 Użyta kategoria nie da się usunąć, pojawia się wskazówka o archiwizacji — bb83f44
+- [x] 3.5 Zmiana kolejności i nazwy widoczna w siatce na `/dashboard` — bb83f44
+- [x] 3.6 Menu „Ustawienia” działa; po wylogowaniu `/settings/categories` przekierowuje na logowanie — bb83f44
 - [ ] 3.7 Przed merge PR migracja jest wypchnięta na produkcję: `npx supabase db push`

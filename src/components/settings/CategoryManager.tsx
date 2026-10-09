@@ -18,10 +18,12 @@ interface Props {
 interface DeleteControlProps {
   pending: boolean;
   onConfirm: () => Promise<boolean>;
+  /** Called when the user backs out, so an error from a failed attempt does not linger. */
+  onCancel: () => void;
 }
 
 /** "Usuń" asks for a second click in place (no browser dialog, which a user can block). A failed delete keeps asking. */
-function DeleteControl({ pending, onConfirm }: DeleteControlProps) {
+function DeleteControl({ pending, onConfirm, onCancel }: DeleteControlProps) {
   const [confirming, setConfirming] = useState(false);
 
   if (!confirming) {
@@ -58,6 +60,7 @@ function DeleteControl({ pending, onConfirm }: DeleteControlProps) {
         disabled={pending}
         onClick={() => {
           setConfirming(false);
+          onCancel();
         }}
         className={actionClass}
       >
@@ -68,7 +71,8 @@ function DeleteControl({ pending, onConfirm }: DeleteControlProps) {
 }
 
 export default function CategoryManager({ initialCategories }: Props) {
-  const { categories, pending, error, add, rename, setArchived, remove, move } = useCategoryActions(initialCategories);
+  const { categories, pending, error, clearError, add, rename, setArchived, remove, move } =
+    useCategoryActions(initialCategories);
   const [newName, setNewName] = useState("");
   const [editing, setEditing] = useState<{ id: string; name: string } | null>(null);
 
@@ -229,7 +233,7 @@ export default function CategoryManager({ initialCategories }: Props) {
                   >
                     Archiwizuj
                   </Button>
-                  <DeleteControl pending={pending} onConfirm={() => remove(category.id)} />
+                  <DeleteControl pending={pending} onConfirm={() => remove(category.id)} onCancel={clearError} />
                 </div>
               )}
               <ServerError message={error?.target === category.id ? error.message : null} />
@@ -264,7 +268,7 @@ export default function CategoryManager({ initialCategories }: Props) {
                     <ArchiveRestore className="size-4" />
                     Przywróć
                   </Button>
-                  <DeleteControl pending={pending} onConfirm={() => remove(category.id)} />
+                  <DeleteControl pending={pending} onConfirm={() => remove(category.id)} onCancel={clearError} />
                 </div>
                 <ServerError message={error?.target === category.id ? error.message : null} />
               </li>

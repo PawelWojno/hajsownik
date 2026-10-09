@@ -1,10 +1,8 @@
 import { useState } from "react";
 import type { ApiError, CategoryListResponse, ManagedCategory } from "@/types";
 
-/** Where an error belongs on the page: a category id, the add form, or the page as a whole. */
-export type ErrorTarget = string;
+/** Error target for the add form; any other target is the id of the category row the error belongs to. */
 export const ADD_TARGET = "add";
-export const PAGE_TARGET = "page";
 
 const CONNECTION_ERROR = "Brak połączenia. Spróbuj ponownie.";
 const UNEXPECTED_ERROR = "Nie udało się zapisać. Spróbuj ponownie.";
@@ -41,10 +39,10 @@ function isApiError(value: unknown): value is ApiError {
 export function useCategoryActions(initial: ManagedCategory[]) {
   const [categories, setCategories] = useState(initial);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<{ target: ErrorTarget; message: string } | null>(null);
+  const [error, setError] = useState<{ target: string; message: string } | null>(null);
 
   /** Resolves to true when the change was saved, so the caller can close its inline form. */
-  async function call(target: ErrorTarget, url: string, method: string, payload?: unknown): Promise<boolean> {
+  async function call(target: string, url: string, method: string, payload?: unknown): Promise<boolean> {
     setPending(true);
     setError(null);
     try {
@@ -95,5 +93,9 @@ export function useCategoryActions(initial: ManagedCategory[]) {
     return call(id, "/api/categories/reorder", "POST", { ids });
   }
 
-  return { categories, pending, error, add, rename, setArchived, remove, move };
+  const clearError = () => {
+    setError(null);
+  };
+
+  return { categories, pending, error, clearError, add, rename, setArchived, remove, move };
 }

@@ -1,14 +1,8 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { INVALID_REQUEST, SAVE_FAILED, UNAUTHORIZED, json } from "@/lib/http";
-import {
-  categoryResponse,
-  deleteCategory,
-  invalidRequest,
-  readJson,
-  renameCategory,
-  setArchived,
-} from "@/lib/services/categories";
+import { categoryResponse } from "@/lib/category-http";
+import { INVALID_REQUEST, SAVE_FAILED, UNAUTHORIZED, invalidRequest, json, readJson } from "@/lib/http";
+import { deleteCategory, renameCategory, setArchived } from "@/lib/services/categories";
 import { createClient } from "@/lib/supabase";
 import { categoryNameField } from "@/lib/validation";
 
