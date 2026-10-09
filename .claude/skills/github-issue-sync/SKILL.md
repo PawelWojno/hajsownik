@@ -1,6 +1,6 @@
 ---
 name: github-issue-sync
-description: Close or create the GitHub issue matching a roadmap Change ID — close after /10x-archive, or create one for a roadmap item that doesn't have one yet. Takes exactly one argument, a Change ID. Use when the user explicitly invokes /github-issue-sync <change-id>.
+description: Close or create the GitHub issue matching a roadmap Change ID — close after /10x-archive, or create one for a roadmap item that doesn't have one yet — and offer to move the issue on the GitHub Project board (Status column). Takes exactly one argument, a Change ID. Use when the user explicitly invokes /github-issue-sync <change-id>.
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ Hand-authored, project-specific skill — not installed/managed by `10x-cli`. It
 
 ## What this is
 
-A human-confirmed bridge between `context/foundation/roadmap.md` (source of truth for Status) and this repo's GitHub Issues. One-way only: this skill reads `roadmap.md` and writes to GitHub, never the reverse. It never touches a roadmap item's `Status` field — that stays the exclusive job of `/10x-plan`, `/10x-implement`, `/10x-archive`. The only thing it writes back into `roadmap.md` is a bookkeeping field, `**GitHub:** #N`, recording which issue a Change ID maps to.
+A human-confirmed bridge between `context/foundation/roadmap.md` (source of truth for Status) and this repo's GitHub Issues. One-way only: this skill reads `roadmap.md` and writes to GitHub, never the reverse. It never touches a roadmap item's `Status` field — that stays the exclusive job of `/10x-plan`, `/10x-implement`, `/10x-archive`. The only thing it writes back into `roadmap.md` is a bookkeeping field, `**GitHub:** #N`, recording which issue a Change ID maps to. At the end it also offers (never silently) to move the issue's card on the GitHub Project board (Step 4).
 
 ## When to use, when to skip
 
@@ -25,8 +25,10 @@ A human-confirmed bridge between `context/foundation/roadmap.md` (source of trut
 Verify it exists in the roadmap:
 
 ```bash
-grep -n '\*\*Change ID:\*\* `'"$CHANGE_ID"'`' context/foundation/roadmap.md
+grep -nE '\*\*Change ID:\*\* `?'"$CHANGE_ID"'`?[[:space:]]*$' context/foundation/roadmap.md
 ```
+
+The backticks are optional on purpose: `roadmap.md` writes `- **Change ID:** <id>` without them, while issue bodies (Step 2/5) write it with them.
 
 If not found, stop and report: `✗ No roadmap item with Change ID "<change-id>" found in context/foundation/roadmap.md.` Do not proceed — every later step needs this item's Outcome/PRD refs/Status/Roadmap ID, and there's nothing to base a title or body on without it.
 
@@ -55,7 +57,7 @@ gh issue view <N> --repo "$REPO" --json number,title,url,state
 ```
 
 - `state: OPEN` → go to Step 3 (close mode) with this issue.
-- `state: CLOSED` → report `ℹ Issue #<N> is already closed. Nothing to do.` and STOP.
+- `state: CLOSED` → report `ℹ Issue #<N> is already closed.` and go to Step 4 (the board card may still need moving).
 - 404 / not found → the stored number is stale (issue deleted). Warn `⚠ Stored GitHub:#<N> no longer exists — treating as no issue.` and fall through to the search below.
 
 **If no `**GitHub:** #N` line (or it was stale):**
@@ -69,7 +71,7 @@ gh issue list --repo "$REPO" --state all --search "\"$CHANGE_ID\"" --json number
 This is a broad text search — do not trust it directly. Filter the results client-side for an exact match of the literal pattern `` **Change ID:** `<change-id>` `` inside each candidate's `body`. This avoids false positives from loose full-text search matching an unrelated issue that happens to mention the string.
 
 - **Zero** exact matches → go to Step 5 (create mode).
-- **Exactly one** exact match → this is the issue, regardless of its `state`. Backfill `**GitHub:** #N` into the item's block in `roadmap.md` now (one `Edit`, immediately after the `**Status:**` line of that item) so future runs skip the search. Then branch on `state`: `OPEN` → go to Step 3 (close mode) with this issue; `CLOSED` → report `ℹ Issue #<N> is already closed. Nothing to do.` and STOP (do not reopen it, do not offer to create a new one).
+- **Exactly one** exact match → this is the issue, regardless of its `state`. Backfill `**GitHub:** #N` into the item's block in `roadmap.md` now (one `Edit`, immediately after the `**Status:**` line of that item) so future runs skip the search. Then branch on `state`: `OPEN` → go to Step 3 (close mode) with this issue; `CLOSED` → report `ℹ Issue #<N> is already closed.` and go to Step 4 (do not reopen it, do not offer to create a new one).
 - **More than one** exact match → print all matches (number, title, url, state) and STOP. Do not guess which one is authoritative — report `✗ Multiple issues match Change ID "<change-id>" — resolve manually.`
 
 ### Step 3 — Close mode: ask before closing
@@ -96,9 +98,9 @@ ARCHIVE_DIR=$(ls context/archive/ 2>/dev/null | grep -- "$CHANGE_ID" | head -1)
 - If found: `gh issue close <N> --repo "$REPO" --comment "Archived via /10x-archive → context/archive/${ARCHIVE_DIR}/. See roadmap.md ## Done."`
 - If not found (closing without an archive having happened): `gh issue close <N> --repo "$REPO" --comment "Closed via github-issue-sync — see context/foundation/roadmap.md."`
 
-Print the issue URL. Done.
+Print the issue URL, then go to Step 4 with this issue (now closed).
 
-**On "Zostaw otwarte":** do nothing further. Report that the issue stays open.
+**On "Zostaw otwarte":** do not touch the issue. Report that it stays open, then go to Step 4 with this issue (still open) — moving the card to "In Progress" without closing is a normal use.
 
 ### Step 5 — Create mode: ask before creating
 
@@ -144,9 +146,70 @@ AskUserQuestion:
 gh issue create --repo "$REPO" --title "<title>" --label "<foundation|slice>" --milestone "<milestone title, if resolved>" --body "<body>"
 ```
 
-Capture the returned URL, extract the issue number, and **write back** `**GitHub:** #<N>` into the item's block in `roadmap.md` (one `Edit`, immediately after that item's `**Status:**` line). Print the URL.
+Capture the returned URL, extract the issue number, and **write back** `**GitHub:** #<N>` into the item's block in `roadmap.md` (one `Edit`, immediately after that item's `**Status:**` line). Print the URL, then go to Step 4 with the new issue.
 
 **On "Nie, pomiń":** do nothing. Report that no issue was created.
+
+### Step 4 — Project board status: ask before moving the card
+
+Runs last, from Steps 2, 3 and 5, for the one issue this invocation dealt with. It only ever *offers* a change; nothing on the board moves without the `AskUserQuestion` below. Nothing is hardcoded — project, field and option ids are resolved at run time, because they differ per repo and change when a project is recreated.
+
+**4a. Find the project.**
+
+```bash
+OWNER=${REPO%%/*}
+gh project list --owner "$OWNER" --format json --jq '.projects[] | {number, title, id}'
+```
+
+- Command fails mentioning a missing `project` scope → print `ℹ Tablica pominięta: gh nie ma uprawnienia "project" (uruchom: gh auth refresh -s project).` and STOP. Do not run the refresh yourself (it is interactive).
+- Zero projects → print `ℹ Brak tablicy projektu dla ${OWNER} — pomijam.` and STOP.
+- Exactly one → use it. More than one → `AskUserQuestion` "Która tablica?" with one option per project (title), and use the answer.
+
+**4b. Find the issue's card and the Status field.**
+
+```bash
+gh project item-list <number> --owner "$OWNER" --limit 200 --format json
+gh project field-list <number> --owner "$OWNER" --format json
+```
+
+- Card = the item whose `content.number` is the issue number and whose `content.repository` is `$REPO`. Keep its `id` and current `status`.
+- Field = the single-select field named `Status`; keep its `id` and its `options` (`id`, `name`). No such field → print `ℹ Tablica nie ma pola Status — pomijam.` and STOP.
+- Card not found → ask `AskUserQuestion` "Issue #<N> nie jest na tablicy \"<title>\". Dodać?" with options `Dodaj na tablicę (Recommended)` / `Nie, pomiń`. On add: `gh project item-add <number> --owner "$OWNER" --url <issue url>`, take the returned item id, and treat its current status as empty. On skip: STOP.
+
+**4c. Pick the recommended status.** Map by what just happened and the roadmap `Status` from Step 0, then match to the closest real option name (case-insensitive; never invent an option):
+
+| Situation | Recommended option |
+| --- | --- |
+| Issue is closed, or roadmap status is `done` | the "done" option (e.g. `Done`) |
+| Roadmap status is `in-progress` or `planning` | the "in progress" option (e.g. `In Progress`) |
+| anything else (`proposed`, `ready`, new issue) | the first / "todo" option (e.g. `Todo`) |
+
+If the card's current status already equals the recommended option, print `ℹ Tablica: #<N> już ma status "<status>".` and STOP — nothing to offer.
+
+**4d. Ask.**
+
+```
+AskUserQuestion:
+  question: "Tablica \"<project title>\": issue #<N> (\"<title>\") ma status \"<current or brak>\". Zmienić status?"
+  header: "Tablica"
+  options:
+    - label: "Ustaw \"<recommended>\" (Recommended)"
+      description: "gh project item-edit na polu Status. Roadmap.md nie jest ruszany."
+    - label: "Ustaw \"<other option>\""        # one entry per remaining Status option except the current one and the recommended one (at most 2)
+      description: "Inny status z tablicy."
+    - label: "Zostaw bez zmian"
+      description: "Karta zostaje w obecnej kolumnie."
+```
+
+**On a status choice:**
+
+```bash
+gh project item-edit --id <item id> --project-id <project id> --field-id <status field id> --single-select-option-id <option id>
+```
+
+Re-read the card (`gh project item-list ... --format json`, same filter) and print `✓ Tablica: #<N> → <status>` with the project URL; if the re-read does not show the new status, print `⚠ Zmiana nie została zapisana — sprawdź tablicę ręcznie.` Never retry in a loop.
+
+**On "Zostaw bez zmian":** do nothing further.
 
 ## What this skill does NOT do
 
@@ -154,5 +217,5 @@ Capture the returned URL, extract the issue number, and **write back** `**GitHub
 - Never writes to `roadmap.md`'s `Status` field. The only field it ever adds or reads there is `**GitHub:** #N`.
 - Never guesses when more than one open issue matches a Change ID — lists them and stops.
 - Never runs any part of its logic if `gh` is unavailable or unauthenticated (Step 1) — fails soft, never blocks `/10x-archive` or any other workflow.
-- Does not move GitHub Project board columns itself. Relies on the Project's own built-in "Item closed → Status: Done" workflow automation (enabled once in the Project's settings UI) to reflect a closed issue on the board.
+- Never moves a card on the Project board, and never adds an issue to a board, without the matching `AskUserQuestion` in Step 4. It does not create, rename or reconfigure projects or their fields, and it does not rely on a hardcoded project number or ids. The Project's own "Item closed → Status: Done" automation, if enabled, still works independently of this skill.
 - Does not run automatically after `/10x-archive` or any other skill — always a separate, explicit invocation.
