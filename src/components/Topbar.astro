@@ -10,6 +10,21 @@ const { user } = Astro.locals;
         <a href="/dashboard" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
           Miesiąc
         </a>
+        <details class="relative">
+          <summary class="cursor-pointer list-none text-purple-300 transition-colors hover:text-purple-100">
+            Ustawienia
+          </summary>
+          <ul class="absolute right-0 z-10 mt-2 min-w-36 rounded-lg border border-white/10 bg-slate-900 p-1 shadow-lg">
+            <li>
+              <a
+                href="/settings/categories"
+                class="block rounded-md px-3 py-2 text-purple-300 transition-colors hover:bg-white/10 hover:text-purple-100"
+              >
+                Kategorie
+              </a>
+            </li>
+          </ul>
+        </details>
         <form method="POST" action="/api/auth/signout">
           <button type="submit" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
             Wyloguj

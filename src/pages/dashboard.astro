@@ -16,7 +16,11 @@ let categories: Category[] = [];
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 if (supabase) {
   try {
-    const { data, error } = await supabase.from("categories").select("id, name").order("sort_order");
+    const { data, error } = await supabase
+      .from("categories")
+      .select("id, name")
+      .is("archived_at", null)
+      .order("sort_order");
     if (error) throw new Error(error.message);
     categories = categoryRows.parse(data);
     summary = await getMonthSummary(supabase, currentMonthStart());

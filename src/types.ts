@@ -22,6 +22,18 @@ export interface SavedEntryResponse {
   inCurrentMonth: boolean;
 }
 
+/** A category as shown on the management page; archived ones stay in the list but are hidden from the entry grid. */
+export interface ManagedCategory {
+  id: string;
+  name: string;
+  archived: boolean;
+}
+
+export interface CategoryListResponse {
+  /** Null when the change is saved but the fresh list could not be read; the client reloads the page. */
+  categories: ManagedCategory[] | null;
+}
+
 export interface ApiError {
   error: string;
 }

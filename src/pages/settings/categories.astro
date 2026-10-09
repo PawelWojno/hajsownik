@@ -1,0 +1,35 @@
+---
+import CategoryManager from "@/components/settings/CategoryManager";
+import Topbar from "@/components/Topbar.astro";
+import Layout from "@/layouts/Layout.astro";
+import { listCategories } from "@/lib/services/categories";
+import { createClient } from "@/lib/supabase";
+import type { ManagedCategory } from "@/types";
+
+let categories: ManagedCategory[] | null = null;
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+if (supabase) {
+  try {
+    categories = await listCategories(supabase);
+  } catch {
+    categories = null;
+  }
+}
+---
+
+<Layout title="Hajsownik — kategorie">
+  <div class="bg-cosmic min-h-screen p-4 sm:p-8">
+    <Topbar />
+    {categories ? (
+      <CategoryManager initialCategories={categories} client:load />
+    ) : (
+      <p
+        role="alert"
+        class="mx-auto max-w-md rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300"
+      >
+        Nie udało się wczytać kategorii. Odśwież stronę.
+      </p>
+    )}
+  </div>
+</Layout>
