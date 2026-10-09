@@ -98,8 +98,7 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Prerequisites:** F-01
 - **Parallel with:** S-03
 - **Blockers:** —
-- **Unknowns:**
-  - The exact default category list (PRD's Socratic note references "a long default list (12 categories)" but the FR text itself doesn't enumerate it) — Owner: user. Block: no (a reasonable default list can be drafted at plan time; this just needs confirmation before shipping, not before sequencing).
+- **Unknowns:** — (resolved during `/10x-plan first-expense-and-income`: the user confirmed the 12 default categories — Jedzenie, Dom i rachunki, Transport, Zdrowie, Higiena i uroda, Ubrania, Rozrywka, Dzieci, Edukacja, Prezenty, Podróże, Inne.)
 - **Risk:** This is the broadest slice by design — it's the north star bundle (expense + income + month view) the user explicitly chose over the narrower expense-only version, so it carries more surface than its siblings.
 - **Status:** in-progress
 - **GitHub:** #2
