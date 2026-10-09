@@ -358,9 +358,9 @@ Backfill of default categories for existing households is part of the migration;
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Type check passes: `npx astro check`
-- [x] 3.3 Build passes: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint` — 8359b7a
+- [x] 3.2 Type check passes: `npx astro check` — 8359b7a
+- [x] 3.3 Build passes: `npm run build` — 8359b7a
 
 #### Manual
 
