@@ -14,11 +14,17 @@ export async function getMonthSummary(supabase: SupabaseClient, monthStart: stri
   return { incomeTotal: row.income_total, expenseTotal: row.expense_total, left: row.income_total - row.expense_total };
 }
 
-/** Response body for a just-saved entry: fresh sums for the current month plus whether the entry is part of them. */
+/**
+ * Response body for a just-saved entry: fresh sums for the current month plus whether the entry is part of them.
+ * The entry is already committed, so a failed sums read yields `summary: null` instead of an error; an error would
+ * invite a retry and a duplicate row.
+ */
 export async function buildSavedResponse(supabase: SupabaseClient, entryDate: string): Promise<SavedEntryResponse> {
   const thisMonth = currentMonthStart();
-  return {
-    summary: await getMonthSummary(supabase, thisMonth),
-    inCurrentMonth: monthStartOf(entryDate) === thisMonth,
-  };
+  const inCurrentMonth = monthStartOf(entryDate) === thisMonth;
+  try {
+    return { summary: await getMonthSummary(supabase, thisMonth), inCurrentMonth };
+  } catch {
+    return { summary: null, inCurrentMonth };
+  }
 }

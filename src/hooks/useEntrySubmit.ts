@@ -22,7 +22,9 @@ function isSummary(value: unknown): value is MonthSummary {
 }
 
 function isSavedEntry(value: unknown): value is SavedEntryResponse {
-  return isRecord(value) && isSummary(value.summary) && typeof value.inCurrentMonth === "boolean";
+  return (
+    isRecord(value) && (value.summary === null || isSummary(value.summary)) && typeof value.inCurrentMonth === "boolean"
+  );
 }
 
 function isApiError(value: unknown): value is ApiError {

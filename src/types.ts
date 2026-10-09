@@ -16,7 +16,8 @@ export interface MonthSummary {
 }
 
 export interface SavedEntryResponse {
-  summary: MonthSummary;
+  /** Null when the entry is saved but the fresh sums could not be read; the client keeps its old sums. */
+  summary: MonthSummary | null;
   /** True when the saved entry's date falls in the current month (Europe/Warsaw), i.e. the sums above include it. */
   inCurrentMonth: boolean;
 }

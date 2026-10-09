@@ -71,6 +71,8 @@ One migration `supabase/migrations/<YYYYMMDDHHmmss>_first_expense_and_income.sql
 **Contract**:
 - `categories(id uuid pk, household_id uuid not null -> households on delete cascade, name text 1..50, sort_order int not null, created_at)`;
   `unique (household_id, id)` (FK target), `unique (household_id, name)`.
+- `expenses.household_id` and `incomes.household_id` also reference `households (id) on delete cascade`, like `categories`:
+  deleting a household deletes its entries. No UI path deletes a household today.
 - `expenses(id, household_id not null default public.current_household_id(), category_id not null, amount_minor bigint check (> 0 and <= 9999999999), spent_on date not null, description text null check (char_length <= 200), created_at)`;
   `foreign key (household_id, category_id) references categories (household_id, id)`; index `(household_id, spent_on)`.
 - `incomes(id, household_id default current_household_id(), source text check in ('wynagrodzenie','działalność','świadczenia','wynajem','inne'), amount_minor (same check), received_on date not null, created_at)`; index `(household_id, received_on)`. `text + check` (not enum) so S-xx can alter the list cheaply.
@@ -92,7 +94,8 @@ from households h where not exists (select 1 from categories c where c.household
 **Contract**: `public.month_summary(p_month date) returns table (income_total bigint, expense_total bigint)`,
 `language sql stable security invoker set search_path = ''`; sums rows with date in `[p_month, p_month + interval '1 month')`,
 `coalesce(...,0)`; EXECUTE revoked from public/anon, granted to authenticated. "zostaje" = income_total - expense_total,
-computed by the caller.
+computed by the caller. `p_month` is truncated to the first day of its calendar month (`date_trunc('month', p_month)`),
+so `month_summary('2026-10-15')` sums all of October; the API always passes the first day anyway.
 
 #### 4. pgTAP test
 
@@ -145,7 +148,8 @@ Warsaw-based "today"/current-month helpers; shared DTOs.
 `description` trim <= 200), insert via the user-session Supabase client, return JSON `{ summary, inCurrentMonth }`.
 
 **Contract**: 401 if no `context.locals.user`; 400 with first zod message on invalid input; 500-safe message on DB error;
-200 `{ summary: MonthSummary (current month), inCurrentMonth: boolean }`, where `inCurrentMonth` is true iff the entry's date
+200 `{ summary: MonthSummary | null (current month), inCurrentMonth: boolean }` (`summary` is null when the entry is saved
+but the sums read failed; a 500 there would invite a retry and a duplicate row), where `inCurrentMonth` is true iff the entry's date
 falls in `[currentMonthStart(), start of next month)` computed in Europe/Warsaw; the client formats the month name for the
 "Zapisano w <miesiąc>" message from the date it sent. JSON body (not form) — cross-site posts
 need a CORS preflight, so no extra CSRF token is required.
