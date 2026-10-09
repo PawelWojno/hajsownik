@@ -376,9 +376,9 @@ Backfill of default categories for existing households is part of the migration;
 
 #### Automated
 
-- [x] 4.1 Smoke passes: `npm run smoke`
-- [x] 4.2 CI-equivalent passes: `npm run lint && npx astro check && npm run build`
+- [x] 4.1 Smoke passes: `npm run smoke` — ab0122f
+- [x] 4.2 CI-equivalent passes: `npm run lint && npx astro check && npm run build` — ab0122f
 
 #### Manual
 
-- [x] 4.3 Roadmap Parked section contains both new entries exactly once, and the S-01 Unknown about the category list is closed
+- [x] 4.3 Roadmap Parked section contains both new entries exactly once, and the S-01 Unknown about the category list is closed — ab0122f
