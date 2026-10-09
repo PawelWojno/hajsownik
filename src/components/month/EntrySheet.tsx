@@ -39,7 +39,10 @@ export function EntrySheet({ open, mode, categories, left, onOpenChange, onSaved
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} direction={isDesktop ? "right" : "bottom"}>
+    // repositionInputs={false}: vaul's own on-screen-keyboard logic writes inline height/bottom styles and, on Android,
+    // loses track of the keyboard closing (a blank band the height of the keyboard stays over the panel). The browser
+    // resizes the layout for the keyboard instead (see interactive-widget in Layout.astro).
+    <Drawer open={open} onOpenChange={onOpenChange} direction={isDesktop ? "right" : "bottom"} repositionInputs={false}>
       <DrawerContent
         className="border-white/10 bg-slate-900 text-white data-[vaul-drawer-direction=bottom]:max-h-[70dvh] data-[vaul-drawer-direction=right]:sm:max-w-sm"
         // The form focuses the amount field itself; stop the dialog from focusing the close button first.

@@ -14,7 +14,8 @@ const { title = "Hajsownik" } = Astro.props;
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <!-- resizes-content: the on-screen keyboard shrinks the layout, so bottom sheets sit above it (Chrome/Brave 108+). -->
+    <meta name="viewport" content="width=device-width, interactive-widget=resizes-content" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
   </head>
