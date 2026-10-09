@@ -44,6 +44,8 @@ async function request(path, { method = "GET", form, json } = {}) {
 
 // Set by the dashboard step, used by the API steps.
 let categoryId = "";
+// Set by the category steps.
+let newCategoryId = "";
 
 function leftFrom(actual) {
   try {
@@ -112,8 +114,63 @@ const steps = [
     () => request("/api/expenses", { method: "POST", json: { amount: "0", categoryId } }),
     { status: 400 },
   ],
+  [
+    "category endpoint adds a category",
+    async () => {
+      const actual = await request("/api/categories", { method: "POST", json: { name: "Smoke Zwierzęta" } });
+      try {
+        newCategoryId = JSON.parse(actual.body).categories.find((c) => c.name === "Smoke Zwierzęta").id;
+      } catch {
+        newCategoryId = "";
+      }
+      return actual;
+    },
+    { status: 200, check: () => (newCategoryId ? null : "new category not in the returned list") },
+  ],
+  [
+    "category endpoint rejects a duplicate differing only in letter case",
+    () => request("/api/categories", { method: "POST", json: { name: "smoke zwierzęta" } }),
+    { status: 400 },
+  ],
+  [
+    "category endpoint rejects a rename and archive in one request",
+    () => request(`/api/categories/${newCategoryId}`, { method: "PATCH", json: { name: "X", archived: true } }),
+    { status: 400 },
+  ],
+  [
+    "category endpoint archives a category",
+    () => request(`/api/categories/${newCategoryId}`, { method: "PATCH", json: { archived: true } }),
+    { status: 200 },
+  ],
+  [
+    "archived category disappears from the month screen",
+    () => request("/dashboard"),
+    {
+      status: 200,
+      check: (actual) => {
+        const ids = /data-category-ids="([^"]*)"/.exec(actual.body)?.[1] ?? "";
+        if (!ids) return "no data-category-ids found";
+        return ids.includes(newCategoryId) ? "archived category is still in data-category-ids" : null;
+      },
+    },
+  ],
+  [
+    "category endpoint deletes an unused category",
+    () => request(`/api/categories/${newCategoryId}`, { method: "DELETE" }),
+    { status: 200 },
+  ],
+  [
+    "category endpoint answers 404 for an unknown id",
+    () => request("/api/categories/00000000-0000-4000-8000-000000000000", { method: "DELETE" }),
+    { status: 404 },
+  ],
   ["signout clears session", () => request("/api/auth/signout", { method: "POST" }), { status: 302, location: "/" }],
   ["dashboard redirects after signout", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
+  [
+    "category settings page redirects after signout",
+    () => request("/settings/categories"),
+    { status: 302, location: "/auth/signin" },
+  ],
   [
     "expense endpoint rejects an anonymous request",
     () => request("/api/expenses", { method: "POST", json: { amount: "1", categoryId } }),

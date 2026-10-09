@@ -259,26 +259,26 @@ Migracja jest addytywna (kolumna nullable, nowy indeks, nowe polityki). Istniej�
 
 #### Automated
 
-- [x] 2.1 Lint przechodzi: `npm run lint`
-- [x] 2.2 Typy i Astro: `npx astro check`
-- [x] 2.3 Build przechodzi: `npm run build`
+- [x] 2.1 Lint przechodzi: `npm run lint` — 4190f17
+- [x] 2.2 Typy i Astro: `npx astro check` — 4190f17
+- [x] 2.3 Build przechodzi: `npm run build` — 4190f17
 
 #### Manual
 
-- [x] 2.4 `curl` z sesją na każdy endpoint zwraca oczekiwane kody (200 / 400 / 400 z komunikatem o archiwizacji / 401)
-- [x] 2.5 Zarchiwizowana kategoria znika z siatki na `/dashboard`
+- [x] 2.4 `curl` z sesją na każdy endpoint zwraca oczekiwane kody (200 / 400 / 400 z komunikatem o archiwizacji / 401) — 4190f17
+- [x] 2.5 Zarchiwizowana kategoria znika z siatki na `/dashboard` — 4190f17
 
 ### Phase 3: UI i nawigacja
 
 #### Automated
 
-- [ ] 3.1 Lint, typy, build: `npm run lint && npx astro check && npm run build`
-- [ ] 3.2 Smoke przechodzi na serwerze podglądu: `npm run smoke`
+- [x] 3.1 Lint, typy, build: `npm run lint && npx astro check && npm run build`
+- [x] 3.2 Smoke przechodzi na serwerze podglądu: `npm run smoke`
 
 #### Manual
 
-- [ ] 3.3 Dodanie, zmiana nazwy, przesunięcie, archiwizacja, przywrócenie i usunięcie działają (mobile i desktop)
-- [ ] 3.4 Użyta kategoria nie da się usunąć, pojawia się wskazówka o archiwizacji
-- [ ] 3.5 Zmiana kolejności i nazwy widoczna w siatce na `/dashboard`
-- [ ] 3.6 Menu „Ustawienia” działa; po wylogowaniu `/settings/categories` przekierowuje na logowanie
+- [x] 3.3 Dodanie, zmiana nazwy, przesunięcie, archiwizacja, przywrócenie i usunięcie działają (mobile i desktop)
+- [x] 3.4 Użyta kategoria nie da się usunąć, pojawia się wskazówka o archiwizacji
+- [x] 3.5 Zmiana kolejności i nazwy widoczna w siatce na `/dashboard`
+- [x] 3.6 Menu „Ustawienia” działa; po wylogowaniu `/settings/categories` przekierowuje na logowanie
 - [ ] 3.7 Przed merge PR migracja jest wypchnięta na produkcję: `npx supabase db push`

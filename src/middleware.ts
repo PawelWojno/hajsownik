@@ -1,7 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { createClient } from "@/lib/supabase";
 
-const PROTECTED_ROUTES = ["/dashboard"];
+const PROTECTED_ROUTES = ["/dashboard", "/settings"];
 // Pages that make no sense for a signed-in user: send them straight to the month screen (exact paths only).
 const SIGNED_OUT_ONLY_ROUTES = ["/", "/auth/signin", "/auth/signup"];
 
