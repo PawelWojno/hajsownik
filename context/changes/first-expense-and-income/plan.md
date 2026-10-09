@@ -161,6 +161,8 @@ need a CORS preflight, so no extra CSRF token is required.
 **File**: `src/pages/api/auth/signin.ts`
 
 **Intent**: Redirect to `/dashboard` instead of `/` so a returning user lands on the month screen.
+Added during implementation (user request): `src/middleware.ts` also redirects a signed-in user who opens `/`, `/auth/signin`
+or `/auth/signup` (exact paths) to `/dashboard`, so the month screen is the home of a signed-in user.
 
 ### Success Criteria
 
@@ -216,6 +218,12 @@ if `inCurrentMonth` is false show "Zapisano w <miesiąc> — nie wpływa na ten 
 (no double submit); on failure keep entered values and show the error (reuse the style of `ServerError`). Use `cn()`
 for classes; no Next.js directives; minimum touch target 44px; no horizontal scroll at 360px width.
 
+Adaptations made during implementation (all minor): (1) on a phone the panel covers the "Zostaje" row, so the panel
+header repeats "Zostaje w tym miesiącu: <kwota>" and updates after each save; (2) the past-month message reads "Zapisano
+(wrzesień 2026) — nie wpływa na ten miesiąc" because the plan's "Zapisano w <miesiąc>" would need Polish declension;
+(3) category buttons are rendered only while the panel is open, so the page root also carries `data-category-ids`
+(comma-separated ids) for the smoke test.
+
 #### 3. Polish UI outside the auth flow
 
 **Files**: `src/layouts/Layout.astro`, `src/components/Topbar.astro`, `src/components/Welcome.astro`
@@ -257,7 +265,7 @@ are translated. The new endpoints return Polish error messages (zod messages inc
 
 **Intent**: Make the smoke script able to check the new contract, staying dependency-free and needing only `BASE_URL`.
 Extend `request()` to send an optional JSON body and to return the response body text; after sign-in fetch `/dashboard`,
-read one category id from the `data-category-id` attribute (Phase 3 renders it on each category button), POST an expense
+read one category id from the `data-category-ids` attribute on the month screen root (Phase 3; the per-button `data-category-id` exists only while the panel is open), POST an expense
 and an income as JSON with the cookie jar, and assert 200 and the returned `left` (income minus expense). Tighten the
 sign-in step to expect the exact redirect `/dashboard` (the current `startsWith` matcher would still accept `/`), and
 assert that the dashboard body does not contain `[object Object]`.
@@ -325,34 +333,34 @@ Backfill of default categories for existing households is part of the migration;
 
 #### Automated
 
-- [x] 1.1 Migration applies on a clean DB: `npx supabase db reset`
-- [x] 1.2 pgTAP suites pass: `npx supabase test db`
+- [x] 1.1 Migration applies on a clean DB: `npx supabase db reset` — ea8ac6f
+- [x] 1.2 pgTAP suites pass: `npx supabase test db` — ea8ac6f
 
 #### Manual
 
-- [x] 1.3 New household has 12 categories in the expected order
-- [x] 1.4 Backfill gives an existing household the 12 categories
+- [x] 1.3 New household has 12 categories in the expected order — ea8ac6f
+- [x] 1.4 Backfill gives an existing household the 12 categories — ea8ac6f
 
 ### Phase 2: Money/date helpers and API endpoints
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Type check passes: `npx astro check`
-- [ ] 2.3 Build passes: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint` — edd80cf
+- [x] 2.2 Type check passes: `npx astro check` — edd80cf
+- [x] 2.3 Build passes: `npm run build` — edd80cf
 
 #### Manual
 
-- [ ] 2.4 Valid POST returns 200 with updated sums; invalid inputs and no session are rejected
-- [ ] 2.5 Entry around the Warsaw month boundary lands in the correct month
+- [x] 2.4 Valid POST returns 200 with updated sums; invalid inputs and no session are rejected — edd80cf
+- [x] 2.5 Entry around the Warsaw month boundary lands in the correct month — edd80cf
 
 ### Phase 3: Month screen with slide-in panel
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Type check passes: `npx astro check`
-- [ ] 3.3 Build passes: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint` — 8359b7a
+- [x] 3.2 Type check passes: `npx astro check` — 8359b7a
+- [x] 3.3 Build passes: `npm run build` — 8359b7a
 
 #### Manual
 
