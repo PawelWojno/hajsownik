@@ -43,7 +43,7 @@ Today, a household budget lives "in someone's head" — there's no reliable, low
 | ---- | ---------------------------- | ------------------------------------------------------------------- | -------------- | ----------------------------- | -------- |
 | F-01 | household-foundation         | (foundation) signup creates a household; RLS scopes all data to it | —              | FR-001, FR-002, Access Control, NFR | done |
 | S-01 | first-expense-and-income      | add an expense and an income entry, see "zostaje" update on month screen | F-01           | US-01, FR-004, FR-006, FR-012, FR-013 | done |
-| S-02 | category-management           | add/remove/archive/rename/reorder categories                       | S-01           | FR-007, FR-008, FR-009, FR-010, FR-011 | proposed |
+| S-02 | category-management           | add/remove/archive/rename/reorder categories                       | S-01           | FR-007, FR-008, FR-009, FR-010, FR-011 | in-progress |
 | S-03 | password-reset                 | reset their password by email if locked out                        | —              | FR-003                        | ready    |
 | S-04 | recurring-expenses              | define/edit/stop a recurring expense over a fixed horizon          | S-01           | FR-014, FR-015                | proposed |
 | S-05 | recurring-income                | define/edit/stop a recurring income over a fixed horizon           | S-01           | FR-016, FR-017                | proposed |
@@ -113,7 +113,7 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Rename/archive both have retroactive effects on history (renaming relabels past expenses; archiving must stay visibly marked in history) — low risk, but worth testing against whatever history view S-06 ships.
-- **Status:** proposed
+- **Status:** in-progress
 - **GitHub:** #4
 
 ### S-03: Password reset
@@ -200,6 +200,8 @@ No cross-slice open questions at this time — the PRD carried zero open questio
 - **Budget / usage bar on the month screen (e.g. "Budżet 68%")** — Why parked: surfaced during `/10x-plan first-expense-and-income` (S-01) from the user's month-screen sketch; per-category/monthly limits and usage bars are a PRD Non-Goal, so S-01 ships totals only. Revisit post-MVP together with budget limits.
 - **Timezone setting in settings** — Why parked: surfaced during `/10x-plan first-expense-and-income` (S-01); v1 hardcodes `Europe/Warsaw` for "today" and month boundaries because Workers run in UTC. A per-household timezone setting is post-MVP.
 - **Polish translation of the auth flow (sign-in, sign-up, confirm-email, forms, `/api/auth/*` messages)** — Why parked: surfaced during `/10x-plan-review first-expense-and-income` (S-01 makes everything outside auth Polish and sets `lang="pl"`); translating the auth files is a separate change. Promote to a slice (e.g. `polish-auth-ui`) if it should count toward M-1.
+- **Limit on the number of categories per household** — Why parked: surfaced during `/10x-plan category-management` (S-02); not in the PRD, so S-02 ships with no cap on how many categories a household can create. Revisit if the entry grid or the management list gets unwieldy.
+- **User-defined icons/colors for categories** — Why parked: surfaced during `/10x-plan category-management` (S-02); not in the PRD, categories are plain names for now. Would add columns to `categories` and picker UI on the management page.
 
 ## Milestone History
 
