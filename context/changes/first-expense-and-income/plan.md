@@ -24,7 +24,7 @@ Data is household-scoped via RLS (pattern from F-01). Covers US-01, FR-004, FR-0
 ## Desired End State
 
 New and existing households have 12 default categories. `/dashboard` shows "<Month> <year>" with Przychody,
-Wydatki, Zostaje (labelled "różnica tego miesiąca, nie oszczędności"), a primary "Dodaj wydatek" button and a
+Wydatki, Zostaje, a primary "Dodaj wydatek" button and a
 secondary "Dodaj przychód". Saving an entry keeps the panel open, resets the form and updates the sums from the API
 response in under 1 s. Another household's data is unreachable (proved by pgTAP).
 
@@ -192,7 +192,7 @@ or `/auth/signup` (exact paths) to `/dashboard`, so the month screen is the home
 **File**: `src/pages/dashboard.astro`
 
 **Intent**: Load categories and `month_summary(currentMonthStart())` with the user-session client; render title
-"<Miesiąc> <rok>", Przychody / Wydatki / Zostaje (with the "różnica tego miesiąca, nie oszczędności" caption), and mount the island with initial data.
+"<Miesiąc> <rok>", Przychody / Wydatki / Zostaje (no explanatory caption under Zostaje — removed at the user's request after implementation), and mount the island with initial data.
 
 **Contract**: remove the placeholder content; keep sign-out; no budget bar.
 The placeholder's `Welcome, <email>` text disappears, so the production sign-in check in `context/deployment/deploy-plan.md`
@@ -376,9 +376,9 @@ Backfill of default categories for existing households is part of the migration;
 
 #### Automated
 
-- [ ] 4.1 Smoke passes: `npm run smoke`
-- [ ] 4.2 CI-equivalent passes: `npm run lint && npx astro check && npm run build`
+- [x] 4.1 Smoke passes: `npm run smoke` — ab0122f
+- [x] 4.2 CI-equivalent passes: `npm run lint && npx astro check && npm run build` — ab0122f
 
 #### Manual
 
-- [ ] 4.3 Roadmap Parked section contains both new entries exactly once, and the S-01 Unknown about the category list is closed
+- [x] 4.3 Roadmap Parked section contains both new entries exactly once, and the S-01 Unknown about the category list is closed — ab0122f
