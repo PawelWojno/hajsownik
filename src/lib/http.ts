@@ -1,6 +1,6 @@
-import type { ApiError, SavedEntryResponse } from "@/types";
+import type { ApiError, CategoryListResponse, SavedEntryResponse } from "@/types";
 
-export function json(body: SavedEntryResponse | ApiError, status = 200): Response {
+export function json(body: SavedEntryResponse | CategoryListResponse | ApiError, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 }
 

@@ -246,27 +246,27 @@ Migracja jest addytywna (kolumna nullable, nowy indeks, nowe polityki). Istniej�
 
 #### Automated
 
-- [x] 1.1 Migracja stosuje się czysto: `npx supabase db reset`
-- [x] 1.2 Testy bazy przechodzą (w tym istniejące): `npx supabase test db`
+- [x] 1.1 Migracja stosuje się czysto: `npx supabase db reset` — f96cce1
+- [x] 1.2 Testy bazy przechodzą (w tym istniejące): `npx supabase test db` — f96cce1
 - [ ] 1.3 Job `smoke` w CI uruchamia `supabase test db` i jest zielony
 
 #### Manual
 
-- [x] 1.4 W Studio nowa migracja nie zmienia 12 domyślnych kategorii ani ich kolejności
-- [x] 1.5 Istniejące konto nadal widzi swoje kategorie
+- [x] 1.4 W Studio nowa migracja nie zmienia 12 domyślnych kategorii ani ich kolejności — f96cce1
+- [x] 1.5 Istniejące konto nadal widzi swoje kategorie — f96cce1
 
 ### Phase 2: Serwis i API
 
 #### Automated
 
-- [ ] 2.1 Lint przechodzi: `npm run lint`
-- [ ] 2.2 Typy i Astro: `npx astro check`
-- [ ] 2.3 Build przechodzi: `npm run build`
+- [x] 2.1 Lint przechodzi: `npm run lint`
+- [x] 2.2 Typy i Astro: `npx astro check`
+- [x] 2.3 Build przechodzi: `npm run build`
 
 #### Manual
 
-- [ ] 2.4 `curl` z sesją na każdy endpoint zwraca oczekiwane kody (200 / 400 / 400 z komunikatem o archiwizacji / 401)
-- [ ] 2.5 Zarchiwizowana kategoria znika z siatki na `/dashboard`
+- [x] 2.4 `curl` z sesją na każdy endpoint zwraca oczekiwane kody (200 / 400 / 400 z komunikatem o archiwizacji / 401)
+- [x] 2.5 Zarchiwizowana kategoria znika z siatki na `/dashboard`
 
 ### Phase 3: UI i nawigacja
 

@@ -23,3 +23,10 @@ export const dateField = z
   .refine((value) => value <= todayInWarsaw(), FUTURE_DATE_ERROR);
 
 export const descriptionField = z.string(DESCRIPTION_ERROR).trim().max(200, DESCRIPTION_ERROR);
+
+/** Same bounds as the database check (1-50 characters, no surrounding whitespace). */
+export const categoryNameField = z
+  .string("Podaj nazwę kategorii")
+  .trim()
+  .min(1, "Podaj nazwę kategorii")
+  .max(50, "Nazwa może mieć maksymalnie 50 znaków");
