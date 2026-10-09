@@ -48,9 +48,6 @@ export default function MonthScreen({ monthLabel, initialSummary, categories }: 
             />
           </div>
         </dl>
-        <p className="mt-3 text-xs text-blue-100/60">
-          Zostaje to różnica tego miesiąca (przychody − wydatki), a nie oszczędności.
-        </p>
       </section>
 
       <div className="flex flex-col items-center gap-3">

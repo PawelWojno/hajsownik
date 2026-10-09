@@ -86,8 +86,8 @@ The insight this product acts on: most budget apps collapse three different numb
   > Socrates: Counter-argument considered: "free-text income sources would produce inconsistent names (e.g. 'pensja' vs 'wynagrodzenie') that break later analysis." Resolution: source is chosen from a predefined list instead of free text.
 
 ### Month overview
-- FR-013: User can view a single month screen showing total income, total expenses, and what's left (zostaje) for their whole household, scoped to that month's dated entries, clearly labeled as this month's difference rather than money already set aside. Priority: must-have
-  > Socrates: Counter-argument considered: "'zostaje' could be mistaken for money already saved — the same confusion the source document itself warns against." Resolution: the month screen must label 'zostaje' as a monthly difference, not as savings.
+- FR-013: User can view a single month screen showing total income, total expenses, and what's left (zostaje) for their whole household, scoped to that month's dated entries. Priority: must-have
+  > Socrates: Counter-argument considered: "'zostaje' could be mistaken for money already saved — the same confusion the source document itself warns against." Resolution: first accepted — the month screen was to label 'zostaje' as a monthly difference, not as savings. Superseded during implementation of S-01 (`first-expense-and-income`): the user decided the screen shows no explanatory caption, because 'zostaje' is plainly income minus expenses and users need no reminder that it differs from savings.
 
 ### Recurring expenses & income
 - FR-014: User can define a recurring expense with an amount, a category, a monthly frequency, and a horizon in months (how many months ahead to generate, e.g. default 12); the app immediately creates that many expense entries, one per month starting from the month the definition was created, and never creates entries for months before that. Priority: must-have
