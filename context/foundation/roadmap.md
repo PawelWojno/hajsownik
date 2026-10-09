@@ -3,7 +3,7 @@ project: Hajsownik
 version: 1
 status: draft
 created: 2026-10-07
-updated: 2026-10-08
+updated: 2026-10-09
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -42,7 +42,7 @@ Today, a household budget lives "in someone's head" — there's no reliable, low
 | ID   | Change ID                   | Outcome (user can …)                                              | Prerequisites  | PRD refs                     | Status   |
 | ---- | ---------------------------- | ------------------------------------------------------------------- | -------------- | ----------------------------- | -------- |
 | F-01 | household-foundation         | (foundation) signup creates a household; RLS scopes all data to it | —              | FR-001, FR-002, Access Control, NFR | done |
-| S-01 | first-expense-and-income      | add an expense and an income entry, see "zostaje" update on month screen | F-01           | US-01, FR-004, FR-006, FR-012, FR-013 | in-progress |
+| S-01 | first-expense-and-income      | add an expense and an income entry, see "zostaje" update on month screen | F-01           | US-01, FR-004, FR-006, FR-012, FR-013 | done |
 | S-02 | category-management           | add/remove/archive/rename/reorder categories                       | S-01           | FR-007, FR-008, FR-009, FR-010, FR-011 | proposed |
 | S-03 | password-reset                 | reset their password by email if locked out                        | —              | FR-003                        | ready    |
 | S-04 | recurring-expenses              | define/edit/stop a recurring expense over a fixed horizon          | S-01           | FR-014, FR-015                | proposed |
@@ -100,7 +100,7 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Blockers:** —
 - **Unknowns:** — (resolved during `/10x-plan first-expense-and-income`: the user confirmed the 12 default categories — Jedzenie, Dom i rachunki, Transport, Zdrowie, Higiena i uroda, Ubrania, Rozrywka, Dzieci, Edukacja, Prezenty, Podróże, Inne.)
 - **Risk:** This is the broadest slice by design — it's the north star bundle (expense + income + month view) the user explicitly chose over the narrower expense-only version, so it carries more surface than its siblings.
-- **Status:** in-progress
+- **Status:** done
 - **GitHub:** #2
 
 ### S-02: Category management
@@ -208,3 +208,4 @@ No cross-slice open questions at this time — the PRD carried zero open questio
 ## Done
 
 - **F-01: (foundation) Signup extends to create a household row linked to the account (completing FR-001; FR-002/login is already satisfied by Baseline). A minimal Postgres schema + Row-Level-Security policy pattern exists so every future domain table is scoped to the caller's household by construction.** — Archived 2026-10-08 → `context/archive/2026-10-08-household-foundation/`. Lesson: —.
+- **S-01: User can add an expense and an income entry and see the month screen immediately reflect updated totals and "zostaje" for their household.** — Archived 2026-10-09 → `context/archive/2026-10-08-first-expense-and-income/`. Lesson: —.
