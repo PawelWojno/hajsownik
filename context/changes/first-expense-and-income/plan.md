@@ -218,6 +218,12 @@ if `inCurrentMonth` is false show "Zapisano w <miesiąc> — nie wpływa na ten 
 (no double submit); on failure keep entered values and show the error (reuse the style of `ServerError`). Use `cn()`
 for classes; no Next.js directives; minimum touch target 44px; no horizontal scroll at 360px width.
 
+Adaptations made during implementation (all minor): (1) on a phone the panel covers the "Zostaje" row, so the panel
+header repeats "Zostaje w tym miesiącu: <kwota>" and updates after each save; (2) the past-month message reads "Zapisano
+(wrzesień 2026) — nie wpływa na ten miesiąc" because the plan's "Zapisano w <miesiąc>" would need Polish declension;
+(3) category buttons are rendered only while the panel is open, so the page root also carries `data-category-ids`
+(comma-separated ids) for the smoke test.
+
 #### 3. Polish UI outside the auth flow
 
 **Files**: `src/layouts/Layout.astro`, `src/components/Topbar.astro`, `src/components/Welcome.astro`
@@ -259,7 +265,7 @@ are translated. The new endpoints return Polish error messages (zod messages inc
 
 **Intent**: Make the smoke script able to check the new contract, staying dependency-free and needing only `BASE_URL`.
 Extend `request()` to send an optional JSON body and to return the response body text; after sign-in fetch `/dashboard`,
-read one category id from the `data-category-id` attribute (Phase 3 renders it on each category button), POST an expense
+read one category id from the `data-category-ids` attribute on the month screen root (Phase 3; the per-button `data-category-id` exists only while the panel is open), POST an expense
 and an income as JSON with the cookie jar, and assert 200 and the returned `left` (income minus expense). Tighten the
 sign-in step to expect the exact redirect `/dashboard` (the current `startsWith` matcher would still accept `/`), and
 assert that the dashboard body does not contain `[object Object]`.
@@ -352,9 +358,9 @@ Backfill of default categories for existing households is part of the migration;
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Type check passes: `npx astro check`
-- [ ] 3.3 Build passes: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint`
+- [x] 3.2 Type check passes: `npx astro check`
+- [x] 3.3 Build passes: `npm run build`
 
 #### Manual
 

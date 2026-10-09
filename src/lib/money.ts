@@ -2,6 +2,8 @@
 
 export const MAX_AMOUNT_MINOR = 9_999_999_999;
 
+export const AMOUNT_ERROR = "Podaj kwotę większą od zera, np. 12,50";
+
 const AMOUNT_PATTERN = /^(\d{1,8})(?:\.(\d{1,2}))?$/;
 
 /** Parses what a user typed ("12,50", "12.5", "1 250") into grosze. Returns null unless the amount is valid and > 0. */
@@ -19,4 +21,21 @@ const plnFormatter = new Intl.NumberFormat("pl-PL", { style: "currency", currenc
 
 export function formatMinor(minor: number): string {
   return plnFormatter.format(minor / 100);
+}
+
+/**
+ * Keystroke filter for the amount field: keeps digits and at most one separator ("," or "."), at most 8 digits before
+ * it and 2 after it. Anything else typed or pasted is dropped. Validation still happens in parseAmountToMinor.
+ */
+export function filterAmountInput(input: string): string {
+  const cleaned = input.replace(/[^\d.,]/g, "");
+  const separatorAt = cleaned.search(/[.,]/);
+  if (separatorAt === -1) return cleaned.slice(0, 8);
+
+  const whole = cleaned.slice(0, separatorAt).slice(0, 8);
+  const fraction = cleaned
+    .slice(separatorAt + 1)
+    .replace(/[.,]/g, "")
+    .slice(0, 2);
+  return `${whole}${cleaned[separatorAt]}${fraction}`;
 }

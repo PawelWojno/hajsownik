@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { isRealDate, todayInWarsaw } from "@/lib/dates";
-import { parseAmountToMinor } from "@/lib/money";
+import { AMOUNT_ERROR, parseAmountToMinor } from "@/lib/money";
 
-export const AMOUNT_ERROR = "Podaj kwotę większą od zera, np. 12,50";
 const DATE_ERROR = "Podaj poprawną datę";
 const FUTURE_DATE_ERROR = "Data nie może być z przyszłości";
 const DESCRIPTION_ERROR = "Opis może mieć maksymalnie 200 znaków";
