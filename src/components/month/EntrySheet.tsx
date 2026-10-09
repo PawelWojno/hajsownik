@@ -65,7 +65,12 @@ export function EntrySheet({ open, mode, categories, left, onOpenChange, onSaved
             </DrawerDescription>
           </div>
           <DrawerClose asChild>
-            <Button variant="ghost" size="icon" aria-label="Zamknij" className="text-white hover:bg-white/10">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Zamknij"
+              className="min-h-11 min-w-11 text-white hover:bg-white/10"
+            >
               <X className="size-5" />
             </Button>
           </DrawerClose>
@@ -139,13 +144,18 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
       return;
     }
 
-    onSaved(result.data.summary);
     const label = mode === "expense" ? categories.find((c) => c.id === categoryId)?.name : source;
-    setNotice(
-      result.data.inCurrentMonth
-        ? `Zapisano ${formatMinor(minor)} · ${label ?? ""}`
-        : `Zapisano (${formatMonthLabel(date)}) — nie wpływa na ten miesiąc`,
-    );
+    if (result.data.summary === null) {
+      // Saved, but the sums are stale: say so, otherwise the user would retry and double the entry.
+      setNotice("Zapisano, ale nie udało się odświeżyć sum. Odśwież stronę.");
+    } else {
+      onSaved(result.data.summary);
+      setNotice(
+        result.data.inCurrentMonth
+          ? `Zapisano ${formatMinor(minor)} · ${label ?? ""}`
+          : `Zapisano (${formatMonthLabel(date)}) — nie wpływa na ten miesiąc`,
+      );
+    }
 
     // Quick entry: back to an empty form, ready for the next one.
     setAmount("");
@@ -254,7 +264,7 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
                   onChange={(event) => {
                     setDescription(event.target.value);
                   }}
-                  className={fieldClass}
+                  className={cn(fieldClass, "min-h-11")}
                 />
               </div>
             )}

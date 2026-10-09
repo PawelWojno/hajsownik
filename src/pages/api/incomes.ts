@@ -37,10 +37,5 @@ export const POST: APIRoute = async (context) => {
   const { error } = await supabase.from("incomes").insert({ source, amount_minor: amount, received_on: date });
   if (error) return json({ error: SAVE_FAILED }, 500);
 
-  try {
-    return json(await buildSavedResponse(supabase, date));
-  } catch {
-    // The entry is saved; only the fresh sums could not be read. The client keeps its old sums.
-    return json({ error: SAVE_FAILED }, 500);
-  }
+  return json(await buildSavedResponse(supabase, date));
 };
