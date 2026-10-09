@@ -35,3 +35,6 @@ CLAUDE.local.md
 .claude/skills/10x-cli-setup
 # Supabase Studio saved queries (local scratch)
 supabase/snippets/
+
+# Playwright MCP plugin output (snapshots, console logs, screenshots)
+.playwright-mcp/
