@@ -364,13 +364,13 @@ Backfill of default categories for existing households is part of the migration;
 
 #### Manual
 
-- [ ] 3.4 Amount -> category -> Save works at 360px width; sums update without reload within 1 s
-- [ ] 3.5 Panel stays open after save with empty, focused amount field; entries accumulate
-- [ ] 3.6 Income raises Przychody and Zostaje; expense lowers Zostaje
-- [ ] 3.7 Past-month entry shows the "nie wpływa na ten miesiąc" message
-- [ ] 3.8 Backdrop tap, X, Esc and swipe-down close the panel; sums stay visible above it
-- [ ] 3.9 A second household sees none of the first one's data
-- [ ] 3.10 Month screen, top bar and landing page are Polish with `lang="pl"`; auth pages intentionally still English
+- [x] 3.4 Amount -> category -> Save works at 360px width; sums update without reload within 1 s — 8359b7a
+- [x] 3.5 Panel stays open after save with empty, focused amount field; entries accumulate — 8359b7a
+- [x] 3.6 Income raises Przychody and Zostaje; expense lowers Zostaje — 8359b7a
+- [x] 3.7 Past-month entry shows the "nie wpływa na ten miesiąc" message — 8359b7a
+- [x] 3.8 Backdrop tap, X, Esc and swipe-down close the panel; sums stay visible above it — 8359b7a
+- [x] 3.9 A second household sees none of the first one's data — 8359b7a
+- [x] 3.10 Month screen, top bar and landing page are Polish with `lang="pl"`; auth pages intentionally still English — 8359b7a
 
 ### Phase 4: Smoke test, roadmap, housekeeping
 
