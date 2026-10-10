@@ -63,7 +63,8 @@ const steps = [
   [
     "signup creates account",
     () => request("/api/auth/signup", { method: "POST", form: { email, password, householdName: "Mój dom" } }),
-    { status: 302, location: "/auth/confirm-email" },
+    // The local Supabase used by CI has email confirmations off, so signUp returns a session right away.
+    { status: 302, location: "/dashboard" },
   ],
   [
     "signin rejects wrong password",
