@@ -293,4 +293,4 @@ Brak zmian w bazie ani danych. Zmiana `config.toml` wymaga restartu lokalnego Su
 
 - [ ] 3.2 Na produkcji prawdziwy mail → klik → zmiana hasła → `/dashboard`
 - [ ] 3.3 Link w mailu zaczyna się od adresu produkcyjnego, nie od `localhost`/Site URL
-- [ ] 3.4 Odnotowane, czy potwierdzanie maili jest włączone w produkcji
+- [x] 3.4 Odnotowane, czy potwierdzanie maili jest włączone w produkcji
