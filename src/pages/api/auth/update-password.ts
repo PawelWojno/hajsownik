@@ -39,5 +39,9 @@ export const POST: APIRoute = async (context) => {
     return context.redirect(`/auth/update-password?error=${encodeURIComponent(error.message)}`);
   }
 
+  // The password is already changed at this point, so ending the other sessions is best effort: it must not turn a
+  // successful reset into an error. A reset often follows a suspected takeover, so an old session must not survive it.
+  await supabase.auth.signOut({ scope: "others" });
+
   return context.redirect("/dashboard");
 };

@@ -271,17 +271,17 @@ Brak zmian w bazie ani danych. Zmiana `config.toml` wymaga restartu lokalnego Su
 
 #### Automated
 
-- [x] 2.1 Linting passes: `npm run lint`
-- [x] 2.2 Type/Astro check passes: `npx astro check`
-- [x] 2.3 Production build passes: `npm run build`
-- [x] 2.4 Smoke (w tym zmiana hasła i logowanie nowym) passes: `npm run smoke`
+- [x] 2.1 Linting passes: `npm run lint` — 1d90fdd
+- [x] 2.2 Type/Astro check passes: `npx astro check` — 1d90fdd
+- [x] 2.3 Production build passes: `npm run build` — 1d90fdd
+- [x] 2.4 Smoke (w tym zmiana hasła i logowanie nowym) passes: `npm run smoke` — 1d90fdd
 
 #### Manual
 
-- [x] 2.5 Pełny obieg w jednej przeglądarce (klik przekierowuje na `/auth/reset-callback?code=`) kończy się logowaniem nowym hasłem; stare hasło nie działa
-- [x] 2.6 Link zużyty i link w innej przeglądarce kończą się komunikatem o nieważnym linku na `/auth/forgot-password`
-- [x] 2.7 Wejście wprost na `/auth/update-password` bez sesji przekierowuje na `/auth/signin`
-- [x] 2.8 Hasło krótsze niż 6 znaków i niezgodne potwierdzenie pokazują błędy po stronie klienta
+- [x] 2.5 Pełny obieg w jednej przeglądarce (klik przekierowuje na `/auth/reset-callback?code=`) kończy się logowaniem nowym hasłem; stare hasło nie działa — 1d90fdd
+- [x] 2.6 Link zużyty i link w innej przeglądarce kończą się komunikatem o nieważnym linku na `/auth/forgot-password` — 1d90fdd
+- [x] 2.7 Wejście wprost na `/auth/update-password` bez sesji przekierowuje na `/auth/signin` — 1d90fdd
+- [x] 2.8 Hasło krótsze niż 6 znaków i niezgodne potwierdzenie pokazują błędy po stronie klienta — 1d90fdd
 
 ### Phase 3: Produkcja i weryfikacja kliknięciem
 
