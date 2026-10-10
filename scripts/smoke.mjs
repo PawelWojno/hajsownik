@@ -60,10 +60,26 @@ function leftFrom(actual) {
 const steps = [
   ["home renders", () => request("/"), { status: 200 }],
   ["dashboard redirects anonymous user", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
+  ["forgot-password page renders", () => request("/auth/forgot-password"), { status: 200 }],
+  [
+    "forgot-password rejects a malformed email",
+    () => request("/api/auth/forgot-password", { method: "POST", form: { email: "not-an-email" } }),
+    { status: 302, locationPrefix: "/auth/forgot-password?error=" },
+  ],
+  [
+    "forgot-password answers the same for an unknown email",
+    () => request("/api/auth/forgot-password", { method: "POST", form: { email: `nobody-${Date.now()}@example.com` } }),
+    { status: 302, location: "/auth/forgot-password?sent=1" },
+  ],
   [
     "signup creates account",
     () => request("/api/auth/signup", { method: "POST", form: { email, password, householdName: "Mój dom" } }),
     // The local Supabase used by CI has email confirmations off, so signUp returns a session right away.
+    { status: 302, location: "/dashboard" },
+  ],
+  [
+    "forgot-password redirects signed-in user to the month screen",
+    () => request("/auth/forgot-password"),
     { status: 302, location: "/dashboard" },
   ],
   [
