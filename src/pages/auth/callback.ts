@@ -6,6 +6,10 @@ export const prerender = false;
 
 const callbackSchema = z.object({ code: z.string().min(1) });
 
+// The email is already confirmed by the time Supabase redirects here, so signing in with the password still works.
+const CONFIRMATION_FAILED_MESSAGE =
+  "Your email is confirmed, but we couldn't sign you in automatically. Please sign in with your email and password.";
+
 export const GET: APIRoute = async (context) => {
   const parsed = callbackSchema.safeParse(Object.fromEntries(context.url.searchParams));
   if (!parsed.success) {
@@ -19,7 +23,9 @@ export const GET: APIRoute = async (context) => {
 
   const { error } = await supabase.auth.exchangeCodeForSession(parsed.data.code);
   if (error) {
-    return context.redirect(`/auth/signin?error=${encodeURIComponent(error.message)}`);
+    // Supabase's message is technical (e.g. a missing PKCE code verifier when the link is opened on another device),
+    // so show the user something they can act on instead.
+    return context.redirect(`/auth/signin?error=${encodeURIComponent(CONFIRMATION_FAILED_MESSAGE)}`);
   }
 
   return context.redirect("/dashboard");
