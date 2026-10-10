@@ -26,7 +26,10 @@ export const POST: APIRoute = async (context) => {
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { household_name: householdName } },
+    options: {
+      data: { household_name: householdName },
+      emailRedirectTo: `${context.url.origin}/auth/callback`,
+    },
   });
 
   if (error) {
