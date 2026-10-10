@@ -3,7 +3,7 @@ project: Hajsownik
 version: 1
 status: draft
 created: 2026-10-07
-updated: 2026-10-09
+updated: 2026-10-10
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -44,7 +44,7 @@ Today, a household budget lives "in someone's head" — there's no reliable, low
 | F-01 | household-foundation         | (foundation) signup creates a household; RLS scopes all data to it | —              | FR-001, FR-002, Access Control, NFR | done |
 | S-01 | first-expense-and-income      | add an expense and an income entry, see "zostaje" update on month screen | F-01           | US-01, FR-004, FR-006, FR-012, FR-013 | done |
 | S-02 | category-management           | add/remove/archive/rename/reorder categories                       | S-01           | FR-007, FR-008, FR-009, FR-010, FR-011 | done |
-| S-03 | password-reset                 | reset their password by email if locked out                        | —              | FR-003                        | ready    |
+| S-03 | password-reset                 | reset their password by email if locked out                        | —              | FR-003                        | in-progress |
 | S-04 | recurring-expenses              | define/edit/stop a recurring expense over a fixed horizon          | S-01           | FR-014, FR-015                | proposed |
 | S-05 | recurring-income                | define/edit/stop a recurring income over a fixed horizon           | S-01           | FR-016, FR-017                | proposed |
 | S-06 | expense-history-and-edits       | view history (filter by month/category) and edit/delete any entry  | S-01, S-04, S-05 | FR-018, FR-019, FR-020      | proposed |
@@ -126,7 +126,7 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Low — Supabase Auth's built-in `resetPasswordForEmail` flow covers this natively; main work is wiring the UI and respecting FR-001's "confirmed email required before reset is usable" gate.
-- **Status:** ready
+- **Status:** in-progress
 - **GitHub:** #3
 
 ### S-04: Recurring expenses
@@ -203,6 +203,7 @@ No cross-slice open questions at this time — the PRD carried zero open questio
 - **Polish translation of the auth flow (sign-in, sign-up, confirm-email, forms, `/api/auth/*` messages, `/auth/callback` messages)** — Why parked: surfaced during `/10x-plan-review first-expense-and-income` (S-01 makes everything outside auth Polish and sets `lang="pl"`); translating the auth files is a separate change. Promote to a slice (e.g. `polish-auth-ui`) if it should count toward M-1.
 - **Limit on the number of categories per household** — Why parked: surfaced during `/10x-plan category-management` (S-02); not in the PRD, so S-02 ships with no cap on how many categories a household can create. Revisit if the entry grid or the management list gets unwieldy.
 - **User-defined icons/colors for categories** — Why parked: surfaced during `/10x-plan category-management` (S-02); not in the PRD, categories are plain names for now. Would add columns to `categories` and picker UI on the management page.
+- **Success page instead of an error banner when signup confirmation can't auto-sign-in** — Why parked: surfaced during `/10x-plan password-reset` (S-03); the user wants it done right after `password-reset` ships, as a separate small change (e.g. `signup-confirmation-page`). Today `src/pages/auth/callback.ts:25-29` redirects to `/auth/signin?error=…` with "Your email is confirmed, but we couldn't sign you in automatically", which renders in the red error banner although the account is fine (typical cause: link opened on another device, PKCE has no `code_verifier` there). Same-browser success (auto sign-in → `/dashboard`) stays as is. Change: send that failure case to a neutral/green "account activated, sign in" page or `?info=` banner (pattern: `confirm-email.astro`). Assumption to verify first: a `?code` in the redirect implies Supabase already confirmed the email (stated in the comment at `callback.ts:9`, not checked in the docs), and whether expired-link errors arrive in the query or the URL fragment (answered 2026-10-10 while testing `password-reset`: for a reused reset link Supabase puts them in the fragment, `#error=access_denied&error_code=otp_expired`, which the server never sees). Keep it out of `password-reset`, which deliberately leaves `callback.ts` untouched.
 
 ## Milestone History
 

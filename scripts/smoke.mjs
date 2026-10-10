@@ -5,6 +5,7 @@
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:4321";
 const email = `smoke-${Date.now()}@example.com`;
 const password = "Smoke-Test-Passw0rd!";
+const newPassword = "Smoke-New-Passw0rd!";
 const jar = new Map();
 
 function cookieHeader() {
@@ -60,10 +61,50 @@ function leftFrom(actual) {
 const steps = [
   ["home renders", () => request("/"), { status: 200 }],
   ["dashboard redirects anonymous user", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
+  ["forgot-password page renders", () => request("/auth/forgot-password"), { status: 200 }],
+  [
+    "forgot-password rejects a malformed email",
+    () => request("/api/auth/forgot-password", { method: "POST", form: { email: "not-an-email" } }),
+    { status: 302, locationPrefix: "/auth/forgot-password?error=" },
+  ],
+  [
+    "forgot-password answers the same for an unknown email",
+    () => request("/api/auth/forgot-password", { method: "POST", form: { email: `nobody-${Date.now()}@example.com` } }),
+    { status: 302, location: "/auth/forgot-password?sent=1" },
+  ],
+  [
+    "update-password page redirects anonymous user",
+    () => request("/auth/update-password"),
+    { status: 302, location: "/auth/signin" },
+  ],
+  [
+    "update-password endpoint rejects an anonymous request",
+    () =>
+      request("/api/auth/update-password", {
+        method: "POST",
+        form: { password: newPassword, confirmPassword: newPassword },
+      }),
+    { status: 302, location: "/auth/signin" },
+  ],
+  [
+    "reset-callback without a code sends the user back to forgot-password",
+    () => request("/auth/reset-callback"),
+    { status: 302, locationPrefix: "/auth/forgot-password?error=" },
+  ],
+  [
+    "reset-callback with an invalid code sends the user back to forgot-password",
+    () => request("/auth/reset-callback?code=invalid"),
+    { status: 302, locationPrefix: "/auth/forgot-password?error=" },
+  ],
   [
     "signup creates account",
     () => request("/api/auth/signup", { method: "POST", form: { email, password, householdName: "Mój dom" } }),
     // The local Supabase used by CI has email confirmations off, so signUp returns a session right away.
+    { status: 302, location: "/dashboard" },
+  ],
+  [
+    "forgot-password redirects signed-in user to the month screen",
+    () => request("/auth/forgot-password"),
     { status: 302, location: "/dashboard" },
   ],
   [
@@ -74,6 +115,24 @@ const steps = [
   [
     "signin accepts correct password",
     () => request("/api/auth/signin", { method: "POST", form: { email, password } }),
+    { status: 302, location: "/dashboard" },
+  ],
+  [
+    "update-password rejects mismatched passwords",
+    () =>
+      request("/api/auth/update-password", {
+        method: "POST",
+        form: { password: newPassword, confirmPassword: "something-else" },
+      }),
+    { status: 302, locationPrefix: "/auth/update-password?error=" },
+  ],
+  [
+    "update-password changes the password of the signed-in user",
+    () =>
+      request("/api/auth/update-password", {
+        method: "POST",
+        form: { password: newPassword, confirmPassword: newPassword },
+      }),
     { status: 302, location: "/dashboard" },
   ],
   ["home redirects signed-in user to the month screen", () => request("/"), { status: 302, location: "/dashboard" }],
@@ -172,6 +231,23 @@ const steps = [
     () => request("/settings/categories"),
     { status: 302, location: "/auth/signin" },
   ],
+  [
+    "signin rejects the old password after the change",
+    () => request("/api/auth/signin", { method: "POST", form: { email, password } }),
+    { status: 302, locationPrefix: "/auth/signin?error=" },
+  ],
+  [
+    "signin accepts the new password",
+    () => request("/api/auth/signin", { method: "POST", form: { email, password: newPassword } }),
+    { status: 302, location: "/dashboard" },
+  ],
+  [
+    "signout after the new-password signin",
+    () => request("/api/auth/signout", { method: "POST" }),
+    { status: 302, location: "/" },
+  ],
+  // Kept before the anonymous expense request: that 401 leaves its JSON body unread, and the dev/preview server then
+  // fails the next request on the same connection ("fetch failed"), so it has to stay the last step.
   [
     "expense endpoint rejects an anonymous request",
     () => request("/api/expenses", { method: "POST", json: { amount: "1", categoryId } }),
