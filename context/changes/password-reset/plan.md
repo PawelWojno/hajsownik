@@ -256,32 +256,32 @@ Brak zmian w bazie ani danych. Zmiana `config.toml` wymaga restartu lokalnego Su
 
 #### Automated
 
-- [x] 1.1 Linting passes: `npm run lint`
-- [x] 1.2 Type/Astro check passes: `npx astro check`
-- [x] 1.3 Production build passes: `npm run build`
-- [x] 1.4 Smoke passes against a running server with local Supabase: `npm run smoke`
+- [x] 1.1 Linting passes: `npm run lint` — cb2e004
+- [x] 1.2 Type/Astro check passes: `npx astro check` — cb2e004
+- [x] 1.3 Production build passes: `npm run build` — cb2e004
+- [x] 1.4 Smoke passes against a running server with local Supabase: `npm run smoke` — cb2e004
 
 #### Manual
 
-- [x] 1.5 Formularz wysyła mail widoczny w Inbucket, a href linku zawiera `redirect_to` równy `{origin}/auth/reset-callback` (bez `?code=`, ten pojawia się dopiero po kliknięciu — faza 2)
-- [x] 1.6 Dla nieistniejącego adresu użytkownik widzi dokładnie tę samą kartę „Check your email”
-- [x] 1.7 Link „Forgot password?” widoczny na `/auth/signin`; zalogowany wchodzący na `/auth/forgot-password` trafia na `/dashboard`
+- [x] 1.5 Formularz wysyła mail widoczny w Inbucket, a href linku zawiera `redirect_to` równy `{origin}/auth/reset-callback` (bez `?code=`, ten pojawia się dopiero po kliknięciu — faza 2) — cb2e004
+- [x] 1.6 Dla nieistniejącego adresu użytkownik widzi dokładnie tę samą kartę „Check your email” — cb2e004
+- [x] 1.7 Link „Forgot password?” widoczny na `/auth/signin`; zalogowany wchodzący na `/auth/forgot-password` trafia na `/dashboard` — cb2e004
 
 ### Phase 2: Lądowanie z linku i ustawienie nowego hasła
 
 #### Automated
 
-- [ ] 2.1 Linting passes: `npm run lint`
-- [ ] 2.2 Type/Astro check passes: `npx astro check`
-- [ ] 2.3 Production build passes: `npm run build`
-- [ ] 2.4 Smoke (w tym zmiana hasła i logowanie nowym) passes: `npm run smoke`
+- [x] 2.1 Linting passes: `npm run lint`
+- [x] 2.2 Type/Astro check passes: `npx astro check`
+- [x] 2.3 Production build passes: `npm run build`
+- [x] 2.4 Smoke (w tym zmiana hasła i logowanie nowym) passes: `npm run smoke`
 
 #### Manual
 
-- [ ] 2.5 Pełny obieg w jednej przeglądarce (klik przekierowuje na `/auth/reset-callback?code=`) kończy się logowaniem nowym hasłem; stare hasło nie działa
-- [ ] 2.6 Link zużyty i link w innej przeglądarce kończą się komunikatem o nieważnym linku na `/auth/forgot-password`
-- [ ] 2.7 Wejście wprost na `/auth/update-password` bez sesji przekierowuje na `/auth/signin`
-- [ ] 2.8 Hasło krótsze niż 6 znaków i niezgodne potwierdzenie pokazują błędy po stronie klienta
+- [x] 2.5 Pełny obieg w jednej przeglądarce (klik przekierowuje na `/auth/reset-callback?code=`) kończy się logowaniem nowym hasłem; stare hasło nie działa
+- [x] 2.6 Link zużyty i link w innej przeglądarce kończą się komunikatem o nieważnym linku na `/auth/forgot-password`
+- [x] 2.7 Wejście wprost na `/auth/update-password` bez sesji przekierowuje na `/auth/signin`
+- [x] 2.8 Hasło krótsze niż 6 znaków i niezgodne potwierdzenie pokazują błędy po stronie klienta
 
 ### Phase 3: Produkcja i weryfikacja kliknięciem
 
