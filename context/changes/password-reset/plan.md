@@ -287,10 +287,10 @@ Brak zmian w bazie ani danych. Zmiana `config.toml` wymaga restartu lokalnego Su
 
 #### Automated
 
-- [ ] 3.1 CI na PR zielone (job `ci` i `smoke`): `gh pr checks`
+- [x] 3.1 CI na PR zielone (job `ci` i `smoke`): `gh pr checks` — 458973c
 
 #### Manual
 
-- [ ] 3.2 Na produkcji prawdziwy mail → klik → zmiana hasła → `/dashboard`
-- [ ] 3.3 Link w mailu zaczyna się od adresu produkcyjnego, nie od `localhost`/Site URL
-- [x] 3.4 Odnotowane, czy potwierdzanie maili jest włączone w produkcji
+- [x] 3.2 Na produkcji prawdziwy mail → klik → zmiana hasła → `/dashboard` — 458973c
+- [x] 3.3 Link w mailu zaczyna się od adresu produkcyjnego, nie od `localhost`/Site URL — 458973c
+- [x] 3.4 Odnotowane, czy potwierdzanie maili jest włączone w produkcji — 3d83545
