@@ -280,6 +280,16 @@ Przypomnienie o kończącym się horyzoncie, krok w smoke teście oraz pomiar CP
 
 Każda akcja to jedno wywołanie RPC (≤ 24 wiersze przy tworzeniu i przedłużaniu, a przy edycji kwoty najwyżej 24 usunięte i 24 wstawione, bo horyzont obejmuje najwyżej 24 miesiące), co odpowiada mitygacji „zbatchuj inserty" z `infrastructure.md:96`. Brak instrumentacji CPU w repo; pomiar odbywa się ręcznie w Phase 4. Indeks częściowy `(recurring_expense_id, spent_on)` obsługuje usuwanie przyszłych wpisów.
 
+**Pomiar na produkcji (2026-10-12, krok 4.8)**, definicja na 24 miesiące, odczyt z logów Cloudflare (`cpuTimeMs` / `wallTimeMs`, limit darmowego planu: 10 ms CPU):
+
+| Wywołanie | cpuTimeMs | wallTimeMs |
+| --- | --- | --- |
+| POST (utworzenie, 24 mies.) | 8 i 6 | 1179 i 691 |
+| PATCH (zmiana kwoty) | 7 | 1535 |
+| DELETE (zatrzymanie) | 5 i 4 | 216 i 187 |
+
+Wszystkie wywołania zakończyły się `outcome: ok` poniżej limitu; najbliżej limitu jest pierwszy POST po deployu (8 ms). Czas CPU wynika z narzutu Workera (sesja, parsowanie, zod, dwa żądania do bazy), a nie z liczby wierszy, bo operacje na wierszach wykonuje baza w jednej funkcji SQL. Czas całkowity (do ok. 1,5 s) to oczekiwanie na sieć i bazę i do limitu CPU się nie liczy.
+
 ## Migration Notes
 
 Migracja jest addytywna (nowa tabela, nowa nullable kolumna, nowe polityki) i nie zmienia istniejących wierszy. Przed merge: `npx supabase db push` na produkcję (job `deploy` migracji nie stosuje, `category-management/plan.md:205,232`); wycofanie to nowa migracja usuwająca funkcje i politykę DELETE, bo istniejące wpisy generowane pozostają poprawnymi wpisami. Workflow git: kod idzie przez branch i PR, nie bezpośrednio na master.
@@ -352,4 +362,4 @@ Migracja jest addytywna (nowa tabela, nowa nullable kolumna, nowe polityki) i ni
 
 - [x] 4.6 Definicja z 2 miesiącami (kończy się w następnym miesiącu) pokazuje baner od razu; „Nie przypominaj" ukrywa go po przeładowaniu i na innym urządzeniu; „Przedłuż" go usuwa, a definicja na liście ma nowy zakres — e439056
 - [x] 4.7 Migracja zastosowana na produkcji przed merge: `npx supabase db push` (job deploy jej nie stosuje)
-- [ ] 4.8 Na produkcji definicja z 24 miesiącami, potem edycja kwoty: czas CPU wywołań sprawdzony w panelu Cloudflare lub `npx wrangler tail` i mieści się w limicie 10 ms; wynik odnotowany w planie
+- [x] 4.8 Na produkcji definicja z 24 miesiącami, potem edycja kwoty: czas CPU wywołań sprawdzony w panelu Cloudflare lub `npx wrangler tail` i mieści się w limicie 10 ms; wynik odnotowany w planie
