@@ -5,13 +5,15 @@ import Topbar from "@/components/Topbar.astro";
 import Layout from "@/layouts/Layout.astro";
 import { currentMonthStart, formatMonthLabel, todayInWarsaw } from "@/lib/dates";
 import { getMonthSummary } from "@/lib/services/month";
+import { listRecurringExpenses } from "@/lib/services/recurring-expenses";
 import { createClient } from "@/lib/supabase";
-import type { Category, MonthSummary } from "@/types";
+import type { Category, MonthSummary, RecurringExpense } from "@/types";
 
 const categoryRows = z.array(z.object({ id: z.string(), name: z.string() }));
 
 let summary: MonthSummary | null = null;
 let categories: Category[] = [];
+let recurring: RecurringExpense[] = [];
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 if (supabase) {
@@ -27,6 +29,13 @@ if (supabase) {
   } catch {
     summary = null;
   }
+
+  // The reminder is optional: a failed read must not take the whole month screen down.
+  try {
+    recurring = await listRecurringExpenses(supabase);
+  } catch {
+    recurring = [];
+  }
 }
 
 const label = formatMonthLabel(todayInWarsaw());
@@ -37,7 +46,13 @@ const monthLabel = label.charAt(0).toUpperCase() + label.slice(1);
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <Topbar />
     {summary ? (
-      <MonthScreen monthLabel={monthLabel} initialSummary={summary} categories={categories} client:load />
+      <MonthScreen
+        monthLabel={monthLabel}
+        initialSummary={summary}
+        categories={categories}
+        recurring={recurring}
+        client:load
+      />
     ) : (
       <p
         role="alert"

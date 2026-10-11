@@ -327,29 +327,29 @@ Migracja jest addytywna (nowa tabela, nowa nullable kolumna, nowe polityki) i ni
 
 #### Automated
 
-- [x] 3.1 Linting przechodzi: `npm run lint`
-- [x] 3.2 Sprawdzanie typów przechodzi: `npx astro check`
-- [x] 3.3 Build przechodzi: `npm run build`
+- [x] 3.1 Linting przechodzi: `npm run lint` — 5befa73
+- [x] 3.2 Sprawdzanie typów przechodzi: `npx astro check` — 5befa73
+- [x] 3.3 Build przechodzi: `npm run build` — 5befa73
 
 #### Manual
 
-- [x] 3.4 Na szerokości telefonu: utworzenie definicji (dzień 10., 3 miesiące) pokazuje ją na liście, a „Zostaje" na `/dashboard` uwzględnia wpis z bieżącego miesiąca
-- [x] 3.5 Edycja kwoty zmienia przyszłe wpisy, ale nie wpis z datą ≤ dziś; zatrzymanie z potwierdzeniem usuwa definicję z listy
-- [x] 3.6 „Przedłuż" dopisuje miesiące; kategoria zarchiwizowana po utworzeniu definicji jest oznaczona na liście
-- [x] 3.7 Po przebudowie (`build`/`astro check`) serwer dev trzeba zrestartować i odświeżyć stronę twardo, bo wyspy przestają się hydratować
+- [x] 3.4 Na szerokości telefonu: utworzenie definicji (dzień 10., 3 miesiące) pokazuje ją na liście, a „Zostaje" na `/dashboard` uwzględnia wpis z bieżącego miesiąca — 5befa73
+- [x] 3.5 Edycja kwoty zmienia przyszłe wpisy, ale nie wpis z datą ≤ dziś; zatrzymanie z potwierdzeniem usuwa definicję z listy — 5befa73
+- [x] 3.6 „Przedłuż" dopisuje miesiące; kategoria zarchiwizowana po utworzeniu definicji jest oznaczona na liście — 5befa73
+- [x] 3.7 Po przebudowie (`build`/`astro check`) serwer dev trzeba zrestartować i odświeżyć stronę twardo, bo wyspy przestają się hydratować — 5befa73
 
 ### Phase 4: Baner na ekranie miesiąca, smoke i domknięcie
 
 #### Automated
 
-- [ ] 4.1 Linting przechodzi: `npm run lint`
-- [ ] 4.2 Sprawdzanie typów przechodzi: `npx astro check`
-- [ ] 4.3 Build przechodzi: `npm run build`
-- [ ] 4.4 Testy pgTAP przechodzą: `npx supabase test db`
-- [ ] 4.5 Smoke przechodzi na buildzie produkcyjnym z lokalnym Supabase: `npm run smoke`
+- [x] 4.1 Linting przechodzi: `npm run lint`
+- [x] 4.2 Sprawdzanie typów przechodzi: `npx astro check`
+- [x] 4.3 Build przechodzi: `npm run build`
+- [x] 4.4 Testy pgTAP przechodzą: `npx supabase test db`
+- [x] 4.5 Smoke przechodzi na buildzie produkcyjnym z lokalnym Supabase: `npm run smoke`
 
 #### Manual
 
-- [ ] 4.6 Definicja z 2 miesiącami (kończy się w następnym miesiącu) pokazuje baner od razu; „Nie przypominaj" ukrywa go po przeładowaniu i na innym urządzeniu; „Przedłuż" go usuwa, a definicja na liście ma nowy zakres
+- [x] 4.6 Definicja z 2 miesiącami (kończy się w następnym miesiącu) pokazuje baner od razu; „Nie przypominaj" ukrywa go po przeładowaniu i na innym urządzeniu; „Przedłuż" go usuwa, a definicja na liście ma nowy zakres
 - [ ] 4.7 Migracja zastosowana na produkcji przed merge: `npx supabase db push` (job deploy jej nie stosuje)
 - [ ] 4.8 Na produkcji definicja z 24 miesiącami, potem edycja kwoty: czas CPU wywołań sprawdzony w panelu Cloudflare lub `npx wrangler tail` i mieści się w limicie 10 ms; wynik odnotowany w planie
