@@ -18,7 +18,6 @@ const labelClass = "text-sm text-blue-100/80";
 const errorFieldClass = "border-red-400/60 focus:ring-red-400";
 
 const EXTEND_STEP = 12;
-const CATEGORY_ERROR = "Wybierz kategorię";
 
 interface Props {
   initialItems: RecurringExpense[];
@@ -38,8 +37,10 @@ interface AddForm {
   months: string;
 }
 
-/** Only the typed amount and the category can be wrong: day and months are picked from lists of valid values. */
-type FieldErrors = Partial<Record<"amount" | "categoryId", string>>;
+/** Only the typed amount can be wrong: category, day and months are picked from lists of valid values. */
+interface FieldErrors {
+  amount?: string;
+}
 
 function range(min: number, max: number): number[] {
   return Array.from({ length: max - min + 1 }, (_, index) => min + index);
@@ -55,7 +56,6 @@ const MONTH_OPTIONS = range(MIN_MONTHS, MAX_HORIZON_MONTHS);
 function validateForm(form: AddForm): FieldErrors {
   const errors: FieldErrors = {};
   if (parseAmountToMinor(form.amount) === null) errors.amount = AMOUNT_ERROR;
-  if (!form.categoryId) errors.categoryId = CATEGORY_ERROR;
   return errors;
 }
 
@@ -250,12 +250,10 @@ export default function RecurringManager({ initialItems, categories }: Props) {
           <select
             id="recurring-category"
             value={form.categoryId}
-            aria-invalid={fieldErrors.categoryId ? true : undefined}
-            aria-describedby={fieldErrors.categoryId ? "recurring-category-error" : undefined}
             onChange={(event) => {
               updateForm("categoryId", event.target.value);
             }}
-            className={cn(fieldClass, "min-h-11", fieldErrors.categoryId && errorFieldClass)}
+            className={cn(fieldClass, "min-h-11")}
           >
             {categories.map((category) => (
               <option key={category.id} value={category.id} className="text-black">
@@ -263,7 +261,6 @@ export default function RecurringManager({ initialItems, categories }: Props) {
               </option>
             ))}
           </select>
-          <FieldError id="recurring-category-error" message={fieldErrors.categoryId} />
         </div>
 
         <div className="flex gap-2">
