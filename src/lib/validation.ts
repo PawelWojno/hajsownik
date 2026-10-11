@@ -24,6 +24,20 @@ export const dateField = z
 
 export const descriptionField = z.string(DESCRIPTION_ERROR).trim().max(200, DESCRIPTION_ERROR);
 
+/** Day of the month an entry falls on; the database clamps it to the length of shorter months. */
+export const dayOfMonthField = z
+  .number("Podaj dzień miesiąca")
+  .int("Podaj dzień miesiąca")
+  .min(1, "Dzień miesiąca musi być od 1 do 31")
+  .max(31, "Dzień miesiąca musi być od 1 do 31");
+
+/** Number of months to create or to append; the database also limits the horizon to 24 months ahead. */
+export const monthsField = z
+  .number("Podaj liczbę miesięcy")
+  .int("Podaj liczbę miesięcy")
+  .min(1, "Liczba miesięcy musi być od 1 do 24")
+  .max(24, "Liczba miesięcy musi być od 1 do 24");
+
 /** Same bounds as the database check (1-50 characters, no surrounding whitespace). */
 export const categoryNameField = z
   .string("Podaj nazwę kategorii")

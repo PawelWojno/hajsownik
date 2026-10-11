@@ -314,14 +314,14 @@ Migracja jest addytywna (nowa tabela, nowa nullable kolumna, nowe polityki) i ni
 
 #### Automated
 
-- [ ] 2.1 Linting przechodzi: `npm run lint`
-- [ ] 2.2 Sprawdzanie typów przechodzi: `npx astro check`
-- [ ] 2.3 Build przechodzi: `npm run build`
+- [x] 2.1 Linting przechodzi: `npm run lint`
+- [x] 2.2 Sprawdzanie typów przechodzi: `npx astro check`
+- [x] 2.3 Build przechodzi: `npm run build`
 
 #### Manual
 
-- [ ] 2.4 Zalogowany `fetch` z konsoli przeglądarki: POST tworzy definicję i zwraca listę; PATCH z `amount`, `extendMonths` i `dismissReminder` zwraca zaktualizowaną listę; DELETE zwraca listę bez definicji
-- [ ] 2.5 Anonimowe wywołanie daje 401, błędne dane (dzień 32, 0 miesięcy, kwota 0) dają 400, nieznane `id` daje 404
+- [x] 2.4 Zalogowany `fetch` z konsoli przeglądarki: POST tworzy definicję i zwraca listę; PATCH z `amount`, `extendMonths` i `dismissReminder` zwraca zaktualizowaną listę; DELETE zwraca listę bez definicji
+- [x] 2.5 Anonimowe wywołanie daje 401, błędne dane (dzień 32, 0 miesięcy, kwota 0) dają 400, nieznane `id` daje 404
 
 ### Phase 3: Strona zarządzania `/settings/recurring`
 
