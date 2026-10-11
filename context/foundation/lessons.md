@@ -15,3 +15,10 @@
 - **Problem**: Without `emailRedirectTo`, Supabase falls back to the dashboard Site URL (default `localhost:3000`), and with PKCE the app needs a route that exchanges `?code` for a session. Signup confirmation links led nowhere even though the flow was marked "verified in production".
 - **Rule**: Every call that sends an Auth email must pass `emailRedirectTo` built from the request origin, pointing at an existing route that calls `exchangeCodeForSession`, and that origin must be in the dashboard Redirect URLs allowlist. Verify by clicking the real email link, not by checking the API response.
 - **Applies to**: plan, implement, impl-review
+
+## Operacja tworząca potrzebuje ochrony przed duplikatem w UI i w bazie
+
+- **Context**: Każda funkcja lub endpoint tworzący nową definicję z wieloma wierszami (cykliczne wydatki S-04, cykliczne przychody S-05), bez naturalnego klucza do zablokowania przed utworzeniem.
+- **Problem**: Podwójny submit lub dwie karty wywołują tworzenie dwa razy: powstają dwie identyczne definicje i podwójna liczba wpisów, co zawyża sumy miesiąca, a zatrzymanie jednej zostawia drugą. Sama blokada przycisku nie chroni przed dwiema kartami ani ręcznym wywołaniem API.
+- **Rule**: Każdą operację tworzącą zabezpiecz dwiema warstwami: wyłącz przycisk na czas żądania (stan `pending` w hooku) i dodaj w bazie częściowy indeks unikalny na parametrach definicji dla aktywnych wierszy (np. `where stopped_at is null`), z mapowaniem błędu 23505 na komunikat po polsku w API.
+- **Applies to**: plan, plan-review, implement, impl-review

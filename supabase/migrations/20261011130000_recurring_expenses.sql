@@ -28,6 +28,12 @@ create table public.recurring_expenses (
   foreign key (household_id, category_id) references public.categories (household_id, id)
 );
 
+-- Two identical active definitions from the same month are almost certainly a double submit (two clicks, two tabs):
+-- they would double the monthly totals, and stopping one would leave the other running. The API maps 23505 to a message.
+create unique index recurring_expenses_active_unique_idx
+  on public.recurring_expenses (household_id, category_id, amount_minor, day_of_month, start_month)
+  where stopped_at is null;
+
 alter table public.expenses add column recurring_expense_id uuid;
 -- Definitions are stopped (stopped_at), never deleted, so no ON DELETE action is needed. A null recurring_expense_id
 -- (a manual entry) skips the check (MATCH SIMPLE).
@@ -139,9 +145,10 @@ set search_path = ''
 as $$
 declare
   v_today date := public.warsaw_today();
+  v_current date := v_today - (extract(day from v_today)::int - 1);
   v_def public.recurring_expenses;
 begin
-  select * into v_def from public.recurring_expenses where id = p_id and stopped_at is null for update;
+  select * into v_def from public.recurring_expenses where id = p_id and stopped_at is null for no key update;
   if not found then
     raise exception 'recurring expense not found' using errcode = 'P0002';
   end if;
@@ -153,7 +160,11 @@ begin
   select v_def.category_id, p_amount_minor, s.spent_on, p_id
   from (
     select public.recurring_slot_date((v_def.start_month + make_interval(months => g))::date, v_def.day_of_month) as spent_on
-    from generate_series(0, public.recurring_month_diff(v_def.start_month, v_def.end_month)) as g
+    -- Slots before the current month are all dated before today, so the series starts at the current month.
+    from generate_series(
+      greatest(0, public.recurring_month_diff(v_def.start_month, v_current)),
+      public.recurring_month_diff(v_def.start_month, v_def.end_month)
+    ) as g
   ) s
   where s.spent_on > v_today;
 end;
@@ -178,7 +189,7 @@ begin
     raise exception 'p_months must be between 1 and 24' using errcode = '22023';
   end if;
 
-  select * into v_def from public.recurring_expenses where id = p_id and stopped_at is null for update;
+  select * into v_def from public.recurring_expenses where id = p_id and stopped_at is null for no key update;
   if not found then
     raise exception 'recurring expense not found' using errcode = 'P0002';
   end if;
@@ -208,7 +219,7 @@ as $$
 declare
   v_today date := public.warsaw_today();
 begin
-  perform 1 from public.recurring_expenses where id = p_id and stopped_at is null for update;
+  perform 1 from public.recurring_expenses where id = p_id and stopped_at is null for no key update;
   if not found then
     raise exception 'recurring expense not found' using errcode = 'P0002';
   end if;

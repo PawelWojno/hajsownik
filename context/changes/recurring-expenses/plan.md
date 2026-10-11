@@ -51,11 +51,11 @@ Bottom-up jak w poprzednich slice'ach: SQL + pgTAP, potem API/serwis, strona zar
 - `months_left` = liczba miesięcy między bieżącym miesiącem a `end_month`. Przypomnienie (`remind`): definicja niezatrzymana, `0 ≤ months_left ≤ 1` i `reminder_dismissed_at is null`. Przykład: 12 slotów od października 2026 kończy się we wrześniu 2027; w lipcu `months_left` = 2 (brak banera), w sierpniu 1 (baner), we wrześniu 0 (baner), w październiku −1 (wygasła, bez banera, nadal przedłużalna na liście).
 - Lista pokazuje definicje niezatrzymane (aktywne i wygasłe).
 
-**Funkcje SQL (wszystkie SECURITY INVOKER, `set search_path = ''`, `revoke … from public, anon; grant … to authenticated`):** `create_recurring_expense`, `update_recurring_expense_amount`, `extend_recurring_expense`, `stop_recurring_expense`, `dismiss_recurring_reminder`, `list_recurring_expenses` oraz czyste pomocniki `warsaw_today()` i `recurring_slot_date(month, day)`. Operacje na istniejącej definicji blokują jej wiersz (`for update`) i zgłaszają `P0002`, gdy definicja nie istnieje, nie należy do gospodarstwa lub jest zatrzymana.
+**Funkcje SQL (wszystkie SECURITY INVOKER, `set search_path = ''`, `revoke … from public, anon; grant … to authenticated`):** `create_recurring_expense`, `update_recurring_expense_amount`, `extend_recurring_expense`, `stop_recurring_expense`, `dismiss_recurring_reminder`, `list_recurring_expenses` oraz czyste pomocniki `warsaw_today()`, `recurring_slot_date(month, day)` i `recurring_month_diff(from, to)`. Operacje na istniejącej definicji blokują jej wiersz (`for update`) i zgłaszają `P0002`, gdy definicja nie istnieje, nie należy do gospodarstwa lub jest zatrzymana.
 
 ## Critical Implementation Details
 
-- **Uprawnienia pomocników.** Funkcje INVOKER wołają pomocników z uprawnieniami wywołującego, więc `recurring_slot_date` i `warsaw_today` muszą mieć `grant execute … to authenticated` (są czyste i niczego nie czytają).
+- **Uprawnienia pomocników.** Funkcje INVOKER wołają pomocników z uprawnieniami wywołującego, więc `recurring_slot_date`, `recurring_month_diff` i `warsaw_today` muszą mieć `grant execute … to authenticated` (są czyste i niczego nie czytają).
 - **Atomowość i współbieżność.** Usuń + wstaw dzieje się w jednej funkcji (jedna transakcja); `select … for update` na wierszu definicji serializuje równoległą edycję/przedłużenie (dwa kliknięcia, dwie karty), żeby nie powstały zdublowane sloty.
 - **Test zegara.** Funkcje publiczne nie przyjmują parametru „dziś" (nie da się cofnąć daty przez `rpc`); logikę dat testuj na czystych pomocnikach ze stałymi datami (m.in. luty roku przestępnego, dzień 31), a scenariusze create/edit/stop asercjami względnymi do `warsaw_today()` i ręcznie wstawionymi wpisami z przeszłą datą.
 
@@ -73,7 +73,7 @@ Nowa migracja z tabelą definicji, kolumną łączącą, politykami RLS i funkcj
 
 **Intent**: Tworzy `recurring_expenses` (kolumny z sekcji Implementation Approach, CHECK: `amount_minor` jak w `expenses`, `day_of_month` 1..31, `start_month` i `end_month` to pierwsze dni miesięcy, `end_month >= start_month`), dodaje `expenses.recurring_expense_id` z indeksem częściowym `(recurring_expense_id, spent_on)` i włącza RLS.
 
-**Contract**: `unique (household_id, id)` na definicji jako cel złożonego FK; złożone FK `(household_id, category_id) → categories(household_id, id)` oraz `(household_id, recurring_expense_id) → recurring_expenses(household_id, id)` (bez `ON DELETE`: definicje nie są usuwane, tylko zatrzymywane). Polityki dla roli `authenticated`, wszystkie z `household_id = (select public.current_household_id())` (lekcja `lessons.md:5-10`): `recurring_expenses` SELECT / INSERT (WITH CHECK) / UPDATE (USING + WITH CHECK), bez DELETE; `expenses` dodatkowo DELETE ograniczony do `recurring_expense_id is not null`. Komentarz nagłówkowy migracji zaktualizować, żeby opisywał zawężony DELETE zamiast „insert-only until S-06".
+**Contract**: `unique (household_id, id)` na definicji jako cel złożonego FK; złożone FK `(household_id, category_id) → categories(household_id, id)` oraz `(household_id, recurring_expense_id) → recurring_expenses(household_id, id)` (bez `ON DELETE`: definicje nie są usuwane, tylko zatrzymywane). Polityki dla roli `authenticated`, wszystkie z `household_id = (select public.current_household_id())` (lekcja `lessons.md:5-10`): `recurring_expenses` SELECT / INSERT (WITH CHECK) / UPDATE (USING + WITH CHECK), bez DELETE; `expenses` dodatkowo DELETE ograniczony do `recurring_expense_id is not null`. Częściowy indeks unikalny `(household_id, category_id, amount_minor, day_of_month, start_month) where stopped_at is null` odrzuca (`23505`) drugą identyczną aktywną definicję z tego samego miesiąca (ochrona przed podwójnym wywołaniem tworzenia; lekcja w `lessons.md`). Komentarz nagłówkowy migracji zaktualizować, żeby opisywał zawężony DELETE zamiast „insert-only until S-06".
 
 #### 2. Funkcje SQL
 
@@ -85,7 +85,7 @@ Nowa migracja z tabelą definicji, kolumną łączącą, politykami RLS i funkcj
 - `create_recurring_expense(p_category_id uuid, p_amount_minor bigint, p_day int, p_months int)` → wstawia definicję (`start_month` = bieżący miesiąc Warszawy, `end_month` = `start_month + (p_months-1)`) i wszystkie sloty; `p_months` poza 1..24 → `22023`.
 - `update_recurring_expense_amount(p_id uuid, p_amount_minor bigint)`, `extend_recurring_expense(p_id uuid, p_months int)` (poza 1..24 oraz gdy po operacji `months_left` > 24 → `22023`), `stop_recurring_expense(p_id uuid)`, `dismiss_recurring_reminder(p_id uuid)` według reguł z Implementation Approach.
 - `list_recurring_expenses()` → wiersze: `id, category_id, category_name, category_archived, amount_minor, day_of_month, start_month, end_month, months_left, remind` dla definicji niezatrzymanych, `order by created_at desc, id` (najnowsze na górze, stabilna kolejność przy remisie).
-- `warsaw_today()` (stable) i `recurring_slot_date(p_month date, p_day int)` (immutable; przycina dzień do ostatniego dnia miesiąca, każdy miesiąc liczony od bazy).
+- `warsaw_today()` (stable) i `recurring_slot_date(p_month date, p_day int)` (immutable; przycina dzień do ostatniego dnia miesiąca, każdy miesiąc liczony od bazy) oraz `recurring_month_diff(p_from date, p_to date)` (immutable; liczba pełnych miesięcy kalendarzowych między miesiącami dwóch dat, ujemna gdy `p_to` jest wcześniejsza; jedno miejsce na arytmetykę miesięcy dla update, extend i list).
 
 #### 3. Testy pgTAP
 
@@ -93,7 +93,7 @@ Nowa migracja z tabelą definicji, kolumną łączącą, politykami RLS i funkcj
 
 **Intent**: Pilnuje reguł dat, izolacji gospodarstw i granicy „przyszłe vs przeszłe" według wzorca istniejących testów (dwóch użytkowników, przełączanie roli, `throws_ok` z kodami).
 
-**Contract**: Pokryć co najmniej: `recurring_slot_date` (dzień 31 → 31 sty / 28 lut / 31 mar, luty roku przestępnego 29, dzień 30 w lutym); `create` tworzy dokładnie `p_months` wierszy z `recurring_expense_id`, pierwszy w bieżącym miesiącu Warszawy; walidacje (miesiące 0 i 25, kwota ≤ 0, cudza kategoria `23503`); `stop` usuwa tylko wpisy z datą późniejszą niż dziś i nie rusza ręcznie wstawionego wpisu generowanego z przeszłą datą ani wpisów ręcznych; `update_amount` zmienia kwotę przyszłych wpisów i ich liczba się nie zmienia; `extend` dopisuje sloty za `end_month`, a dla wygasłej definicji zaczyna od bieżącego miesiąca; przedłużenie dokładnie do 24 miesięcy do przodu przechodzi, a o jeden miesiąc dalej → `22023`; `dismiss` ustawia znacznik, a `extend` go zeruje; `list` oblicza `months_left`/`remind` dla definicji kończącej się w bieżącym i następnym miesiącu, a dla definicji kończącej się za 2 miesiące zwraca `remind = false`; izolacja (użytkownik B nie widzi ani nie modyfikuje definicji A → `P0002`/0 wierszy); użytkownik `anon` bez dostępu; bezpośredni DELETE wpisu ręcznego nadal dotyka 0 wierszy. Uaktualnić `plan(N)`.
+**Contract**: Pokryć co najmniej: `recurring_slot_date` (dzień 31 → 31 sty / 28 lut / 31 mar, luty roku przestępnego 29, dzień 30 w lutym); `create` tworzy dokładnie `p_months` wierszy z `recurring_expense_id`, pierwszy w bieżącym miesiącu Warszawy; walidacje (miesiące 0 i 25, kwota ≤ 0, cudza kategoria `23503`); `stop` usuwa tylko wpisy z datą późniejszą niż dziś i nie rusza ręcznie wstawionego wpisu generowanego z przeszłą datą ani wpisów ręcznych; `update_amount` zmienia kwotę przyszłych wpisów i ich liczba się nie zmienia; `extend` dopisuje sloty za `end_month`, a dla wygasłej definicji zaczyna od bieżącego miesiąca; przedłużenie dokładnie do 24 miesięcy do przodu przechodzi, a o jeden miesiąc dalej → `22023`; `dismiss` ustawia znacznik, a `extend` go zeruje; `list` oblicza `months_left`/`remind` dla definicji kończącej się w bieżącym i następnym miesiącu, a dla definicji kończącej się za 2 miesiące zwraca `remind = false`; izolacja (użytkownik B nie widzi ani nie modyfikuje definicji A → `P0002`/0 wierszy); druga identyczna aktywna definicja → `23505`, a po zatrzymaniu pierwszej identyczna jest dozwolona; użytkownik `anon` bez dostępu; bezpośredni DELETE wpisu ręcznego nadal dotyka 0 wierszy. Uaktualnić `plan(N)`.
 
 ### Success Criteria:
 
@@ -141,7 +141,7 @@ Cienkie endpointy nad funkcjami SQL, serwis, typy i mapowanie błędów. Po tej 
 
 **Intent**: Wzorzec `categories/*`: `prerender = false`, 401 bez `locals.user`, `createClient`, `readJson`, `safeParse`, odpowiedź ze świeżą listą. PATCH przyjmuje dokładnie jedno z: `{amount}`, `{extendMonths}`, `{dismissReminder: true}`; DELETE zatrzymuje definicję.
 
-**Contract**: Mapowanie kodów w jednym miejscu (na wzór `src/lib/category-http.ts`): `23503` → 400 „Wybierz kategorię z listy", `22023` → 400 z komunikatem walidacyjnym (dla przekroczenia horyzontu: „Horyzont może sięgać najwyżej 24 miesięcy do przodu"), `P0002` → 404, inne → 500 `SAVE_FAILED`. `[id]` walidowane `z.uuid()`.
+**Contract**: Mapowanie kodów w jednym miejscu (na wzór `src/lib/category-http.ts`): `23503` → 400 „Wybierz kategorię z listy", `22023` → 400 z komunikatem walidacyjnym (dla przekroczenia horyzontu: „Horyzont może sięgać najwyżej 24 miesięcy do przodu"), `23505` → 400 „Taka cykliczna pozycja już istnieje" (tworzenie i zmiana kwoty), `P0002` → 404, inne → 500 `SAVE_FAILED`. `[id]` walidowane `z.uuid()`.
 
 ### Success Criteria:
 
@@ -180,7 +180,7 @@ Ekran listy, dodawania, edycji kwoty, przedłużenia i zatrzymania. Po tej fazie
 
 **File**: `src/components/settings/RecurringManager.tsx`, `src/hooks/useRecurringActions.ts`
 
-**Intent**: Formularz dodawania (kwota, kategoria, dzień miesiąca, liczba miesięcy z domyślnym 12) i lista wierszy z inline edycją kwoty, akcją „Przedłuż" o `min(12, 24 − monthsLeft)` mies. (nieaktywna z podpowiedzią, gdy `monthsLeft` ≥ 24), zatrzymaniem z potwierdzeniem w miejscu („Na pewno? Wygenerowane przyszłe wpisy zostaną usunięte", jak `DeleteControl`) i oznaczeniem statusu „Wygasła". Hook kopiuje wzorzec `useCategoryActions` (świeża lista po każdej mutacji, reload przy 409/`null`).
+**Intent**: Formularz dodawania (kwota, kategoria, dzień miesiąca, liczba miesięcy z domyślnym 12; przycisk „Dodaj" wyłączony na czas żądania dzięki stanowi `pending`, jako ochrona przed podwójnym submitem) i lista wierszy z inline edycją kwoty, akcją „Przedłuż" o `min(12, 24 − monthsLeft)` mies. (nieaktywna z podpowiedzią, gdy `monthsLeft` ≥ 24), zatrzymaniem z potwierdzeniem w miejscu („Na pewno? Wygenerowane przyszłe wpisy zostaną usunięte", jak `DeleteControl`) i oznaczeniem statusu „Wygasła". Hook kopiuje wzorzec `useCategoryActions` (świeża lista po każdej mutacji, reload przy 409/`null`).
 
 **Contract**: Wiersz pokazuje kategorię (z dopiskiem „zarchiwizowana", gdy `categoryArchived`), kwotę (`formatMinor`), dzień miesiąca i zakres „od–do" z `startMonth`/`endMonth` (`formatMonthLabel`). Cele dotykowe `min-h-11`, pola jak istniejący `fieldClass`, bez nowych komponentów shadcn. Komunikaty po polsku, błędy per wiersz przez `ServerError`.
 
@@ -302,13 +302,13 @@ Migracja jest addytywna (nowa tabela, nowa nullable kolumna, nowe polityki) i ni
 
 #### Automated
 
-- [x] 1.1 Migracja stosuje się na czysto: `npx supabase db reset`
-- [x] 1.2 Wszystkie testy pgTAP przechodzą, w tym nowy plik, a istniejące pliki bez edycji: `npx supabase test db`
+- [x] 1.1 Migracja stosuje się na czysto: `npx supabase db reset` — f60dd04
+- [x] 1.2 Wszystkie testy pgTAP przechodzą, w tym nowy plik, a istniejące pliki bez edycji: `npx supabase test db` — f60dd04
 
 #### Manual
 
-- [x] 1.3 W Studio `select create_recurring_expense(...)` z dniem 31 i 3 miesiącami daje wiersze w `expenses` z poprawnie przyciętymi datami i wypełnionym `recurring_expense_id`
-- [x] 1.4 `list_recurring_expenses()` pokazuje `months_left` i `remind` zgodne z przykładem z sekcji Implementation Approach
+- [x] 1.3 W Studio `select create_recurring_expense(...)` z dniem 31 i 3 miesiącami daje wiersze w `expenses` z poprawnie przyciętymi datami i wypełnionym `recurring_expense_id` — f60dd04
+- [x] 1.4 `list_recurring_expenses()` pokazuje `months_left` i `remind` zgodne z przykładem z sekcji Implementation Approach — f60dd04
 
 ### Phase 2: API, serwis i typy
 

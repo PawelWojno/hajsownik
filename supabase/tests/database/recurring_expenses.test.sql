@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(74);
+select plan(87);
 
 -- Fixture: two real signups (household + 12 default categories each).
 insert into auth.users (id, email, raw_user_meta_data) values
@@ -79,6 +79,13 @@ select is(
    where r.day_of_month = 31 and e.amount_minor = 185000),
   12::bigint,
   'every generated entry carries the definition amount'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 31
+     and e.spent_on = public.recurring_slot_date(date_trunc('month', e.spent_on)::date, 31)),
+  12::bigint,
+  'every generated entry sits on the clamped chosen day of its own month'
 );
 select is((select months_left from public.list_recurring_expenses() where day_of_month = 31), 11, 'D1 has 11 months left');
 select is((select remind from public.list_recurring_expenses() where day_of_month = 31), false, 'D1 does not remind yet');
@@ -173,6 +180,16 @@ select is((select count(*) from del), 0::bigint, 'A DELETE on manual entries mat
 with upd as (update public.expenses set amount_minor = 1 returning 1)
 select is((select count(*) from upd), 0::bigint, 'A UPDATE on entries matches zero rows (default-deny)');
 
+-- an identical active definition from the same month is a double submit; a stopped one no longer blocks
+select lives_ok(
+  $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 190000, 31, 3) $$,
+  'an identical definition is allowed once the earlier one is stopped'
+);
+select throws_ok(
+  $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 190000, 31, 3) $$,
+  '23505', null, 'a second identical active definition is rejected (double submit)'
+);
+
 -- D2: two months -> reminder due; dismiss; extend
 select lives_ok(
   $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 5000, 10, 2) $$,
@@ -217,6 +234,8 @@ select lives_ok(
   $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 6000, 15, 1) $$,
   'A can create a 1-month definition'
 );
+select is((select months_left from public.list_recurring_expenses() where day_of_month = 15), 0, 'a definition ending this month has 0 months left');
+select is((select remind from public.list_recurring_expenses() where day_of_month = 15), true, 'a definition ending this month reminds');
 select lives_ok(
   $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 15), 24) $$,
   'extending to exactly 24 months ahead is allowed'
@@ -240,6 +259,14 @@ select is(
   25::bigint,
   'D3 has 1 + 24 entries and the rejected extensions added none'
 );
+with del as (
+  delete from public.expenses
+  where recurring_expense_id = (select id from public.recurring_expenses where day_of_month = 15)
+    and spent_on = (select max(x.spent_on) from public.expenses x
+                    where x.recurring_expense_id = (select id from public.recurring_expenses where day_of_month = 15))
+  returning 1
+)
+select is((select count(*) from del), 1::bigint, 'A can delete a generated entry directly (narrow DELETE policy)');
 
 -- D4: a lapsed definition restarts at the current month
 select lives_ok(
@@ -268,6 +295,19 @@ select is(
   'the first new entry is in the current month, nothing is created for past months'
 );
 select is((select months_left from public.list_recurring_expenses() where day_of_month = 5), 2, 'the extended lapsed definition has 2 months left');
+select is((select remind from public.list_recurring_expenses() where day_of_month = 5), false, 'a definition ending in 2 months does not remind');
+
+-- D5: a definition with no entries in a category nobody else uses, to isolate the foreign key from definition to category
+select lives_ok(
+  $$ insert into public.recurring_expenses (category_id, amount_minor, day_of_month, start_month, end_month)
+     values ((select id from public.categories order by sort_order offset 1 limit 1), 8000, 20,
+             date_trunc('month', public.warsaw_today())::date, date_trunc('month', public.warsaw_today())::date) $$,
+  'a definition without entries can exist (inserted by hand)'
+);
+select throws_ok(
+  $$ delete from public.categories where id = (select category_id from public.recurring_expenses where day_of_month = 20) $$,
+  '23503', null, 'a category with a definition cannot be deleted'
+);
 
 -- archived category stays visible in the list
 update public.categories set archived_at = now() where id = (select cid from ids where email = 'a@example.com');
@@ -302,6 +342,11 @@ select throws_ok(
   '23503', null, 'B cannot create a definition in a category of household A'
 );
 select throws_ok(
+  $$ insert into public.expenses (category_id, amount_minor, spent_on, recurring_expense_id)
+     values ((select cid from ids where email = 'b@example.com'), 1000, public.warsaw_today(), (select id from a_def)) $$,
+  '23503', null, 'B cannot tag an entry with a definition of household A (composite FK)'
+);
+select throws_ok(
   $$ insert into public.recurring_expenses (household_id, category_id, amount_minor, day_of_month, start_month, end_month)
      values ((select hid from ids where email = 'a@example.com'), (select cid from ids where email = 'a@example.com'),
              1000, 10, '2026-10-01', '2026-10-01') $$,
@@ -309,6 +354,22 @@ select throws_ok(
 );
 
 reset role;
+
+-- ===== Household deletion: the new foreign keys do not block the cascade =====
+select lives_ok(
+  $$ delete from public.households where id = (select hid from ids where email = 'a@example.com') $$,
+  'deleting a household that has definitions and generated entries works'
+);
+select is(
+  (select count(*) from public.recurring_expenses where household_id = (select hid from ids where email = 'a@example.com')),
+  0::bigint,
+  'the cascade removed the definitions'
+);
+select is(
+  (select count(*) from public.expenses where household_id = (select hid from ids where email = 'a@example.com')),
+  0::bigint,
+  'the cascade removed the entries'
+);
 
 -- ===== As anon =====
 set local role anon;

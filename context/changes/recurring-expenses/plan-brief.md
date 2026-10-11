@@ -55,6 +55,7 @@ W Ustawieniach → „Cykliczne wydatki" użytkownik dodaje, edytuje kwotę, prz
 - Edycja kwoty nie poprawia wpisu z datą ≤ dziś; S-06 pozwoli go poprawić ręcznie.
 - Ręcznie usunięty (S-06) przyszły wpis wraca przy edycji kwoty, bo regeneracja odtwarza wszystkie przyszłe sloty (zgodnie z FR-015); przedłużenie tylko dopisuje sloty za końcem horyzontu i dziur wewnątrz nie łata.
 - Limit CPU Workera (10 ms) nie jest zmierzony w repo; pomiar ręczny w Phase 4.
+- Dwie w pełni identyczne aktywne definicje (kategoria, kwota, dzień) z tego samego miesiąca są odrzucane jako podwójny submit; obejście to inna kwota lub dzień.
 
 ## Success Criteria (Summary)
 
