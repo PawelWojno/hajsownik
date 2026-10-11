@@ -1,0 +1,329 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+
+select plan(74);
+
+-- Fixture: two real signups (household + 12 default categories each).
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'a@example.com', '{"household_name": "Dom A"}'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'b@example.com', '{"household_name": "Dom B"}');
+
+create temp table ids as
+  select u.email,
+         m.household_id as hid,
+         (select c.id from public.categories c where c.household_id = m.household_id order by c.sort_order limit 1) as cid
+  from auth.users u
+  join public.household_members m on m.user_id = u.id
+  where u.id in ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb');
+grant select on ids to authenticated;
+
+-- The "clock" is the database's own Warsaw today, so every date below is derived from it. Definitions are told apart
+-- by day_of_month: 31 = D1 (12 months), 10 = D2, 15 = D3, 5 = D4 (lapsed).
+
+-- ===== Pure helpers (fixed dates) =====
+select is(public.recurring_slot_date('2028-01-01', 31), '2028-01-31'::date, 'day 31 in January stays 31');
+select is(public.recurring_slot_date('2027-02-01', 31), '2027-02-28'::date, 'day 31 in February is clamped to 28');
+select is(public.recurring_slot_date('2028-02-01', 31), '2028-02-29'::date, 'day 31 in a leap February is clamped to 29');
+select is(public.recurring_slot_date('2028-03-17', 31), '2028-03-31'::date, 'the base day is used again after a short month (no drift)');
+select is(public.recurring_slot_date('2027-02-10', 30), '2027-02-28'::date, 'day 30 in February is clamped to 28');
+select is(public.recurring_month_diff('2026-10-15', '2027-09-01'), 11, 'month diff counts calendar months');
+select is(public.recurring_month_diff('2026-10-01', '2026-08-20'), -2, 'month diff is negative when the target is earlier');
+
+-- ===== As user A =====
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"}';
+
+-- validation
+select throws_ok(
+  $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 1000, 10, 0) $$,
+  '22023', null, 'a horizon of 0 months is rejected'
+);
+select throws_ok(
+  $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 1000, 10, 25) $$,
+  '22023', null, 'a horizon of 25 months is rejected'
+);
+select throws_ok(
+  $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 0, 10, 12) $$,
+  '23514', null, 'a zero amount is rejected by the check constraint'
+);
+select throws_ok(
+  $$ select public.create_recurring_expense((select cid from ids where email = 'b@example.com'), 1000, 10, 12) $$,
+  '23503', null, 'A cannot create a definition in a category of household B (composite FK)'
+);
+
+-- create D1: 12 months, day 31
+select lives_ok(
+  $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 185000, 31, 12) $$,
+  'A can create a recurring expense'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 31),
+  12::bigint,
+  'create generates exactly p_months entries'
+);
+select is(
+  (select min(e.spent_on) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 31),
+  public.recurring_slot_date(public.warsaw_today(), 31),
+  'the first entry sits in the current Warsaw month on the chosen day'
+);
+select is(
+  (select count(distinct date_trunc('month', e.spent_on)) from public.expenses e
+   join public.recurring_expenses r on r.id = e.recurring_expense_id where r.day_of_month = 31),
+  12::bigint,
+  'the entries fall in 12 different months'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 31 and e.amount_minor = 185000),
+  12::bigint,
+  'every generated entry carries the definition amount'
+);
+select is((select months_left from public.list_recurring_expenses() where day_of_month = 31), 11, 'D1 has 11 months left');
+select is((select remind from public.list_recurring_expenses() where day_of_month = 31), false, 'D1 does not remind yet');
+
+-- A past generated row and a future manual row, to prove what stop / amount changes leave alone
+select lives_ok(
+  $$ insert into public.expenses (category_id, amount_minor, spent_on, recurring_expense_id)
+     values ((select cid from ids where email = 'a@example.com'), 185000, public.warsaw_today() - 40,
+             (select id from public.recurring_expenses where day_of_month = 31)) $$,
+  'a generated entry from the past (inserted by hand) is accepted'
+);
+select lives_ok(
+  $$ insert into public.expenses (category_id, amount_minor, spent_on)
+     values ((select cid from ids where email = 'a@example.com'), 111, public.warsaw_today() + 60) $$,
+  'a manual future entry is accepted'
+);
+
+-- update the amount of D1
+select lives_ok(
+  $$ select public.update_recurring_expense_amount((select id from public.recurring_expenses where day_of_month = 31), 190000) $$,
+  'A can change the amount of a definition'
+);
+select is(
+  (select amount_minor from public.recurring_expenses where day_of_month = 31),
+  190000::bigint,
+  'the definition stores the new amount'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 31 and e.spent_on > public.warsaw_today()),
+  (select count(*) from generate_series(0, 11) g
+   where public.recurring_slot_date((date_trunc('month', public.warsaw_today())::date + make_interval(months => g))::date, 31)
+         > public.warsaw_today()),
+  'after the change there is one future entry per remaining slot'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 31 and e.spent_on > public.warsaw_today() and e.amount_minor = 190000),
+  (select count(*) from generate_series(0, 11) g
+   where public.recurring_slot_date((date_trunc('month', public.warsaw_today())::date + make_interval(months => g))::date, 31)
+         > public.warsaw_today()),
+  'every future entry has the new amount'
+);
+select is(
+  (select amount_minor from public.expenses where spent_on = public.warsaw_today() - 40),
+  185000::bigint,
+  'a generated entry dated before today keeps its old amount'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 31),
+  13::bigint,
+  'the number of generated entries is unchanged (12 slots + the entry added by hand)'
+);
+select is((select count(*) from public.expenses where amount_minor = 111), 1::bigint, 'a manual future entry is untouched by the change');
+
+-- stop D1
+select lives_ok(
+  $$ select public.stop_recurring_expense((select id from public.recurring_expenses where day_of_month = 31)) $$,
+  'A can stop a definition'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 31 and e.spent_on > public.warsaw_today()),
+  0::bigint,
+  'stop deletes every entry dated after today'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 31 and e.spent_on <= public.warsaw_today()),
+  (1 + case when public.recurring_slot_date(public.warsaw_today(), 31) <= public.warsaw_today() then 1 else 0 end)::bigint,
+  'stop leaves the entries dated today or earlier'
+);
+select is((select count(*) from public.expenses where amount_minor = 111), 1::bigint, 'stop leaves manual entries alone');
+select is(
+  (select count(*) from public.list_recurring_expenses() where day_of_month = 31),
+  0::bigint,
+  'a stopped definition leaves the list'
+);
+select throws_ok(
+  $$ select public.stop_recurring_expense((select id from public.recurring_expenses where day_of_month = 31)) $$,
+  'P0002', null, 'a stopped definition cannot be stopped again'
+);
+select throws_ok(
+  $$ select public.update_recurring_expense_amount((select id from public.recurring_expenses where day_of_month = 31), 1) $$,
+  'P0002', null, 'a stopped definition cannot change its amount'
+);
+
+-- manual entries stay protected: the DELETE policy only covers generated rows, there is still no UPDATE policy
+with del as (delete from public.expenses where recurring_expense_id is null returning 1)
+select is((select count(*) from del), 0::bigint, 'A DELETE on manual entries matches zero rows (default-deny)');
+with upd as (update public.expenses set amount_minor = 1 returning 1)
+select is((select count(*) from upd), 0::bigint, 'A UPDATE on entries matches zero rows (default-deny)');
+
+-- D2: two months -> reminder due; dismiss; extend
+select lives_ok(
+  $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 5000, 10, 2) $$,
+  'A can create a 2-month definition'
+);
+select is((select months_left from public.list_recurring_expenses() where day_of_month = 10), 1, 'D2 has 1 month left');
+select is((select remind from public.list_recurring_expenses() where day_of_month = 10), true, 'D2 reminds');
+select lives_ok(
+  $$ select public.dismiss_recurring_reminder((select id from public.recurring_expenses where day_of_month = 10)) $$,
+  'A can dismiss the reminder'
+);
+select is((select remind from public.list_recurring_expenses() where day_of_month = 10), false, 'a dismissed reminder is not shown');
+select isnt(
+  (select reminder_dismissed_at from public.recurring_expenses where day_of_month = 10),
+  null,
+  'the dismissal is stored on the definition'
+);
+select lives_ok(
+  $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 10), 12) $$,
+  'A can extend a definition by 12 months'
+);
+select is(
+  (select end_month from public.recurring_expenses where day_of_month = 10),
+  (date_trunc('month', public.warsaw_today())::date + make_interval(months => 13))::date,
+  'extend moves end_month 12 months further'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 10),
+  14::bigint,
+  'extend appends exactly p_months entries after the horizon'
+);
+select is(
+  (select reminder_dismissed_at from public.recurring_expenses where day_of_month = 10),
+  null,
+  'extend clears the dismissal'
+);
+select is((select months_left from public.list_recurring_expenses() where day_of_month = 10), 13, 'D2 has 13 months left after extending');
+
+-- D3: the horizon may reach exactly 24 months ahead, not 25
+select lives_ok(
+  $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 6000, 15, 1) $$,
+  'A can create a 1-month definition'
+);
+select lives_ok(
+  $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 15), 24) $$,
+  'extending to exactly 24 months ahead is allowed'
+);
+select is((select months_left from public.list_recurring_expenses() where day_of_month = 15), 24, 'D3 has 24 months left');
+select throws_ok(
+  $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 15), 1) $$,
+  '22023', null, 'extending past 24 months ahead is rejected'
+);
+select throws_ok(
+  $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 15), 0) $$,
+  '22023', null, 'extending by 0 months is rejected'
+);
+select throws_ok(
+  $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 15), 25) $$,
+  '22023', null, 'extending by 25 months is rejected'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 15),
+  25::bigint,
+  'D3 has 1 + 24 entries and the rejected extensions added none'
+);
+
+-- D4: a lapsed definition restarts at the current month
+select lives_ok(
+  $$ insert into public.recurring_expenses (category_id, amount_minor, day_of_month, start_month, end_month)
+     values ((select cid from ids where email = 'a@example.com'), 7000, 5,
+             (date_trunc('month', public.warsaw_today())::date - make_interval(months => 3))::date,
+             (date_trunc('month', public.warsaw_today())::date - make_interval(months => 1))::date) $$,
+  'a lapsed definition can exist (inserted by hand)'
+);
+select is((select months_left from public.list_recurring_expenses() where day_of_month = 5), -1, 'a lapsed definition has -1 months left');
+select is((select remind from public.list_recurring_expenses() where day_of_month = 5), false, 'a lapsed definition does not remind');
+select lives_ok(
+  $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 5), 3) $$,
+  'a lapsed definition can be extended'
+);
+select is(
+  (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 5),
+  3::bigint,
+  'extending a lapsed definition creates exactly p_months entries'
+);
+select is(
+  (select min(e.spent_on) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
+   where r.day_of_month = 5),
+  public.recurring_slot_date(public.warsaw_today(), 5),
+  'the first new entry is in the current month, nothing is created for past months'
+);
+select is((select months_left from public.list_recurring_expenses() where day_of_month = 5), 2, 'the extended lapsed definition has 2 months left');
+
+-- archived category stays visible in the list
+update public.categories set archived_at = now() where id = (select cid from ids where email = 'a@example.com');
+select is(
+  (select category_archived from public.list_recurring_expenses() where day_of_month = 10),
+  true,
+  'the list marks an archived category'
+);
+
+reset role;
+
+create temp table a_def as select id from public.recurring_expenses where day_of_month = 10;
+grant select on a_def to authenticated;
+
+-- ===== As user B: A's data is invisible, every operation on it fails =====
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"}';
+
+select is((select count(*) from public.recurring_expenses), 0::bigint, 'B sees no definitions of A');
+select is_empty($$ select * from public.list_recurring_expenses() $$, 'B gets an empty list');
+select throws_ok(
+  $$ select public.update_recurring_expense_amount((select id from a_def), 1) $$,
+  'P0002', null, 'B cannot change the amount of a definition of A'
+);
+select throws_ok($$ select public.extend_recurring_expense((select id from a_def), 1) $$, 'P0002', null, 'B cannot extend a definition of A');
+select throws_ok($$ select public.stop_recurring_expense((select id from a_def)) $$, 'P0002', null, 'B cannot stop a definition of A');
+select throws_ok($$ select public.dismiss_recurring_reminder((select id from a_def)) $$, 'P0002', null, 'B cannot dismiss a reminder of A');
+with del as (delete from public.expenses where recurring_expense_id = (select id from a_def) returning 1)
+select is((select count(*) from del), 0::bigint, 'B cannot delete generated entries of A (0 rows)');
+select throws_ok(
+  $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 1000, 10, 12) $$,
+  '23503', null, 'B cannot create a definition in a category of household A'
+);
+select throws_ok(
+  $$ insert into public.recurring_expenses (household_id, category_id, amount_minor, day_of_month, start_month, end_month)
+     values ((select hid from ids where email = 'a@example.com'), (select cid from ids where email = 'a@example.com'),
+             1000, 10, '2026-10-01', '2026-10-01') $$,
+  '42501', null, 'B cannot insert a definition into household A (RLS with check)'
+);
+
+reset role;
+
+-- ===== As anon =====
+set local role anon;
+
+select throws_ok(
+  $$ select public.create_recurring_expense('00000000-0000-0000-0000-000000000000', 1000, 10, 12) $$,
+  '42501', null, 'anon cannot call create_recurring_expense'
+);
+select throws_ok($$ select * from public.list_recurring_expenses() $$, '42501', null, 'anon cannot call list_recurring_expenses');
+select throws_ok(
+  $$ select public.stop_recurring_expense('00000000-0000-0000-0000-000000000000') $$,
+  '42501', null, 'anon cannot call stop_recurring_expense'
+);
+
+reset role;
+
+select * from finish();
+rollback;
