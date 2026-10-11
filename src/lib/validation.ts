@@ -1,6 +1,14 @@
 import { z } from "zod";
 import { isRealDate, todayInWarsaw } from "@/lib/dates";
 import { AMOUNT_ERROR, parseAmountToMinor } from "@/lib/money";
+import {
+  DAY_OF_MONTH_ERROR,
+  MAX_DAY_OF_MONTH,
+  MAX_HORIZON_MONTHS,
+  MIN_DAY_OF_MONTH,
+  MIN_MONTHS,
+  MONTHS_ERROR,
+} from "@/lib/recurring-limits";
 
 const DATE_ERROR = "Podaj poprawną datę";
 const FUTURE_DATE_ERROR = "Data nie może być z przyszłości";
@@ -23,6 +31,20 @@ export const dateField = z
   .refine((value) => value <= todayInWarsaw(), FUTURE_DATE_ERROR);
 
 export const descriptionField = z.string(DESCRIPTION_ERROR).trim().max(200, DESCRIPTION_ERROR);
+
+/** Day of the month an entry falls on; the database clamps it to the length of shorter months. */
+export const dayOfMonthField = z
+  .number("Podaj dzień miesiąca")
+  .int("Podaj dzień miesiąca")
+  .min(MIN_DAY_OF_MONTH, DAY_OF_MONTH_ERROR)
+  .max(MAX_DAY_OF_MONTH, DAY_OF_MONTH_ERROR);
+
+/** Number of months to create or to append; the database also limits the horizon to 24 months ahead. */
+export const monthsField = z
+  .number("Podaj liczbę miesięcy")
+  .int("Podaj liczbę miesięcy")
+  .min(MIN_MONTHS, MONTHS_ERROR)
+  .max(MAX_HORIZON_MONTHS, MONTHS_ERROR);
 
 /** Same bounds as the database check (1-50 characters, no surrounding whitespace). */
 export const categoryNameField = z

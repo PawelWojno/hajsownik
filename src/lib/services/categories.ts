@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import type { ManagedCategory } from "@/types";
+import type { Category, ManagedCategory } from "@/types";
 
 /** Pseudo error code: the id matched no row visible to the caller (RLS hides foreign rows, it does not raise). */
 export const NOT_FOUND = "not_found";
@@ -20,6 +20,19 @@ export async function listCategories(supabase: SupabaseClient): Promise<ManagedC
     .map((row) => ({ id: row.id, name: row.name, archived: row.archived_at !== null }));
   // Array.prototype.sort is stable, so the sort_order inside each group is kept.
   return categories.sort((a, b) => Number(a.archived) - Number(b.archived));
+}
+
+const activeCategoryRows = z.array(z.object({ id: z.string(), name: z.string() }));
+
+/** Categories offered when choosing one for a new entry or definition: the active ones, in the user's order. */
+export async function listActiveCategories(supabase: SupabaseClient): Promise<Category[]> {
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, name")
+    .is("archived_at", null)
+    .order("sort_order");
+  if (error) throw new Error(error.message);
+  return activeCategoryRows.parse(data);
 }
 
 /** The write is already committed here, so a failed read must not look like a failed write (it would invite a retry). */

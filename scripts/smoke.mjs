@@ -47,6 +47,16 @@ async function request(path, { method = "GET", form, json } = {}) {
 let categoryId = "";
 // Set by the category steps.
 let newCategoryId = "";
+// Set by the recurring-expense steps.
+let recurringId = "";
+
+function recurringItems(actual) {
+  try {
+    return JSON.parse(actual.body).items;
+  } catch {
+    return undefined;
+  }
+}
 
 function leftFrom(actual) {
   try {
@@ -187,6 +197,89 @@ const steps = [
     },
   ],
   [
+    "recurring endpoint creates a two-month definition",
+    async () => {
+      const actual = await request("/api/recurring-expenses", {
+        method: "POST",
+        json: { categoryId, amount: "10", dayOfMonth: 1, months: 2 },
+      });
+      recurringId = recurringItems(actual)?.find((item) => item.amountMinor === 1000)?.id ?? "";
+      return actual;
+    },
+    { status: 200, check: () => (recurringId ? null : "new definition not in the returned list") },
+  ],
+  [
+    "dashboard shows the reminder for a definition that ends next month",
+    () => request("/dashboard"),
+    {
+      status: 200,
+      check: (actual) => {
+        if (actual.body.includes("[object Object]")) return "body contains [object Object]";
+        return actual.body.includes("Nie przypominaj") ? null : "reminder banner is missing";
+      },
+    },
+  ],
+  [
+    "recurring endpoint dismisses the reminder",
+    () => request(`/api/recurring-expenses/${recurringId}`, { method: "PATCH", json: { dismissReminder: true } }),
+    {
+      status: 200,
+      check: (actual) =>
+        recurringItems(actual)?.find((item) => item.id === recurringId)?.remind === false
+          ? null
+          : "reminder is still on",
+    },
+  ],
+  [
+    "dashboard hides the dismissed reminder",
+    () => request("/dashboard"),
+    {
+      status: 200,
+      check: (actual) => {
+        // "Zostaje" proves the month screen rendered; without it the absence of the banner proves nothing.
+        if (!actual.body.includes("Zostaje")) return 'body has no "Zostaje"';
+        return actual.body.includes("Nie przypominaj") ? "reminder banner is still shown" : null;
+      },
+    },
+  ],
+  [
+    "recurring endpoint changes the amount",
+    () => request(`/api/recurring-expenses/${recurringId}`, { method: "PATCH", json: { amount: "20" } }),
+    {
+      status: 200,
+      check: (actual) =>
+        recurringItems(actual)?.find((item) => item.id === recurringId)?.amountMinor === 2000
+          ? null
+          : "amount was not updated",
+    },
+  ],
+  [
+    "recurring settings page renders for a signed-in user",
+    () => request("/settings/recurring"),
+    {
+      status: 200,
+      check: (actual) => {
+        if (actual.body.includes("[object Object]")) return "body contains [object Object]";
+        // "Cykliczne wydatki" is also the Topbar link text, so check a heading only the manager renders.
+        return actual.body.includes("Twoje cykliczne wydatki") ? null : 'body has no "Twoje cykliczne wydatki"';
+      },
+    },
+  ],
+  [
+    "recurring endpoint rejects a day outside 1-31",
+    () =>
+      request("/api/recurring-expenses", {
+        method: "POST",
+        json: { categoryId, amount: "10", dayOfMonth: 32, months: 2 },
+      }),
+    { status: 400 },
+  ],
+  [
+    "recurring endpoint stops the definition",
+    () => request(`/api/recurring-expenses/${recurringId}`, { method: "DELETE" }),
+    { status: 200, check: (actual) => (recurringItems(actual)?.length === 0 ? null : "definition is still listed") },
+  ],
+  [
     "expense endpoint rejects a zero amount",
     () => request("/api/expenses", { method: "POST", json: { amount: "0", categoryId } }),
     { status: 400 },
@@ -249,6 +342,11 @@ const steps = [
     { status: 302, location: "/auth/signin" },
   ],
   [
+    "recurring settings page redirects after signout",
+    () => request("/settings/recurring"),
+    { status: 302, location: "/auth/signin" },
+  ],
+  [
     "signin rejects the old password after the change",
     () => request("/api/auth/signin", { method: "POST", form: { email, password } }),
     { status: 302, locationPrefix: "/auth/signin?error=" },
@@ -262,6 +360,11 @@ const steps = [
     "signout after the new-password signin",
     () => request("/api/auth/signout", { method: "POST" }),
     { status: 302, location: "/" },
+  ],
+  [
+    "recurring endpoint rejects an anonymous request",
+    () => request("/api/recurring-expenses/00000000-0000-4000-8000-000000000000", { method: "DELETE" }),
+    { status: 401 },
   ],
   // Kept before the anonymous expense request: that 401 leaves its JSON body unread, and the dev/preview server then
   // fails the next request on the same connection ("fetch failed"), so it has to stay the last step.

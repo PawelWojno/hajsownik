@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { EntrySheet, type EntryMode } from "@/components/month/EntrySheet";
+import { RecurringReminders } from "@/components/month/RecurringReminders";
 import { Button } from "@/components/ui/button";
 import { formatMinor } from "@/lib/money";
 import { cn } from "@/lib/utils";
-import type { Category, MonthSummary } from "@/types";
+import type { Category, MonthSummary, RecurringExpense } from "@/types";
 
 interface Props {
   monthLabel: string;
   initialSummary: MonthSummary;
   categories: Category[];
+  /** All recurring expenses; the reminder banner picks the ones whose horizon is about to end. */
+  recurring: RecurringExpense[];
 }
 
-export default function MonthScreen({ monthLabel, initialSummary, categories }: Props) {
+export default function MonthScreen({ monthLabel, initialSummary, categories, recurring }: Props) {
   const [summary, setSummary] = useState(initialSummary);
   const [mode, setMode] = useState<EntryMode>("expense");
   const [open, setOpen] = useState(false);
@@ -31,6 +34,8 @@ export default function MonthScreen({ monthLabel, initialSummary, categories }: 
       <h1 className="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-3xl font-bold text-transparent">
         {monthLabel}
       </h1>
+
+      <RecurringReminders initialItems={recurring} />
 
       <section
         aria-live="polite"
