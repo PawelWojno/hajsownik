@@ -2,6 +2,7 @@
 import RecurringManager from "@/components/settings/RecurringManager";
 import Topbar from "@/components/Topbar.astro";
 import Layout from "@/layouts/Layout.astro";
+import { todayInWarsaw } from "@/lib/dates";
 import { listActiveCategories } from "@/lib/services/categories";
 import { listRecurringExpenses } from "@/lib/services/recurring-expenses";
 import { createClient } from "@/lib/supabase";
@@ -24,7 +25,12 @@ if (supabase) {
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <Topbar />
     {items ? (
-      <RecurringManager initialItems={items} categories={categories} client:load />
+      <RecurringManager
+        initialItems={items}
+        categories={categories}
+        defaultDay={Number(todayInWarsaw().slice(8))}
+        client:load
+      />
     ) : (
       <p
         role="alert"

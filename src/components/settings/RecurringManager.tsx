@@ -23,6 +23,8 @@ interface Props {
   initialItems: RecurringExpense[];
   /** Active categories only: an archived one is not offered for a new definition. */
   categories: Category[];
+  /** Today's day of the month in Warsaw, computed on the server so it matches the hydrated form. */
+  defaultDay: number;
 }
 
 /** How many months "Przedłuż" appends: a year, or less when that would pass the limit of 24 months from the current. */
@@ -127,12 +129,12 @@ function StopControl({ itemLabel, pending, onConfirm, onCancel }: StopControlPro
   );
 }
 
-export default function RecurringManager({ initialItems, categories }: Props) {
+export default function RecurringManager({ initialItems, categories, defaultDay }: Props) {
   const { items, pending, error, clearError, add, changeAmount, extend, stop } = useRecurringActions(initialItems);
   const [form, setForm] = useState<AddForm>({
     amount: "",
     categoryId: categories[0]?.id ?? "",
-    day: "1",
+    day: String(defaultDay),
     months: "12",
   });
   const [editing, setEditing] = useState<{ id: string; amount: string } | null>(null);

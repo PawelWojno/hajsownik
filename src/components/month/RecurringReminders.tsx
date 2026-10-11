@@ -33,7 +33,7 @@ export function RecurringReminders({ initialItems }: Props) {
               <span className="font-semibold">
                 {item.categoryName}, {formatMinor(item.amountMinor)}, dzień {item.dayOfMonth}:
               </span>{" "}
-              {endsIn(item)}. Przedłuż albo pozwól wygasnąć.
+              {endsIn(item)}
             </p>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <Button
