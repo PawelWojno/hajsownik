@@ -37,7 +37,8 @@ export function filterAmountInput(input: string): string {
   const separatorAt = cleaned.search(/[.,]/);
   if (separatorAt === -1) return cleaned.slice(0, 8);
 
-  const whole = cleaned.slice(0, separatorAt).slice(0, 8);
+  // A leading separator ("," or ".5") gets the zero it implies, so ",5" becomes "0,5" as the user types.
+  const whole = cleaned.slice(0, separatorAt).slice(0, 8) || "0";
   const fraction = cleaned
     .slice(separatorAt + 1)
     .replace(/[.,]/g, "")
