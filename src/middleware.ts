@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase";
 
 const PROTECTED_ROUTES = ["/dashboard", "/settings", "/auth/update-password"];
 // Pages that make no sense for a signed-in user: send them straight to the month screen (exact paths only).
-const SIGNED_OUT_ONLY_ROUTES = ["/", "/auth/signin", "/auth/signup", "/auth/forgot-password"];
+const SIGNED_OUT_ONLY_ROUTES = ["/", "/auth/signin", "/auth/signup", "/auth/forgot-password", "/auth/confirmed"];
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const supabase = createClient(context.request.headers, context.cookies);

@@ -1,7 +1,7 @@
 ---
 change_id: signup-confirmation-page
 title: Strona sukcesu zamiast błędu, gdy auto-logowanie po potwierdzeniu nie działa
-status: implemented
+status: impl_reviewed
 created: 2026-10-11
 updated: 2026-10-11
 archived_at: null

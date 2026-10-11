@@ -120,6 +120,11 @@ const steps = [
     { status: 302, location: "/dashboard" },
   ],
   [
+    "confirmed page redirects signed-in user to the month screen",
+    () => request("/auth/confirmed"),
+    { status: 302, location: "/dashboard" },
+  ],
+  [
     "signin rejects wrong password",
     () => request("/api/auth/signin", { method: "POST", form: { email, password: "wrong" } }),
     { status: 302, locationPrefix: "/auth/signin?error=" },
