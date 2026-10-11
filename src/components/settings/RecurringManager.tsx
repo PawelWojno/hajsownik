@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { SubmitEvent } from "react";
-import { Check, Pencil, X } from "lucide-react";
+import { Check, CircleAlert, Pencil, X } from "lucide-react";
 import { ServerError } from "@/components/auth/ServerError";
 import { Button } from "@/components/ui/button";
 import { ADD_TARGET, useRecurringActions } from "@/hooks/useRecurringActions";
 import { formatMonthLabel } from "@/lib/dates";
-import { filterAmountInput, formatMinor, formatMinorForInput } from "@/lib/money";
+import { AMOUNT_ERROR, filterAmountInput, formatMinor, formatMinorForInput, parseAmountToMinor } from "@/lib/money";
+import { MAX_DAY_OF_MONTH, MAX_HORIZON_MONTHS, MIN_DAY_OF_MONTH, MIN_MONTHS } from "@/lib/recurring-limits";
 import { cn } from "@/lib/utils";
 import type { Category, RecurringExpense } from "@/types";
 
@@ -13,10 +14,11 @@ const fieldClass =
   "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/40 transition-colors focus:ring-2 focus:ring-purple-400 focus:outline-none";
 const actionClass = "min-h-11 min-w-11 text-purple-300 hover:bg-white/10 hover:text-purple-100";
 const labelClass = "text-sm text-blue-100/80";
+/** Same error look as FormField in the auth forms: red border and ring. */
+const errorFieldClass = "border-red-400/60 focus:ring-red-400";
 
-/** The horizon covers at most this many months counting the current one (enforced by the database too). */
-const MAX_HORIZON_MONTHS = 24;
 const EXTEND_STEP = 12;
+const CATEGORY_ERROR = "Wybierz kategorię";
 
 interface Props {
   initialItems: RecurringExpense[];
@@ -27,6 +29,45 @@ interface Props {
 /** How many months "Przedłuż" appends: a year, or less when that would pass the limit of 24 months from the current. */
 function extendBy(item: RecurringExpense): number {
   return Math.min(EXTEND_STEP, MAX_HORIZON_MONTHS - 1 - item.monthsLeft);
+}
+
+interface AddForm {
+  amount: string;
+  categoryId: string;
+  day: string;
+  months: string;
+}
+
+/** Only the typed amount and the category can be wrong: day and months are picked from lists of valid values. */
+type FieldErrors = Partial<Record<"amount" | "categoryId", string>>;
+
+function range(min: number, max: number): number[] {
+  return Array.from({ length: max - min + 1 }, (_, index) => min + index);
+}
+
+const DAY_OPTIONS = range(MIN_DAY_OF_MONTH, MAX_DAY_OF_MONTH);
+const MONTH_OPTIONS = range(MIN_MONTHS, MAX_HORIZON_MONTHS);
+
+/**
+ * Checks what the user can get wrong before sending, so each message shows under its own field instead of the
+ * browser's validation bubble. The server still validates everything: this only saves a round trip.
+ */
+function validateForm(form: AddForm): FieldErrors {
+  const errors: FieldErrors = {};
+  if (parseAmountToMinor(form.amount) === null) errors.amount = AMOUNT_ERROR;
+  if (!form.categoryId) errors.categoryId = CATEGORY_ERROR;
+  return errors;
+}
+
+/** Message under a field, same look as in FormField. */
+function FieldError({ id, message }: { id: string; message?: string }) {
+  if (!message) return null;
+  return (
+    <p id={id} className="flex items-center gap-1 text-xs text-red-300">
+      <CircleAlert className="size-3 shrink-0" />
+      {message}
+    </p>
+  );
 }
 
 interface StopControlProps {
@@ -88,12 +129,28 @@ function StopControl({ itemLabel, pending, onConfirm, onCancel }: StopControlPro
 
 export default function RecurringManager({ initialItems, categories }: Props) {
   const { items, pending, error, clearError, add, changeAmount, extend, stop } = useRecurringActions(initialItems);
-  const [form, setForm] = useState({ amount: "", categoryId: categories[0]?.id ?? "", day: "1", months: "12" });
+  const [form, setForm] = useState<AddForm>({
+    amount: "",
+    categoryId: categories[0]?.id ?? "",
+    day: "1",
+    months: "12",
+  });
   const [editing, setEditing] = useState<{ id: string; amount: string } | null>(null);
+
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  /** Updates one field and clears its message, so the error disappears as soon as the user corrects it. */
+  function updateForm(field: keyof AddForm, value: string) {
+    setForm((current) => ({ ...current, [field]: value }));
+    setFieldErrors((current) => ({ ...current, [field]: undefined }));
+  }
 
   async function handleAdd(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
+    const errors = validateForm(form);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
     const saved = await add({
       categoryId: form.categoryId,
       amount: form.amount,
@@ -160,7 +217,7 @@ export default function RecurringManager({ initialItems, categories }: Props) {
         Cykliczne wydatki
       </h1>
 
-      <form onSubmit={handleAdd} className="flex flex-col gap-3">
+      <form onSubmit={handleAdd} noValidate className="flex flex-col gap-3">
         <p className="text-sm text-blue-100/70">
           Wpisy powstają od razu, po jednym na miesiąc, od bieżącego miesiąca. Nie dodajemy ich za miesiące, które już
           minęły.
@@ -176,11 +233,14 @@ export default function RecurringManager({ initialItems, categories }: Props) {
             autoComplete="off"
             placeholder="np. 1850,00"
             value={form.amount}
+            aria-invalid={fieldErrors.amount ? true : undefined}
+            aria-describedby={fieldErrors.amount ? "recurring-amount-error" : undefined}
             onChange={(event) => {
-              setForm((current) => ({ ...current, amount: filterAmountInput(event.target.value) }));
+              updateForm("amount", filterAmountInput(event.target.value));
             }}
-            className={cn(fieldClass, "min-h-11")}
+            className={cn(fieldClass, "min-h-11", fieldErrors.amount && errorFieldClass)}
           />
+          <FieldError id="recurring-amount-error" message={fieldErrors.amount} />
         </div>
 
         <div className="flex flex-col gap-1">
@@ -190,10 +250,12 @@ export default function RecurringManager({ initialItems, categories }: Props) {
           <select
             id="recurring-category"
             value={form.categoryId}
+            aria-invalid={fieldErrors.categoryId ? true : undefined}
+            aria-describedby={fieldErrors.categoryId ? "recurring-category-error" : undefined}
             onChange={(event) => {
-              setForm((current) => ({ ...current, categoryId: event.target.value }));
+              updateForm("categoryId", event.target.value);
             }}
-            className={cn(fieldClass, "min-h-11")}
+            className={cn(fieldClass, "min-h-11", fieldErrors.categoryId && errorFieldClass)}
           >
             {categories.map((category) => (
               <option key={category.id} value={category.id} className="text-black">
@@ -201,6 +263,7 @@ export default function RecurringManager({ initialItems, categories }: Props) {
               </option>
             ))}
           </select>
+          <FieldError id="recurring-category-error" message={fieldErrors.categoryId} />
         </div>
 
         <div className="flex gap-2">
@@ -208,35 +271,39 @@ export default function RecurringManager({ initialItems, categories }: Props) {
             <label htmlFor="recurring-day" className={labelClass}>
               Dzień miesiąca
             </label>
-            <input
+            <select
               id="recurring-day"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={31}
               value={form.day}
               onChange={(event) => {
-                setForm((current) => ({ ...current, day: event.target.value }));
+                updateForm("day", event.target.value);
               }}
               className={cn(fieldClass, "min-h-11")}
-            />
+            >
+              {DAY_OPTIONS.map((day) => (
+                <option key={day} value={day} className="text-black">
+                  {day}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="flex flex-1 flex-col gap-1">
             <label htmlFor="recurring-months" className={labelClass}>
               Liczba miesięcy
             </label>
-            <input
+            <select
               id="recurring-months"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={MAX_HORIZON_MONTHS}
               value={form.months}
               onChange={(event) => {
-                setForm((current) => ({ ...current, months: event.target.value }));
+                updateForm("months", event.target.value);
               }}
               className={cn(fieldClass, "min-h-11")}
-            />
+            >
+              {MONTH_OPTIONS.map((months) => (
+                <option key={months} value={months} className="text-black">
+                  {months}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <p className="text-xs text-white/50">W krótszych miesiącach wpis wypada ostatniego dnia (np. 28 lutego).</p>
