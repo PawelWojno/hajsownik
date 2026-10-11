@@ -97,6 +97,18 @@ const steps = [
     { status: 302, locationPrefix: "/auth/forgot-password?error=" },
   ],
   [
+    "callback without a code sends the user back to sign-in",
+    () => request("/auth/callback"),
+    { status: 302, locationPrefix: "/auth/signin?error=" },
+  ],
+  [
+    // The anonymous request has no PKCE verifier cookie, like a confirmation link opened in another browser.
+    "callback with a code but no PKCE verifier sends the user to the sign-in prompt",
+    () => request("/auth/callback?code=invalid"),
+    { status: 302, location: "/auth/confirmed" },
+  ],
+  ["confirmed page renders", () => request("/auth/confirmed"), { status: 200 }],
+  [
     "signup creates account",
     () => request("/api/auth/signup", { method: "POST", form: { email, password, householdName: "Mój dom" } }),
     // The local Supabase used by CI has email confirmations off, so signUp returns a session right away.
