@@ -235,7 +235,11 @@ const steps = [
     () => request("/dashboard"),
     {
       status: 200,
-      check: (actual) => (actual.body.includes("Nie przypominaj") ? "reminder banner is still shown" : null),
+      check: (actual) => {
+        // "Zostaje" proves the month screen rendered; without it the absence of the banner proves nothing.
+        if (!actual.body.includes("Zostaje")) return 'body has no "Zostaje"';
+        return actual.body.includes("Nie przypominaj") ? "reminder banner is still shown" : null;
+      },
     },
   ],
   [
@@ -256,7 +260,8 @@ const steps = [
       status: 200,
       check: (actual) => {
         if (actual.body.includes("[object Object]")) return "body contains [object Object]";
-        return actual.body.includes("Cykliczne wydatki") ? null : 'body has no "Cykliczne wydatki"';
+        // "Cykliczne wydatki" is also the Topbar link text, so check a heading only the manager renders.
+        return actual.body.includes("Twoje cykliczne wydatki") ? null : 'body has no "Twoje cykliczne wydatki"';
       },
     },
   ],

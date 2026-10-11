@@ -30,6 +30,8 @@ function extendBy(item: RecurringExpense): number {
 }
 
 interface StopControlProps {
+  /** Category and amount, so a screen reader can tell the rows' buttons apart. */
+  itemLabel: string;
   pending: boolean;
   onConfirm: () => Promise<boolean>;
   /** Called when the user backs out, so an error from a failed attempt does not linger. */
@@ -37,7 +39,7 @@ interface StopControlProps {
 }
 
 /** "Zatrzymaj" asks for a second click in place (no browser dialog, which a user can block). */
-function StopControl({ pending, onConfirm, onCancel }: StopControlProps) {
+function StopControl({ itemLabel, pending, onConfirm, onCancel }: StopControlProps) {
   const [confirming, setConfirming] = useState(false);
 
   if (!confirming) {
@@ -46,6 +48,7 @@ function StopControl({ pending, onConfirm, onCancel }: StopControlProps) {
         type="button"
         variant="ghost"
         disabled={pending}
+        aria-label={`Zatrzymaj: ${itemLabel}`}
         onClick={() => {
           setConfirming(true);
         }}
@@ -57,7 +60,7 @@ function StopControl({ pending, onConfirm, onCancel }: StopControlProps) {
   }
 
   return (
-    <div role="group" aria-label="Potwierdź zatrzymanie" className="flex flex-wrap items-center gap-1">
+    <div role="group" aria-label={`Potwierdź zatrzymanie: ${itemLabel}`} className="flex flex-wrap items-center gap-1">
       <span className="text-sm text-red-200">Na pewno? Wygenerowane przyszłe wpisy zostaną usunięte.</span>
       <Button
         type="button"
@@ -264,6 +267,7 @@ export default function RecurringManager({ initialItems, categories }: Props) {
             const lapsed = item.monthsLeft < 0;
             const extendMonths = extendBy(item);
             const canExtend = extendMonths >= 1;
+            const itemLabel = `${item.categoryName}, ${formatMinor(item.amountMinor)}`;
             return (
               <li key={item.id} className="rounded-xl border border-white/10 bg-white/5 p-3">
                 <div className="flex flex-wrap items-center gap-2">
@@ -300,19 +304,31 @@ export default function RecurringManager({ initialItems, categories }: Props) {
                 <p className="mt-1 text-sm text-blue-100/70">
                   Dzień {item.dayOfMonth}, od {formatMonthLabel(item.startMonth)} do {formatMonthLabel(item.endMonth)}
                 </p>
-                <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    disabled={pending || !canExtend}
-                    title={canExtend ? undefined : "Horyzont obejmuje już 24 miesiące"}
-                    onClick={() => void extend(item.id, extendMonths)}
-                    className="min-h-11 text-purple-300 hover:bg-white/10 hover:text-purple-100"
-                  >
-                    {canExtend ? `Przedłuż o ${extendMonths} mies.` : "Maksymalny horyzont"}
-                  </Button>
-                  <StopControl pending={pending} onConfirm={() => stop(item.id)} onCancel={clearError} />
-                </div>
+                {editing?.id !== item.id && (
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={pending || !canExtend}
+                      aria-label={canExtend ? `Przedłuż o ${extendMonths} mies.: ${itemLabel}` : undefined}
+                      onClick={() => void extend(item.id, extendMonths)}
+                      className="min-h-11 text-purple-300 hover:bg-white/10 hover:text-purple-100"
+                    >
+                      {canExtend ? `Przedłuż o ${extendMonths} mies.` : "Maksymalny horyzont"}
+                    </Button>
+                    <StopControl
+                      itemLabel={itemLabel}
+                      pending={pending}
+                      onConfirm={() => stop(item.id)}
+                      onCancel={clearError}
+                    />
+                  </div>
+                )}
+                {!canExtend && (
+                  <p className="mt-1 text-xs text-white/50">
+                    Horyzont obejmuje już 24 miesiące licząc od bieżącego, więc nie da się go przedłużyć.
+                  </p>
+                )}
                 <ServerError message={error?.target === item.id ? error.message : null} />
               </li>
             );

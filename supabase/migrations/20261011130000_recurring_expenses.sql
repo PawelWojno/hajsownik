@@ -25,7 +25,10 @@ create table public.recurring_expenses (
   -- Target of the composite foreign key on expenses.
   unique (household_id, id),
   -- Same reasoning as on expenses: a plain FK on category_id would be checked without RLS.
-  foreign key (household_id, category_id) references public.categories (household_id, id)
+  -- ON DELETE CASCADE: a stopped definition stays in the table (soft delete) and is invisible to the user, so without
+  -- it a category with no expenses left could never be deleted. A category that still has entries stays protected by
+  -- the foreign key from expenses.
+  foreign key (household_id, category_id) references public.categories (household_id, id) on delete cascade
 );
 
 -- Two identical active definitions from the same month are almost certainly a double submit (two clicks, two tabs):

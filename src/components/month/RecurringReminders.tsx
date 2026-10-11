@@ -25,36 +25,41 @@ export function RecurringReminders({ initialItems }: Props) {
 
   return (
     <section aria-label="Cykliczne wydatki: koniec horyzontu" className="flex flex-col gap-2">
-      {due.map((item) => (
-        <div key={item.id} className="rounded-xl border border-amber-300/30 bg-amber-900/20 p-3 text-amber-100">
-          <p className="text-sm">
-            <span className="font-semibold">
-              {item.categoryName}, {formatMinor(item.amountMinor)}, dzień {item.dayOfMonth}:
-            </span>{" "}
-            {endsIn(item)}. Przedłuż albo pozwól wygasnąć.
-          </p>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              disabled={pending}
-              onClick={() => void extend(item.id, EXTEND_MONTHS)}
-              className="min-h-11 bg-purple-600 text-white hover:bg-purple-500"
-            >
-              Przedłuż o {EXTEND_MONTHS} mies.
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={pending}
-              onClick={() => void dismissReminder(item.id)}
-              className="min-h-11 text-amber-100 hover:bg-white/10 hover:text-white"
-            >
-              Nie przypominaj
-            </Button>
+      {due.map((item) => {
+        const itemLabel = `${item.categoryName}, ${formatMinor(item.amountMinor)}`;
+        return (
+          <div key={item.id} className="rounded-xl border border-amber-300/30 bg-amber-900/20 p-3 text-amber-100">
+            <p className="text-sm">
+              <span className="font-semibold">
+                {item.categoryName}, {formatMinor(item.amountMinor)}, dzień {item.dayOfMonth}:
+              </span>{" "}
+              {endsIn(item)}. Przedłuż albo pozwól wygasnąć.
+            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                disabled={pending}
+                aria-label={`Przedłuż o ${EXTEND_MONTHS} mies.: ${itemLabel}`}
+                onClick={() => void extend(item.id, EXTEND_MONTHS)}
+                className="min-h-11 bg-purple-600 text-white hover:bg-purple-500"
+              >
+                Przedłuż o {EXTEND_MONTHS} mies.
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={pending}
+                aria-label={`Nie przypominaj: ${itemLabel}`}
+                onClick={() => void dismissReminder(item.id)}
+                className="min-h-11 text-amber-100 hover:bg-white/10 hover:text-white"
+              >
+                Nie przypominaj
+              </Button>
+            </div>
+            <ServerError message={error?.target === item.id ? error.message : null} />
           </div>
-          <ServerError message={error?.target === item.id ? error.message : null} />
-        </div>
-      ))}
+        );
+      })}
     </section>
   );
 }

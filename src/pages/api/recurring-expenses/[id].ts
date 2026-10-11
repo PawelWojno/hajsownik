@@ -17,11 +17,14 @@ const idSchema = z.uuid();
 
 // Exactly one of the three fields: a new amount, an extension, or dismissing the reminder.
 const patchSchema = z
-  .object({
-    amount: amountField.optional(),
-    extendMonths: monthsField.optional(),
-    dismissReminder: z.literal(true).optional(),
-  })
+  .object(
+    {
+      amount: amountField.optional(),
+      extendMonths: monthsField.optional(),
+      dismissReminder: z.literal(true, INVALID_REQUEST).optional(),
+    },
+    INVALID_REQUEST,
+  )
   .refine(
     (value) =>
       [value.amount, value.extendMonths, value.dismissReminder].filter((field) => field !== undefined).length === 1,

@@ -6,7 +6,7 @@ export const ADD_TARGET = "add";
 
 const CONNECTION_ERROR = "Brak połączenia. Spróbuj ponownie.";
 const UNEXPECTED_ERROR = "Nie udało się zapisać. Spróbuj ponownie.";
-const CONFLICT = 409;
+const NOT_FOUND = 404;
 
 export interface NewRecurring {
   categoryId: string;
@@ -46,7 +46,8 @@ function isApiError(value: unknown): value is ApiError {
 
 /**
  * Calls the recurring-expense API and keeps the list in state. Every mutation answers with the fresh list, so the state
- * is replaced in one go; a missing list (saved but unreadable) or a 409 (stale list) reloads the page instead.
+ * is replaced in one go; a missing list (saved but unreadable) or a 404 (the definition was stopped elsewhere, e.g. in
+ * another tab, so the list is stale) reloads the page instead.
  * While a request runs `pending` is true: callers disable their buttons with it, so a double click cannot send a
  * second "create" (see the duplicate-protection lesson in context/foundation/lessons.md).
  */
@@ -67,7 +68,7 @@ export function useRecurringActions(initial: RecurringExpense[]) {
       });
       const body: unknown = await response.json().catch(() => null);
 
-      if (response.status === CONFLICT) {
+      if (response.status === NOT_FOUND) {
         window.location.reload();
         return false;
       }

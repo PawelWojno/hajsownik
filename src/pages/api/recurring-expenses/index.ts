@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { SAVE_FAILED, UNAUTHORIZED, invalidRequest, json, readJson } from "@/lib/http";
+import { INVALID_REQUEST, SAVE_FAILED, UNAUTHORIZED, invalidRequest, json, readJson } from "@/lib/http";
 import { recurringResponse } from "@/lib/recurring-http";
 import { createRecurringExpense } from "@/lib/services/recurring-expenses";
 import { createClient } from "@/lib/supabase";
@@ -9,12 +9,15 @@ import { amountField, dayOfMonthField, monthsField } from "@/lib/validation";
 export const prerender = false;
 
 // No date field: the database computes every entry's date from the chosen day and the current Warsaw month.
-const createSchema = z.object({
-  categoryId: z.uuid("Wybierz kategorię"),
-  amount: amountField,
-  dayOfMonth: dayOfMonthField,
-  months: monthsField,
-});
+const createSchema = z.object(
+  {
+    categoryId: z.uuid("Wybierz kategorię"),
+    amount: amountField,
+    dayOfMonth: dayOfMonthField,
+    months: monthsField,
+  },
+  INVALID_REQUEST,
+);
 
 export const POST: APIRoute = async (context) => {
   if (!context.locals.user) return json({ error: UNAUTHORIZED }, 401);

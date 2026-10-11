@@ -73,7 +73,7 @@ Nowa migracja z tabelą definicji, kolumną łączącą, politykami RLS i funkcj
 
 **Intent**: Tworzy `recurring_expenses` (kolumny z sekcji Implementation Approach, CHECK: `amount_minor` jak w `expenses`, `day_of_month` 1..31, `start_month` i `end_month` to pierwsze dni miesięcy, `end_month >= start_month`), dodaje `expenses.recurring_expense_id` z indeksem częściowym `(recurring_expense_id, spent_on)` i włącza RLS.
 
-**Contract**: `unique (household_id, id)` na definicji jako cel złożonego FK; złożone FK `(household_id, category_id) → categories(household_id, id)` oraz `(household_id, recurring_expense_id) → recurring_expenses(household_id, id)` (bez `ON DELETE`: definicje nie są usuwane, tylko zatrzymywane). Polityki dla roli `authenticated`, wszystkie z `household_id = (select public.current_household_id())` (lekcja `lessons.md:5-10`): `recurring_expenses` SELECT / INSERT (WITH CHECK) / UPDATE (USING + WITH CHECK), bez DELETE; `expenses` dodatkowo DELETE ograniczony do `recurring_expense_id is not null`. Częściowy indeks unikalny `(household_id, category_id, amount_minor, day_of_month, start_month) where stopped_at is null` odrzuca (`23505`) drugą identyczną aktywną definicję z tego samego miesiąca (ochrona przed podwójnym wywołaniem tworzenia; lekcja w `lessons.md`). Komentarz nagłówkowy migracji zaktualizować, żeby opisywał zawężony DELETE zamiast „insert-only until S-06".
+**Contract**: `unique (household_id, id)` na definicji jako cel złożonego FK; złożone FK `(household_id, category_id) → categories(household_id, id)` oraz `(household_id, recurring_expense_id) → recurring_expenses(household_id, id)` (FK do kategorii ma `ON DELETE CASCADE`, bo zatrzymana definicja zostaje w tabeli i blokowałaby usunięcie kategorii bez wydatków — poprawka z pełnego review, F1; FK z `expenses` do definicji jest bez `ON DELETE`, bo definicje nie są usuwane, tylko zatrzymywane). Polityki dla roli `authenticated`, wszystkie z `household_id = (select public.current_household_id())` (lekcja `lessons.md:5-10`): `recurring_expenses` SELECT / INSERT (WITH CHECK) / UPDATE (USING + WITH CHECK), bez DELETE; `expenses` dodatkowo DELETE ograniczony do `recurring_expense_id is not null`. Częściowy indeks unikalny `(household_id, category_id, amount_minor, day_of_month, start_month) where stopped_at is null` odrzuca (`23505`) drugą identyczną aktywną definicję z tego samego miesiąca (ochrona przed podwójnym wywołaniem tworzenia; lekcja w `lessons.md`). Komentarz nagłówkowy migracji zaktualizować, żeby opisywał zawężony DELETE zamiast „insert-only until S-06".
 
 #### 2. Funkcje SQL
 
@@ -342,14 +342,14 @@ Migracja jest addytywna (nowa tabela, nowa nullable kolumna, nowe polityki) i ni
 
 #### Automated
 
-- [x] 4.1 Linting przechodzi: `npm run lint`
-- [x] 4.2 Sprawdzanie typów przechodzi: `npx astro check`
-- [x] 4.3 Build przechodzi: `npm run build`
-- [x] 4.4 Testy pgTAP przechodzą: `npx supabase test db`
-- [x] 4.5 Smoke przechodzi na buildzie produkcyjnym z lokalnym Supabase: `npm run smoke`
+- [x] 4.1 Linting przechodzi: `npm run lint` — e439056
+- [x] 4.2 Sprawdzanie typów przechodzi: `npx astro check` — e439056
+- [x] 4.3 Build przechodzi: `npm run build` — e439056
+- [x] 4.4 Testy pgTAP przechodzą: `npx supabase test db` — e439056
+- [x] 4.5 Smoke przechodzi na buildzie produkcyjnym z lokalnym Supabase: `npm run smoke` — e439056
 
 #### Manual
 
-- [x] 4.6 Definicja z 2 miesiącami (kończy się w następnym miesiącu) pokazuje baner od razu; „Nie przypominaj" ukrywa go po przeładowaniu i na innym urządzeniu; „Przedłuż" go usuwa, a definicja na liście ma nowy zakres
+- [x] 4.6 Definicja z 2 miesiącami (kończy się w następnym miesiącu) pokazuje baner od razu; „Nie przypominaj" ukrywa go po przeładowaniu i na innym urządzeniu; „Przedłuż" go usuwa, a definicja na liście ma nowy zakres — e439056
 - [ ] 4.7 Migracja zastosowana na produkcji przed merge: `npx supabase db push` (job deploy jej nie stosuje)
 - [ ] 4.8 Na produkcji definicja z 24 miesiącami, potem edycja kwoty: czas CPU wywołań sprawdzony w panelu Cloudflare lub `npx wrangler tail` i mieści się w limicie 10 ms; wynik odnotowany w planie

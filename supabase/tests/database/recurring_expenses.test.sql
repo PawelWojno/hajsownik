@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(87);
+select plan(89);
 
 -- Fixture: two real signups (household + 12 default categories each).
 insert into auth.users (id, email, raw_user_meta_data) values
@@ -297,16 +297,25 @@ select is(
 select is((select months_left from public.list_recurring_expenses() where day_of_month = 5), 2, 'the extended lapsed definition has 2 months left');
 select is((select remind from public.list_recurring_expenses() where day_of_month = 5), false, 'a definition ending in 2 months does not remind');
 
--- D5: a definition with no entries in a category nobody else uses, to isolate the foreign key from definition to category
+-- D5: a definition with no entries in a category nobody else uses: deleting the category cascades to the definition
 select lives_ok(
   $$ insert into public.recurring_expenses (category_id, amount_minor, day_of_month, start_month, end_month)
      values ((select id from public.categories order by sort_order offset 1 limit 1), 8000, 20,
              date_trunc('month', public.warsaw_today())::date, date_trunc('month', public.warsaw_today())::date) $$,
   'a definition without entries can exist (inserted by hand)'
 );
-select throws_ok(
+select lives_ok(
   $$ delete from public.categories where id = (select category_id from public.recurring_expenses where day_of_month = 20) $$,
-  '23503', null, 'a category with a definition cannot be deleted'
+  'a category referenced only by a definition without entries can be deleted'
+);
+select is(
+  (select count(*) from public.recurring_expenses where day_of_month = 20),
+  0::bigint,
+  'deleting the category removed that definition (cascade)'
+);
+select throws_ok(
+  $$ delete from public.categories where id = (select cid from ids where email = 'a@example.com') $$,
+  '23503', null, 'a category with generated entries still cannot be deleted'
 );
 
 -- archived category stays visible in the list

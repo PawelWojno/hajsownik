@@ -13,8 +13,7 @@ let categories: Category[] = [];
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 if (supabase) {
   try {
-    items = await listRecurringExpenses(supabase);
-    categories = await listActiveCategories(supabase);
+    [items, categories] = await Promise.all([listRecurringExpenses(supabase), listActiveCategories(supabase)]);
   } catch {
     items = null;
   }

@@ -1,15 +1,13 @@
 ---
-import { z } from "zod";
 import MonthScreen from "@/components/month/MonthScreen";
 import Topbar from "@/components/Topbar.astro";
 import Layout from "@/layouts/Layout.astro";
 import { currentMonthStart, formatMonthLabel, todayInWarsaw } from "@/lib/dates";
+import { listActiveCategories } from "@/lib/services/categories";
 import { getMonthSummary } from "@/lib/services/month";
 import { listRecurringExpenses } from "@/lib/services/recurring-expenses";
 import { createClient } from "@/lib/supabase";
 import type { Category, MonthSummary, RecurringExpense } from "@/types";
-
-const categoryRows = z.array(z.object({ id: z.string(), name: z.string() }));
 
 let summary: MonthSummary | null = null;
 let categories: Category[] = [];
@@ -17,24 +15,15 @@ let recurring: RecurringExpense[] = [];
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 if (supabase) {
-  try {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("id, name")
-      .is("archived_at", null)
-      .order("sort_order");
-    if (error) throw new Error(error.message);
-    categories = categoryRows.parse(data);
-    summary = await getMonthSummary(supabase, currentMonthStart());
-  } catch {
-    summary = null;
-  }
-
-  // The reminder is optional: a failed read must not take the whole month screen down.
-  try {
-    recurring = await listRecurringExpenses(supabase);
-  } catch {
-    recurring = [];
+  // The three reads are independent, so they run in parallel. The reminder list is optional: its failure must not
+  // take the month screen down, and it is only used when the month data loaded (otherwise the screen shows an error).
+  const [month, reminders] = await Promise.allSettled([
+    Promise.all([listActiveCategories(supabase), getMonthSummary(supabase, currentMonthStart())]),
+    listRecurringExpenses(supabase),
+  ]);
+  if (month.status === "fulfilled") {
+    [categories, summary] = month.value;
+    recurring = reminders.status === "fulfilled" ? reminders.value : [];
   }
 }
 
