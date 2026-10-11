@@ -45,7 +45,7 @@ Today, a household budget lives "in someone's head" — there's no reliable, low
 | S-01 | first-expense-and-income      | add an expense and an income entry, see "zostaje" update on month screen | F-01           | US-01, FR-004, FR-006, FR-012, FR-013 | done |
 | S-02 | category-management           | add/remove/archive/rename/reorder categories                       | S-01           | FR-007, FR-008, FR-009, FR-010, FR-011 | done |
 | S-03 | password-reset                 | reset their password by email if locked out                        | —              | FR-003                        | done |
-| S-04 | recurring-expenses              | define/edit/stop a recurring expense over a fixed horizon          | S-01           | FR-014, FR-015                | in-progress |
+| S-04 | recurring-expenses              | define/edit/stop a recurring expense over a fixed horizon          | S-01           | FR-014, FR-015                | done |
 | S-05 | recurring-income                | define/edit/stop a recurring income over a fixed horizon           | S-01           | FR-016, FR-017                | proposed |
 | S-06 | expense-history-and-edits       | view history (filter by month/category) and edit/delete any entry  | S-01, S-04, S-05 | FR-018, FR-019, FR-020      | proposed |
 
@@ -139,7 +139,7 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** The fixed-horizon model (materialize N months upfront, no scheduler) was already resolved during tech-stack selection specifically to fit the 5-week timeline — implement exactly that, not an open-ended recurrence.
-- **Status:** in-progress
+- **Status:** done
 - **GitHub:** #5
 
 ### S-05: Recurring income
@@ -221,3 +221,4 @@ No cross-slice open questions at this time — the PRD carried zero open questio
 - **S-01: User can add an expense and an income entry and see the month screen immediately reflect updated totals and "zostaje" for their household.** — Archived 2026-10-09 → `context/archive/2026-10-08-first-expense-and-income/`. Lesson: —.
 - **S-02: User can add, remove, archive, rename, and reorder categories so the default list fits their own household.** — Archived 2026-10-09 → `context/archive/2026-10-09-category-management/`. Lesson: —.
 - **S-03: User can reset their password by email if they forget it, without being permanently locked out of their household's financial data.** — Archived 2026-10-10 → `context/archive/2026-10-10-password-reset/`. Lesson: —.
+- **S-04: User can define a recurring expense (amount, category, monthly frequency, fixed horizon in months) and edit its amount or stop it entirely.** — Archived 2026-10-11 → `context/archive/2026-10-11-recurring-expenses/`. Lesson: duplicate protection for create operations (UI + DB), see `context/foundation/lessons.md`.
