@@ -351,5 +351,5 @@ Migracja jest addytywna (nowa tabela, nowa nullable kolumna, nowe polityki) i ni
 #### Manual
 
 - [x] 4.6 Definicja z 2 miesiącami (kończy się w następnym miesiącu) pokazuje baner od razu; „Nie przypominaj" ukrywa go po przeładowaniu i na innym urządzeniu; „Przedłuż" go usuwa, a definicja na liście ma nowy zakres — e439056
-- [ ] 4.7 Migracja zastosowana na produkcji przed merge: `npx supabase db push` (job deploy jej nie stosuje)
+- [x] 4.7 Migracja zastosowana na produkcji przed merge: `npx supabase db push` (job deploy jej nie stosuje)
 - [ ] 4.8 Na produkcji definicja z 24 miesiącami, potem edycja kwoty: czas CPU wywołań sprawdzony w panelu Cloudflare lub `npx wrangler tail` i mieści się w limicie 10 ms; wynik odnotowany w planie
