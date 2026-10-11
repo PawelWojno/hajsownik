@@ -8,7 +8,7 @@
 --   * a row's date is day_of_month clamped to the length of that month, computed from the base day for every month
 --     (31 -> 31 Jan, 28 Feb, 31 Mar - no drift);
 --   * "future" entries are rows dated after today; stop deletes them, an amount change deletes and re-creates them;
---   * the horizon never reaches more than 24 months ahead of the current month (months_left <= 24).
+--   * the horizon covers at most 24 months counting the current one (months_left <= 23), for create and extend alike.
 
 create table public.recurring_expenses (
   id uuid primary key default gen_random_uuid(),
@@ -171,7 +171,7 @@ end;
 $$;
 
 -- Appends p_months slots after the horizon. A lapsed definition (end_month before the current month) restarts at the
--- current month, so nothing is created for past months. The horizon may not reach more than 24 months ahead.
+-- current month, so nothing is created for past months. The horizon may cover at most 24 months counting the current one.
 create function public.extend_recurring_expense(p_id uuid, p_months int)
 returns void
 language plpgsql
@@ -196,8 +196,8 @@ begin
 
   v_first := greatest((v_def.end_month + make_interval(months => 1))::date, v_current);
   v_new_end := (v_first + make_interval(months => p_months - 1))::date;
-  if public.recurring_month_diff(v_current, v_new_end) > 24 then
-    raise exception 'the horizon cannot reach more than 24 months ahead' using errcode = '22023';
+  if public.recurring_month_diff(v_current, v_new_end) > 23 then
+    raise exception 'the horizon cannot cover more than 24 months from the current one' using errcode = '22023';
   end if;
 
   update public.recurring_expenses set end_month = v_new_end, reminder_dismissed_at = null where id = p_id;

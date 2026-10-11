@@ -17,6 +17,11 @@ export function parseAmountToMinor(input: string): number | null {
   return minor > 0 && minor <= MAX_AMOUNT_MINOR ? minor : null;
 }
 
+/** Grosze as editable text ("1850,00"), the inverse of parseAmountToMinor, for pre-filling an input. */
+export function formatMinorForInput(minor: number): string {
+  return (minor / 100).toFixed(2).replace(".", ",");
+}
+
 const plnFormatter = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" });
 
 export function formatMinor(minor: number): string {

@@ -24,7 +24,7 @@ W Ustawieniach → „Cykliczne wydatki" użytkownik dodaje, edytuje kwotę, prz
 | Model danych | Osobna tabela `recurring_expenses` + `expenses.recurring_expense_id` | Zwykłe złożone FK z RLS; S-05 dostaje bliźniaczą tabelę | Plan |
 | Mechanizm | Funkcje SQL INVOKER przez `rpc` + wąska polityka DELETE na wpisach generowanych | Atomowo i jedno podzapytanie z Workera; nie wchodzi w zakres S-06 | Research |
 | Baner | W zakresie; zamykalny, zapis w bazie, akcja „Przedłuż" | Domyka obietnicę PRD „przedłuż albo pozwól wygasnąć" bez nagabywania | Plan |
-| Horyzont | Domyślnie 12 mies.; po każdej operacji najwyżej 24 mies. do przodu (przedłużać można bez końca) | Ogranicza liczbę przyszłych wpisów, a czynsz nie wygasa na stałe | Plan |
+| Horyzont | Domyślnie 12 mies.; po każdej operacji najwyżej 24 mies. łącznie z bieżącym (przedłużać można bez końca) | Ogranicza liczbę przyszłych wpisów, a czynsz nie wygasa na stałe | Plan |
 | UI | Osobna strona `/settings/recurring` | Szybka ścieżka dodawania wydatku (`EntrySheet`) zostaje nietknięta | Plan |
 | „Dziś" | Liczone w bazie w Europe/Warsaw | Jedno źródło prawdy, brak cofania daty przez `rpc` | Research |
 
@@ -51,7 +51,7 @@ W Ustawieniach → „Cykliczne wydatki" użytkownik dodaje, edytuje kwotę, prz
 
 ## Open Risks & Assumptions
 
-- „Łącznie do 24" znaczy 24 miesiące do przodu licząc od bieżącego (wariant C wybrany w triage), a nie 24 miesiące życia definicji; przedłużenie ponad tę granicę jest odrzucane.
+- „Łącznie do 24" znaczy najwyżej 24 miesiące licząc od bieżącego włącznie (wariant C z triage, zaostrzony w fazie 3 po uwadze użytkownika), a nie 24 miesiące życia definicji; przedłużenie ponad tę granicę jest odrzucane.
 - Edycja kwoty nie poprawia wpisu z datą ≤ dziś; S-06 pozwoli go poprawić ręcznie.
 - Ręcznie usunięty (S-06) przyszły wpis wraca przy edycji kwoty, bo regeneracja odtwarza wszystkie przyszłe sloty (zgodnie z FR-015); przedłużenie tylko dopisuje sloty za końcem horyzontu i dziur wewnątrz nie łata.
 - Limit CPU Workera (10 ms) nie jest zmierzony w repo; pomiar ręczny w Phase 4.

@@ -229,7 +229,7 @@ select is(
 );
 select is((select months_left from public.list_recurring_expenses() where day_of_month = 10), 13, 'D2 has 13 months left after extending');
 
--- D3: the horizon may reach exactly 24 months ahead, not 25
+-- D3: the horizon may cover exactly 24 months counting the current one, not 25
 select lives_ok(
   $$ select public.create_recurring_expense((select cid from ids where email = 'a@example.com'), 6000, 15, 1) $$,
   'A can create a 1-month definition'
@@ -237,13 +237,13 @@ select lives_ok(
 select is((select months_left from public.list_recurring_expenses() where day_of_month = 15), 0, 'a definition ending this month has 0 months left');
 select is((select remind from public.list_recurring_expenses() where day_of_month = 15), true, 'a definition ending this month reminds');
 select lives_ok(
-  $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 15), 24) $$,
-  'extending to exactly 24 months ahead is allowed'
+  $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 15), 23) $$,
+  'extending to the limit (24 months counting the current one) is allowed'
 );
-select is((select months_left from public.list_recurring_expenses() where day_of_month = 15), 24, 'D3 has 24 months left');
+select is((select months_left from public.list_recurring_expenses() where day_of_month = 15), 23, 'D3 has 23 months left (24 counting the current one)');
 select throws_ok(
   $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 15), 1) $$,
-  '22023', null, 'extending past 24 months ahead is rejected'
+  '22023', null, 'extending past 24 months counting the current one is rejected'
 );
 select throws_ok(
   $$ select public.extend_recurring_expense((select id from public.recurring_expenses where day_of_month = 15), 0) $$,
@@ -256,8 +256,8 @@ select throws_ok(
 select is(
   (select count(*) from public.expenses e join public.recurring_expenses r on r.id = e.recurring_expense_id
    where r.day_of_month = 15),
-  25::bigint,
-  'D3 has 1 + 24 entries and the rejected extensions added none'
+  24::bigint,
+  'D3 has 1 + 23 entries and the rejected extensions added none'
 );
 with del as (
   delete from public.expenses

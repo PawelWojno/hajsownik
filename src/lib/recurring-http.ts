@@ -16,8 +16,8 @@ export function recurringResponse(result: RecurringResult): Response {
     case FOREIGN_KEY_VIOLATION:
       return json({ error: "Wybierz kategorię z listy" }, 400);
     case INVALID_PARAMETER:
-      // zod already checks the 1-24 range, so the database only raises this when the horizon would pass 24 months ahead.
-      return json({ error: "Horyzont może sięgać najwyżej 24 miesięcy do przodu" }, 400);
+      // zod already checks the 1-24 range, so the database only raises this when the horizon would pass 24 months.
+      return json({ error: "Horyzont może obejmować najwyżej 24 miesiące (licząc od bieżącego)" }, 400);
     case NO_DATA_FOUND:
       return json({ error: "Nie znaleziono cyklicznego wydatku" }, 404);
     default:

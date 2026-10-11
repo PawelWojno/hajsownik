@@ -47,7 +47,7 @@ Bottom-up jak w poprzednich slice'ach: SQL + pgTAP, potem API/serwis, strona zar
 **Reguły (zatwierdzone w wywiadzie).**
 - Pierwszy wpis w miesiącu utworzenia na wybrany dzień, także gdy ten dzień już minął (reguła „od miesiąca utworzenia, nigdy wcześniej" z FR-014) i także gdy jest późniejszy niż dziś (wtedy liczy się od razu do „Zostaje").
 - „Przyszłe" wpisy = `spent_on` późniejsze niż dziś w Warszawie. Zatrzymanie usuwa je; edycja kwoty usuwa je i wstawia ponownie sloty z datą późniejszą niż dziś, już z nową kwotą; wpisy z datą ≤ dziś zostają.
-- Przedłużenie o N (1–24): nowe sloty zaczynają się od `max(end_month + 1 miesiąc, bieżący miesiąc)`, a `end_month` przesuwa się na ostatni nowy slot (przedłużenie wygasłej definicji zaczyna od bieżącego miesiąca, nie tworzy przeszłych wpisów) i zeruje `reminder_dismissed_at`. Limit „do 24" oznacza, że po operacji do `end_month` zostaje najwyżej 24 miesiące licząc od bieżącego: przedłużenie, po którym `months_left` byłoby większe niż 24, kończy się błędem `22023`. Definicję można więc przedłużać bez końca (czynsz), ale wpisów w przyszłości jest zawsze ograniczona liczba, a edycja kwoty regeneruje ich najwyżej 25 (24 przyszłe miesiące plus ewentualny wpis bieżącego miesiąca z datą po dziś). Wariant wybrany przez użytkownika w triage przeglądu planu (F4, wariant C); ta sama reguła obejmuje tworzenie (`p_months` 1..24).
+- Przedłużenie o N (1–24): nowe sloty zaczynają się od `max(end_month + 1 miesiąc, bieżący miesiąc)`, a `end_month` przesuwa się na ostatni nowy slot (przedłużenie wygasłej definicji zaczyna od bieżącego miesiąca, nie tworzy przeszłych wpisów) i zeruje `reminder_dismissed_at`. Limit „do 24" oznacza, że horyzont obejmuje najwyżej 24 miesiące licząc od bieżącego włącznie (`months_left` ≤ 23): przedłużenie, po którym `months_left` byłoby większe niż 23, kończy się błędem `22023`. Definicję można więc przedłużać bez końca (czynsz), ale wpisów w przyszłości jest zawsze najwyżej 24, a edycja kwoty regeneruje ich najwyżej tyle samo. To wariant C z triage przeglądu planu (F4), zaostrzony w fazie 3: pierwotnie było 24 miesiące po bieżącym (`months_left` ≤ 24), co przy przedłużeniu dawało 25 wpisów, a przy tworzeniu 24; ta sama reguła obejmuje teraz tworzenie (`p_months` 1..24) i przedłużanie.
 - `months_left` = liczba miesięcy między bieżącym miesiącem a `end_month`. Przypomnienie (`remind`): definicja niezatrzymana, `0 ≤ months_left ≤ 1` i `reminder_dismissed_at is null`. Przykład: 12 slotów od października 2026 kończy się we wrześniu 2027; w lipcu `months_left` = 2 (brak banera), w sierpniu 1 (baner), we wrześniu 0 (baner), w październiku −1 (wygasła, bez banera, nadal przedłużalna na liście).
 - Lista pokazuje definicje niezatrzymane (aktywne i wygasłe).
 
@@ -83,7 +83,7 @@ Nowa migracja z tabelą definicji, kolumną łączącą, politykami RLS i funkcj
 
 **Contract**:
 - `create_recurring_expense(p_category_id uuid, p_amount_minor bigint, p_day int, p_months int)` → wstawia definicję (`start_month` = bieżący miesiąc Warszawy, `end_month` = `start_month + (p_months-1)`) i wszystkie sloty; `p_months` poza 1..24 → `22023`.
-- `update_recurring_expense_amount(p_id uuid, p_amount_minor bigint)`, `extend_recurring_expense(p_id uuid, p_months int)` (poza 1..24 oraz gdy po operacji `months_left` > 24 → `22023`), `stop_recurring_expense(p_id uuid)`, `dismiss_recurring_reminder(p_id uuid)` według reguł z Implementation Approach.
+- `update_recurring_expense_amount(p_id uuid, p_amount_minor bigint)`, `extend_recurring_expense(p_id uuid, p_months int)` (poza 1..24 oraz gdy po operacji `months_left` > 23 → `22023`), `stop_recurring_expense(p_id uuid)`, `dismiss_recurring_reminder(p_id uuid)` według reguł z Implementation Approach.
 - `list_recurring_expenses()` → wiersze: `id, category_id, category_name, category_archived, amount_minor, day_of_month, start_month, end_month, months_left, remind` dla definicji niezatrzymanych, `order by created_at desc, id` (najnowsze na górze, stabilna kolejność przy remisie).
 - `warsaw_today()` (stable) i `recurring_slot_date(p_month date, p_day int)` (immutable; przycina dzień do ostatniego dnia miesiąca, każdy miesiąc liczony od bazy) oraz `recurring_month_diff(p_from date, p_to date)` (immutable; liczba pełnych miesięcy kalendarzowych między miesiącami dwóch dat, ujemna gdy `p_to` jest wcześniejsza; jedno miejsce na arytmetykę miesięcy dla update, extend i list).
 
@@ -93,7 +93,7 @@ Nowa migracja z tabelą definicji, kolumną łączącą, politykami RLS i funkcj
 
 **Intent**: Pilnuje reguł dat, izolacji gospodarstw i granicy „przyszłe vs przeszłe" według wzorca istniejących testów (dwóch użytkowników, przełączanie roli, `throws_ok` z kodami).
 
-**Contract**: Pokryć co najmniej: `recurring_slot_date` (dzień 31 → 31 sty / 28 lut / 31 mar, luty roku przestępnego 29, dzień 30 w lutym); `create` tworzy dokładnie `p_months` wierszy z `recurring_expense_id`, pierwszy w bieżącym miesiącu Warszawy; walidacje (miesiące 0 i 25, kwota ≤ 0, cudza kategoria `23503`); `stop` usuwa tylko wpisy z datą późniejszą niż dziś i nie rusza ręcznie wstawionego wpisu generowanego z przeszłą datą ani wpisów ręcznych; `update_amount` zmienia kwotę przyszłych wpisów i ich liczba się nie zmienia; `extend` dopisuje sloty za `end_month`, a dla wygasłej definicji zaczyna od bieżącego miesiąca; przedłużenie dokładnie do 24 miesięcy do przodu przechodzi, a o jeden miesiąc dalej → `22023`; `dismiss` ustawia znacznik, a `extend` go zeruje; `list` oblicza `months_left`/`remind` dla definicji kończącej się w bieżącym i następnym miesiącu, a dla definicji kończącej się za 2 miesiące zwraca `remind = false`; izolacja (użytkownik B nie widzi ani nie modyfikuje definicji A → `P0002`/0 wierszy); druga identyczna aktywna definicja → `23505`, a po zatrzymaniu pierwszej identyczna jest dozwolona; użytkownik `anon` bez dostępu; bezpośredni DELETE wpisu ręcznego nadal dotyka 0 wierszy. Uaktualnić `plan(N)`.
+**Contract**: Pokryć co najmniej: `recurring_slot_date` (dzień 31 → 31 sty / 28 lut / 31 mar, luty roku przestępnego 29, dzień 30 w lutym); `create` tworzy dokładnie `p_months` wierszy z `recurring_expense_id`, pierwszy w bieżącym miesiącu Warszawy; walidacje (miesiące 0 i 25, kwota ≤ 0, cudza kategoria `23503`); `stop` usuwa tylko wpisy z datą późniejszą niż dziś i nie rusza ręcznie wstawionego wpisu generowanego z przeszłą datą ani wpisów ręcznych; `update_amount` zmienia kwotę przyszłych wpisów i ich liczba się nie zmienia; `extend` dopisuje sloty za `end_month`, a dla wygasłej definicji zaczyna od bieżącego miesiąca; przedłużenie dokładnie do limitu (24 miesiące łącznie z bieżącym) przechodzi, a o jeden miesiąc dalej → `22023`; `dismiss` ustawia znacznik, a `extend` go zeruje; `list` oblicza `months_left`/`remind` dla definicji kończącej się w bieżącym i następnym miesiącu, a dla definicji kończącej się za 2 miesiące zwraca `remind = false`; izolacja (użytkownik B nie widzi ani nie modyfikuje definicji A → `P0002`/0 wierszy); druga identyczna aktywna definicja → `23505`, a po zatrzymaniu pierwszej identyczna jest dozwolona; użytkownik `anon` bez dostępu; bezpośredni DELETE wpisu ręcznego nadal dotyka 0 wierszy. Uaktualnić `plan(N)`.
 
 ### Success Criteria:
 
@@ -141,7 +141,7 @@ Cienkie endpointy nad funkcjami SQL, serwis, typy i mapowanie błędów. Po tej 
 
 **Intent**: Wzorzec `categories/*`: `prerender = false`, 401 bez `locals.user`, `createClient`, `readJson`, `safeParse`, odpowiedź ze świeżą listą. PATCH przyjmuje dokładnie jedno z: `{amount}`, `{extendMonths}`, `{dismissReminder: true}`; DELETE zatrzymuje definicję.
 
-**Contract**: Mapowanie kodów w jednym miejscu (na wzór `src/lib/category-http.ts`): `23503` → 400 „Wybierz kategorię z listy", `22023` → 400 z komunikatem walidacyjnym (dla przekroczenia horyzontu: „Horyzont może sięgać najwyżej 24 miesięcy do przodu"), `23505` → 400 „Taka cykliczna pozycja już istnieje" (tworzenie i zmiana kwoty), `P0002` → 404, inne → 500 `SAVE_FAILED`. `[id]` walidowane `z.uuid()`.
+**Contract**: Mapowanie kodów w jednym miejscu (na wzór `src/lib/category-http.ts`): `23503` → 400 „Wybierz kategorię z listy", `22023` → 400 z komunikatem walidacyjnym (dla przekroczenia horyzontu: „Horyzont może obejmować najwyżej 24 miesiące (licząc od bieżącego)"), `23505` → 400 „Taka cykliczna pozycja już istnieje" (tworzenie i zmiana kwoty), `P0002` → 404, inne → 500 `SAVE_FAILED`. `[id]` walidowane `z.uuid()`.
 
 ### Success Criteria:
 
@@ -180,7 +180,7 @@ Ekran listy, dodawania, edycji kwoty, przedłużenia i zatrzymania. Po tej fazie
 
 **File**: `src/components/settings/RecurringManager.tsx`, `src/hooks/useRecurringActions.ts`
 
-**Intent**: Formularz dodawania (kwota, kategoria, dzień miesiąca, liczba miesięcy z domyślnym 12; przycisk „Dodaj" wyłączony na czas żądania dzięki stanowi `pending`, jako ochrona przed podwójnym submitem) i lista wierszy z inline edycją kwoty, akcją „Przedłuż" o `min(12, 24 − monthsLeft)` mies. (nieaktywna z podpowiedzią, gdy `monthsLeft` ≥ 24), zatrzymaniem z potwierdzeniem w miejscu („Na pewno? Wygenerowane przyszłe wpisy zostaną usunięte", jak `DeleteControl`) i oznaczeniem statusu „Wygasła". Hook kopiuje wzorzec `useCategoryActions` (świeża lista po każdej mutacji, reload przy 409/`null`).
+**Intent**: Formularz dodawania (kwota, kategoria, dzień miesiąca, liczba miesięcy z domyślnym 12; przycisk „Dodaj" wyłączony na czas żądania dzięki stanowi `pending`, jako ochrona przed podwójnym submitem) i lista wierszy z inline edycją kwoty, akcją „Przedłuż" o `min(12, 23 − monthsLeft)` mies. (nieaktywna z podpowiedzią, gdy `monthsLeft` ≥ 23), zatrzymaniem z potwierdzeniem w miejscu („Na pewno? Wygenerowane przyszłe wpisy zostaną usunięte", jak `DeleteControl`) i oznaczeniem statusu „Wygasła". Hook kopiuje wzorzec `useCategoryActions` (świeża lista po każdej mutacji, reload przy 409/`null`).
 
 **Contract**: Wiersz pokazuje kategorię (z dopiskiem „zarchiwizowana", gdy `categoryArchived`), kwotę (`formatMinor`), dzień miesiąca i zakres „od–do" z `startMonth`/`endMonth` (`formatMonthLabel`). Cele dotykowe `min-h-11`, pola jak istniejący `fieldClass`, bez nowych komponentów shadcn. Komunikaty po polsku, błędy per wiersz przez `ServerError`.
 
@@ -263,7 +263,7 @@ Przypomnienie o kończącym się horyzoncie, krok w smoke teście oraz pomiar CP
 ### Unit Tests:
 
 - Brak runnera JS w repo (`first-expense-and-income/plan.md:47,304`), więc logika dat jest testowana w pgTAP (Phase 1) na czystych funkcjach SQL.
-- Przypadki brzegowe: dzień 29–31 w krótkich miesiącach i w roku przestępnym, granica „data ≤ dziś" przy zatrzymaniu i edycji, przedłużenie wygasłej definicji, granica 24 miesięcy do przodu przy przedłużeniu, ukryte przypomnienie po przedłużeniu, izolacja gospodarstw.
+- Przypadki brzegowe: dzień 29–31 w krótkich miesiącach i w roku przestępnym, granica „data ≤ dziś" przy zatrzymaniu i edycji, przedłużenie wygasłej definicji, granica 24 miesięcy łącznie z bieżącym przy przedłużeniu, ukryte przypomnienie po przedłużeniu, izolacja gospodarstw.
 
 ### Integration Tests:
 
@@ -278,7 +278,7 @@ Przypomnienie o kończącym się horyzoncie, krok w smoke teście oraz pomiar CP
 
 ## Performance Considerations
 
-Każda akcja to jedno wywołanie RPC (≤ 24 wiersze przy tworzeniu i przedłużaniu, a przy edycji kwoty najwyżej 25 usuniętych i 25 wstawionych, bo horyzont do przodu jest ograniczony do 24 miesięcy), co odpowiada mitygacji „zbatchuj inserty" z `infrastructure.md:96`. Brak instrumentacji CPU w repo; pomiar odbywa się ręcznie w Phase 4. Indeks częściowy `(recurring_expense_id, spent_on)` obsługuje usuwanie przyszłych wpisów.
+Każda akcja to jedno wywołanie RPC (≤ 24 wiersze przy tworzeniu i przedłużaniu, a przy edycji kwoty najwyżej 24 usunięte i 24 wstawione, bo horyzont obejmuje najwyżej 24 miesiące), co odpowiada mitygacji „zbatchuj inserty" z `infrastructure.md:96`. Brak instrumentacji CPU w repo; pomiar odbywa się ręcznie w Phase 4. Indeks częściowy `(recurring_expense_id, spent_on)` obsługuje usuwanie przyszłych wpisów.
 
 ## Migration Notes
 
@@ -314,29 +314,29 @@ Migracja jest addytywna (nowa tabela, nowa nullable kolumna, nowe polityki) i ni
 
 #### Automated
 
-- [x] 2.1 Linting przechodzi: `npm run lint`
-- [x] 2.2 Sprawdzanie typów przechodzi: `npx astro check`
-- [x] 2.3 Build przechodzi: `npm run build`
+- [x] 2.1 Linting przechodzi: `npm run lint` — e71049c
+- [x] 2.2 Sprawdzanie typów przechodzi: `npx astro check` — e71049c
+- [x] 2.3 Build przechodzi: `npm run build` — e71049c
 
 #### Manual
 
-- [x] 2.4 Zalogowany `fetch` z konsoli przeglądarki: POST tworzy definicję i zwraca listę; PATCH z `amount`, `extendMonths` i `dismissReminder` zwraca zaktualizowaną listę; DELETE zwraca listę bez definicji
-- [x] 2.5 Anonimowe wywołanie daje 401, błędne dane (dzień 32, 0 miesięcy, kwota 0) dają 400, nieznane `id` daje 404
+- [x] 2.4 Zalogowany `fetch` z konsoli przeglądarki: POST tworzy definicję i zwraca listę; PATCH z `amount`, `extendMonths` i `dismissReminder` zwraca zaktualizowaną listę; DELETE zwraca listę bez definicji — e71049c
+- [x] 2.5 Anonimowe wywołanie daje 401, błędne dane (dzień 32, 0 miesięcy, kwota 0) dają 400, nieznane `id` daje 404 — e71049c
 
 ### Phase 3: Strona zarządzania `/settings/recurring`
 
 #### Automated
 
-- [ ] 3.1 Linting przechodzi: `npm run lint`
-- [ ] 3.2 Sprawdzanie typów przechodzi: `npx astro check`
-- [ ] 3.3 Build przechodzi: `npm run build`
+- [x] 3.1 Linting przechodzi: `npm run lint`
+- [x] 3.2 Sprawdzanie typów przechodzi: `npx astro check`
+- [x] 3.3 Build przechodzi: `npm run build`
 
 #### Manual
 
-- [ ] 3.4 Na szerokości telefonu: utworzenie definicji (dzień 10., 3 miesiące) pokazuje ją na liście, a „Zostaje" na `/dashboard` uwzględnia wpis z bieżącego miesiąca
-- [ ] 3.5 Edycja kwoty zmienia przyszłe wpisy, ale nie wpis z datą ≤ dziś; zatrzymanie z potwierdzeniem usuwa definicję z listy
-- [ ] 3.6 „Przedłuż" dopisuje miesiące; kategoria zarchiwizowana po utworzeniu definicji jest oznaczona na liście
-- [ ] 3.7 Po przebudowie (`build`/`astro check`) serwer dev trzeba zrestartować i odświeżyć stronę twardo, bo wyspy przestają się hydratować
+- [x] 3.4 Na szerokości telefonu: utworzenie definicji (dzień 10., 3 miesiące) pokazuje ją na liście, a „Zostaje" na `/dashboard` uwzględnia wpis z bieżącego miesiąca
+- [x] 3.5 Edycja kwoty zmienia przyszłe wpisy, ale nie wpis z datą ≤ dziś; zatrzymanie z potwierdzeniem usuwa definicję z listy
+- [x] 3.6 „Przedłuż" dopisuje miesiące; kategoria zarchiwizowana po utworzeniu definicji jest oznaczona na liście
+- [x] 3.7 Po przebudowie (`build`/`astro check`) serwer dev trzeba zrestartować i odświeżyć stronę twardo, bo wyspy przestają się hydratować
 
 ### Phase 4: Baner na ekranie miesiąca, smoke i domknięcie
 

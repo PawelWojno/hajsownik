@@ -1,0 +1,38 @@
+---
+import RecurringManager from "@/components/settings/RecurringManager";
+import Topbar from "@/components/Topbar.astro";
+import Layout from "@/layouts/Layout.astro";
+import { listActiveCategories } from "@/lib/services/categories";
+import { listRecurringExpenses } from "@/lib/services/recurring-expenses";
+import { createClient } from "@/lib/supabase";
+import type { Category, RecurringExpense } from "@/types";
+
+let items: RecurringExpense[] | null = null;
+let categories: Category[] = [];
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+if (supabase) {
+  try {
+    items = await listRecurringExpenses(supabase);
+    categories = await listActiveCategories(supabase);
+  } catch {
+    items = null;
+  }
+}
+---
+
+<Layout title="Hajsownik — cykliczne wydatki">
+  <div class="bg-cosmic min-h-screen p-4 sm:p-8">
+    <Topbar />
+    {items ? (
+      <RecurringManager initialItems={items} categories={categories} client:load />
+    ) : (
+      <p
+        role="alert"
+        class="mx-auto max-w-md rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300"
+      >
+        Nie udało się wczytać cyklicznych wydatków. Odśwież stronę.
+      </p>
+    )}
+  </div>
+</Layout>
