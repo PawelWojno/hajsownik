@@ -92,14 +92,14 @@ Smoke covers the redirect: the anonymous request has no PKCE verifier cookie, so
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Type check passes: `npx astro check`
-- [x] 1.3 Build passes: `npm run build`
-- [x] 1.4 Smoke passes against a running preview: `npm run smoke`
+- [x] 1.1 Lint passes: `npm run lint` — 7f09bd6
+- [x] 1.2 Type check passes: `npx astro check` — 7f09bd6
+- [x] 1.3 Build passes: `npm run build` — 7f09bd6
+- [x] 1.4 Smoke passes against a running preview: `npm run smoke` — 7f09bd6
 
 #### Manual
 
-- [x] 1.5 Real confirmation link opened in a different browser shows the "Sign in to continue" page, no red banner
-- [x] 1.6 Same link in the original browser still lands on `/dashboard`
-- [x] 1.7 `/auth/callback` without a code still shows the red error on sign-in
+- [x] 1.5 Real confirmation link opened in a different browser shows the "Sign in to continue" page, no red banner — 7f09bd6
+- [x] 1.6 Same link in the original browser still lands on `/dashboard` — 7f09bd6
+- [x] 1.7 `/auth/callback` without a code still shows the red error on sign-in — 7f09bd6
 
