@@ -46,7 +46,7 @@ Today, a household budget lives "in someone's head" — there's no reliable, low
 | S-02 | category-management           | add/remove/archive/rename/reorder categories                       | S-01           | FR-007, FR-008, FR-009, FR-010, FR-011 | done |
 | S-03 | password-reset                 | reset their password by email if locked out                        | —              | FR-003                        | done |
 | S-04 | recurring-expenses              | define/edit/stop a recurring expense over a fixed horizon          | S-01           | FR-014, FR-015                | done |
-| S-05 | recurring-income                | define/edit/stop a recurring income over a fixed horizon           | S-01           | FR-016, FR-017                | in-progress |
+| S-05 | recurring-income                | define/edit/stop a recurring income over a fixed horizon           | S-01           | FR-016, FR-017                | done |
 | S-06 | expense-history-and-edits       | view history (filter by month/category) and edit/delete any entry  | S-01, S-04, S-05 | FR-018, FR-019, FR-020      | proposed |
 | S-07 | income-categories               | (post-MVP) manage their own list of income categories, one shared add form for expense and income | S-02, S-05, S-06 | FR-012 (changes it; PRD v2) | proposed |
 
@@ -153,7 +153,7 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Shares its mechanism with S-04 by design (PRD states both follow an identical forward-only, fixed-horizon rule) — implement as the same underlying pattern applied to a second entity, not a divergent one-off. Decision 2026-10-12: a recurring income keeps the predefined `source` (FR-012), not a `category_id`; the user wants their own income categories, but as post-MVP slice S-07, which will swap `source` for `category_id` in `incomes` and `recurring_incomes`. So keep `source` in as few places as possible (one column, one constant, one select) to make that swap a small change.
-- **Status:** in-progress
+- **Status:** done
 - **GitHub:** #6
 
 ### S-06: Expense/income history, with edit and delete
@@ -237,3 +237,4 @@ No cross-slice open questions at this time — the PRD carried zero open questio
 - **S-02: User can add, remove, archive, rename, and reorder categories so the default list fits their own household.** — Archived 2026-10-09 → `context/archive/2026-10-09-category-management/`. Lesson: —.
 - **S-03: User can reset their password by email if they forget it, without being permanently locked out of their household's financial data.** — Archived 2026-10-10 → `context/archive/2026-10-10-password-reset/`. Lesson: —.
 - **S-04: User can define a recurring expense (amount, category, monthly frequency, fixed horizon in months) and edit its amount or stop it entirely.** — Archived 2026-10-11 → `context/archive/2026-10-11-recurring-expenses/`. Lesson: duplicate protection for create operations (UI + DB), see `context/foundation/lessons.md`.
+- **S-05: User can define a recurring income (amount, monthly frequency, fixed horizon in months) and edit its amount or stop it entirely — the same rule as S-04, applied symmetrically.** — Archived 2026-10-12 → `context/archive/2026-10-12-recurring-income/`. Lesson: —.
