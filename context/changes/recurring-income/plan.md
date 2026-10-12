@@ -310,4 +310,4 @@ Migracja addytywna (nowa tabela, nowa nullowalna kolumna w `incomes`); bez backf
 #### Manual
 
 - [x] 4.4 Baner pojawia się dla definicji kończącej się w tym lub następnym miesiącu i można go zamknąć na stałe — b4840f9
-- [x] 4.5 Na produkcji pełny cykl create → zmiana → zatrzymanie na telefonie; pomiar CPU poniżej 10 ms lub odnotowane odstępstwo
+- [x] 4.5 Na produkcji pełny cykl create → zmiana → zatrzymanie na telefonie; pomiar CPU poniżej 10 ms lub odnotowane odstępstwo — c00614f
