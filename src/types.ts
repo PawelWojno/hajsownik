@@ -57,6 +57,27 @@ export interface RecurringListResponse {
   items: RecurringExpense[] | null;
 }
 
+/** A recurring income as listed on the management page and in the month-screen reminder. */
+export interface RecurringIncome {
+  id: string;
+  source: IncomeSource;
+  /** Integer minor units (grosze). */
+  amountMinor: number;
+  dayOfMonth: number;
+  /** First day of the first / last month that has an entry, as YYYY-MM-DD. */
+  startMonth: string;
+  endMonth: string;
+  /** Calendar months from the current month to endMonth; negative once the definition has lapsed. */
+  monthsLeft: number;
+  /** True while the end of the horizon is near and nobody dismissed the reminder. */
+  remind: boolean;
+}
+
+export interface RecurringIncomeListResponse {
+  /** Null when the change is saved but the fresh list could not be read; the client reloads the page. */
+  items: RecurringIncome[] | null;
+}
+
 export interface ApiError {
   error: string;
 }

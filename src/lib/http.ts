@@ -1,7 +1,13 @@
-import type { ApiError, CategoryListResponse, RecurringListResponse, SavedEntryResponse } from "@/types";
+import type {
+  ApiError,
+  CategoryListResponse,
+  RecurringIncomeListResponse,
+  RecurringListResponse,
+  SavedEntryResponse,
+} from "@/types";
 
 export function json(
-  body: SavedEntryResponse | CategoryListResponse | RecurringListResponse | ApiError,
+  body: SavedEntryResponse | CategoryListResponse | RecurringListResponse | RecurringIncomeListResponse | ApiError,
   status = 200,
 ): Response {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });

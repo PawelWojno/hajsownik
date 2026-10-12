@@ -1,36 +1,78 @@
 ---
+import RecurringIncomeManager from "@/components/settings/RecurringIncomeManager";
 import RecurringManager from "@/components/settings/RecurringManager";
 import Topbar from "@/components/Topbar.astro";
 import Layout from "@/layouts/Layout.astro";
 import { todayInWarsaw } from "@/lib/dates";
 import { listActiveCategories } from "@/lib/services/categories";
 import { listRecurringExpenses } from "@/lib/services/recurring-expenses";
+import { listRecurringIncomes } from "@/lib/services/recurring-incomes";
 import { createClient } from "@/lib/supabase";
-import type { Category, RecurringExpense } from "@/types";
+import type { Category, RecurringExpense, RecurringIncome } from "@/types";
 
-let items: RecurringExpense[] | null = null;
+// Any value other than "przychody" (or none) shows the expenses, as before the tabs existed.
+const showIncomes = Astro.url.searchParams.get("typ") === "przychody";
+
+let expenses: RecurringExpense[] | null = null;
+let incomes: RecurringIncome[] | null = null;
 let categories: Category[] = [];
 
 const supabase = createClient(Astro.request.headers, Astro.cookies);
 if (supabase) {
   try {
-    [items, categories] = await Promise.all([listRecurringExpenses(supabase), listActiveCategories(supabase)]);
+    if (showIncomes) {
+      incomes = await listRecurringIncomes(supabase);
+    } else {
+      [expenses, categories] = await Promise.all([listRecurringExpenses(supabase), listActiveCategories(supabase)]);
+    }
   } catch {
-    items = null;
+    expenses = null;
+    incomes = null;
   }
 }
+
+const tabClass =
+  "flex min-h-11 flex-1 items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors";
+const activeTabClass = "bg-purple-600 text-white";
+const inactiveTabClass = "text-purple-300 hover:bg-white/10 hover:text-purple-100";
+const defaultDay = Number(todayInWarsaw().slice(8));
 ---
 
-<Layout title="Hajsownik — cykliczne wydatki">
+<Layout title={showIncomes ? "Hajsownik — cykliczne przychody" : "Hajsownik — cykliczne wydatki"}>
   <div class="bg-cosmic min-h-screen p-4 sm:p-8">
     <Topbar />
-    {items ? (
-      <RecurringManager
-        initialItems={items}
-        categories={categories}
-        defaultDay={Number(todayInWarsaw().slice(8))}
-        client:load
-      />
+    <nav
+      aria-label="Rodzaj cyklicznych wpisów"
+      class="mx-auto mb-4 flex max-w-md gap-1 rounded-xl border border-white/10 bg-white/5 p-1"
+    >
+      <a
+        href="/settings/recurring"
+        aria-current={showIncomes ? undefined : "page"}
+        class:list={[tabClass, showIncomes ? inactiveTabClass : activeTabClass]}
+      >
+        Wydatki
+      </a>
+      <a
+        href="/settings/recurring?typ=przychody"
+        aria-current={showIncomes ? "page" : undefined}
+        class:list={[tabClass, showIncomes ? activeTabClass : inactiveTabClass]}
+      >
+        Przychody
+      </a>
+    </nav>
+    {showIncomes ? (
+      incomes ? (
+        <RecurringIncomeManager initialItems={incomes} defaultDay={defaultDay} client:load />
+      ) : (
+        <p
+          role="alert"
+          class="mx-auto max-w-md rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300"
+        >
+          Nie udało się wczytać cyklicznych przychodów. Odśwież stronę.
+        </p>
+      )
+    ) : expenses ? (
+      <RecurringManager initialItems={expenses} categories={categories} defaultDay={defaultDay} client:load />
     ) : (
       <p
         role="alert"

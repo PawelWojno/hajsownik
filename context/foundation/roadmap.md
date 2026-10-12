@@ -3,7 +3,7 @@ project: Hajsownik
 version: 1
 status: draft
 created: 2026-10-07
-updated: 2026-10-11
+updated: 2026-10-12
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -24,7 +24,7 @@ milestone_status: open
 
 - **Intent:** Ship the full must-have path of the PRD — household-scoped expense/income tracking with categories, recurring entries, history, and account recovery — as a real, usable tool, not a prototype.
 - **Source materials:** `context/foundation/prd.md` (v1)
-- **Done when:** every F-NN and S-NN below is `done`.
+- **Done when:** every F-NN and S-NN below is `done`, except S-07, which is post-MVP and not counted in M-1.
 - **Scope anchors:** US-01; every must-have FR (FR-001–FR-004, FR-006–FR-020 — excluding the nice-to-have FR-005).
 
 ## Vision recap
@@ -46,8 +46,9 @@ Today, a household budget lives "in someone's head" — there's no reliable, low
 | S-02 | category-management           | add/remove/archive/rename/reorder categories                       | S-01           | FR-007, FR-008, FR-009, FR-010, FR-011 | done |
 | S-03 | password-reset                 | reset their password by email if locked out                        | —              | FR-003                        | done |
 | S-04 | recurring-expenses              | define/edit/stop a recurring expense over a fixed horizon          | S-01           | FR-014, FR-015                | done |
-| S-05 | recurring-income                | define/edit/stop a recurring income over a fixed horizon           | S-01           | FR-016, FR-017                | proposed |
+| S-05 | recurring-income                | define/edit/stop a recurring income over a fixed horizon           | S-01           | FR-016, FR-017                | in-progress |
 | S-06 | expense-history-and-edits       | view history (filter by month/category) and edit/delete any entry  | S-01, S-04, S-05 | FR-018, FR-019, FR-020      | proposed |
+| S-07 | income-categories               | (post-MVP) manage their own list of income categories, one shared add form for expense and income | S-02, S-05, S-06 | FR-012 (changes it; PRD v2) | proposed |
 
 ## Streams
 
@@ -151,8 +152,8 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Parallel with:** S-02, S-04
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Shares its mechanism with S-04 by design (PRD states both follow an identical forward-only, fixed-horizon rule) — implement as the same underlying pattern applied to a second entity, not a divergent one-off.
-- **Status:** proposed
+- **Risk:** Shares its mechanism with S-04 by design (PRD states both follow an identical forward-only, fixed-horizon rule) — implement as the same underlying pattern applied to a second entity, not a divergent one-off. Decision 2026-10-12: a recurring income keeps the predefined `source` (FR-012), not a `category_id`; the user wants their own income categories, but as post-MVP slice S-07, which will swap `source` for `category_id` in `incomes` and `recurring_incomes`. So keep `source` in as few places as possible (one column, one constant, one select) to make that swap a small change.
+- **Status:** in-progress
 - **GitHub:** #6
 
 ### S-06: Expense/income history, with edit and delete
@@ -168,6 +169,19 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Status:** proposed
 - **GitHub:** #7
 
+### S-07: Income categories (post-MVP)
+
+- **Outcome:** User can build and manage their own list of income categories (add, rename, archive, reorder) instead of the five predefined sources, and the "add income" and "add expense" forms share one standardised layout.
+- **Change ID:** income-categories
+- **PRD refs:** FR-012 (this slice replaces "a source chosen from a predefined list" with a user-managed category; the change goes into PRD v2, v1 stays as is), FR-007–FR-011 (category management extended to income), FR-016
+- **Prerequisites:** S-02, S-05, S-06
+- **Parallel with:** —
+- **Blockers:** PRD v2 must first update FR-012 (and its Socratic note rejecting free-text sources: a managed list keeps the names consistent, which was that note's concern).
+- **Unknowns:** Shared `categories` table with a kind column (`expense` / `income`) or separate tables for income categories? Decide in `/10x-research` + `/10x-plan` against the code as it is after S-06. Also: do the 12 default categories stay expense-only, and what are the default income categories (probably the five old sources); how does category deletion treat income entries.
+- **Risk:** Data migration on a live database: `incomes.source` (and `recurring_incomes.source` from S-05) become `category_id`, so existing rows need a backfill from the five old values. Touches S-01 (income form, `api/incomes.ts`, `INCOME_SOURCES`), S-02 (category management and the delete-protection check, which looks only at expenses today) and S-05/S-06 (recurring income, income edit). Archived changes stay immutable; the work happens in this new change.
+- **Status:** proposed (post-MVP, outside M-1)
+- **GitHub:** #21
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                 | Suggested issue title                                  | Ready for `/10x-plan` | Notes                          |
@@ -179,6 +193,7 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 | S-04       | recurring-expenses              | Recurring expenses (fixed horizon)                          | yes                       | S-01 done; planned, implemented on branch, awaiting PR |
 | S-05       | recurring-income                | Recurring income (fixed horizon)                            | no                        | Blocked on S-01                  |
 | S-06       | expense-history-and-edits       | Expense/income history with edit & delete                   | no                        | Blocked on S-01, S-04, S-05      |
+| S-07       | income-categories               | Income categories (own list) + standardised add forms        | no                        | Post-MVP; needs PRD v2 (FR-012) and S-05, S-06 done |
 
 ## Open Roadmap Questions
 
