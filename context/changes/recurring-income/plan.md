@@ -250,12 +250,12 @@ Migracja addytywna (nowa tabela, nowa nullowalna kolumna w `incomes`); bez backf
 
 #### Automated
 
-- [ ] 1.1 Migracja i testy przechodzą na lokalnej bazie: `npx supabase db reset && npx supabase test db`
-- [ ] 1.2 Lint SQL/format nie psuje commita (husky + `npm run lint`)
+- [x] 1.1 Migracja i testy przechodzą na lokalnej bazie: `npx supabase db reset && npx supabase test db`
+- [x] 1.2 Lint SQL/format nie psuje commita (husky + `npm run lint`)
 
 #### Manual
 
-- [ ] 1.3 W `supabase studio` widać `recurring_incomes` z włączonym RLS i polityki o oczekiwanych nazwach
+- [x] 1.3 W `supabase studio` widać `recurring_incomes` z włączonym RLS i polityki o oczekiwanych nazwach
 
 ### Phase 2: API i serwis
 
