@@ -106,7 +106,15 @@ Typy, serwis, mapowanie błędów i trasy; hook w fazie 3.
 
 **Contract**: `listRecurringIncomes`, `createRecurringIncome({source, amountMinor, dayOfMonth, months})`, `updateRecurringIncomeAmount`, `extendRecurringIncome`, `stopRecurringIncome`, `dismissRecurringIncomeReminder` zwracają `RecurringResult`-podobny wynik (`ok` z listą albo `items: null` gdy zapis udany, a odczyt nie). Mapowanie: `23505` → „Taka cykliczna pozycja już istnieje”, `22023` → komunikat o 24 miesiącach, `P0002` → 404 „Nie znaleziono cyklicznego przychodu”, reszta → `SAVE_FAILED` 500. Brak `23503`.
 
-#### 3. Trasy
+#### 3. Wspólny helper odpowiedzi
+
+**File**: `src/lib/http.ts`
+
+**Intent**: Trasy przychodów zwracają `{ items }` przez wspólne `json()`, więc jego unia typów ciała odpowiedzi musi przyjąć nowy typ listy (dodane po review implementacji, F1).
+
+**Contract**: unia argumentu `json()` zawiera `RecurringIncomeListResponse`; reszta pliku bez zmian.
+
+#### 4. Trasy
 
 **File**: `src/pages/api/recurring-incomes/index.ts` (POST), `src/pages/api/recurring-incomes/[id].ts` (PATCH z dokładnie jednym z `amount`/`extendMonths`/`dismissReminder`, DELETE)
 
@@ -285,11 +293,11 @@ Migracja addytywna (nowa tabela, nowa nullowalna kolumna w `incomes`); bez backf
 
 #### Automated
 
-- [x] 4.1 `npm run lint`, `npx astro check`, `npm run build`
-- [x] 4.2 `supabase test db` zielone
-- [x] 4.3 `npm run smoke` przechodzi na buildzie (preview) z lokalnym Supabase
+- [x] 4.1 `npm run lint`, `npx astro check`, `npm run build` — b4840f9
+- [x] 4.2 `supabase test db` zielone — b4840f9
+- [x] 4.3 `npm run smoke` przechodzi na buildzie (preview) z lokalnym Supabase — b4840f9
 
 #### Manual
 
-- [x] 4.4 Baner pojawia się dla definicji kończącej się w tym lub następnym miesiącu i można go zamknąć na stałe
+- [x] 4.4 Baner pojawia się dla definicji kończącej się w tym lub następnym miesiącu i można go zamknąć na stałe — b4840f9
 - [ ] 4.5 Na produkcji pełny cykl create → zmiana → zatrzymanie na telefonie; pomiar CPU poniżej 10 ms lub odnotowane odstępstwo
