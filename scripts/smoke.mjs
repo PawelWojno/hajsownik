@@ -49,6 +49,10 @@ let categoryId = "";
 let newCategoryId = "";
 // Set by the recurring-expense steps.
 let recurringId = "";
+// Set by the recurring-income steps.
+let recurringIncomeId = "";
+// The income banner is found by its aria-label: its buttons read the same as the expense banner's.
+const INCOME_BANNER = "Cykliczne przychody: koniec horyzontu";
 
 function recurringItems(actual) {
   try {
@@ -279,6 +283,102 @@ const steps = [
     () => request(`/api/recurring-expenses/${recurringId}`, { method: "DELETE" }),
     { status: 200, check: (actual) => (recurringItems(actual)?.length === 0 ? null : "definition is still listed") },
   ],
+  // The income steps come after the expense definition is stopped: both banners contain "Nie przypominaj", so an active
+  // income banner would break the expense step above. The income banner is told apart by its aria-label instead.
+  [
+    "recurring income endpoint creates a two-month definition",
+    async () => {
+      const actual = await request("/api/recurring-incomes", {
+        method: "POST",
+        json: { source: "wynagrodzenie", amount: "700", dayOfMonth: 1, months: 2 },
+      });
+      recurringIncomeId = recurringItems(actual)?.find((item) => item.amountMinor === 70000)?.id ?? "";
+      return actual;
+    },
+    { status: 200, check: () => (recurringIncomeId ? null : "new definition not in the returned list") },
+  ],
+  [
+    "dashboard shows the reminder for an income that ends next month",
+    () => request("/dashboard"),
+    {
+      status: 200,
+      check: (actual) => {
+        if (actual.body.includes("[object Object]")) return "body contains [object Object]";
+        // "Zostaje" proves the month screen rendered; the aria-label is what only the income banner has.
+        if (!actual.body.includes("Zostaje")) return 'body has no "Zostaje"';
+        return actual.body.includes(INCOME_BANNER) ? null : "income reminder banner is missing";
+      },
+    },
+  ],
+  [
+    "recurring income endpoint dismisses the reminder",
+    () => request(`/api/recurring-incomes/${recurringIncomeId}`, { method: "PATCH", json: { dismissReminder: true } }),
+    {
+      status: 200,
+      check: (actual) =>
+        recurringItems(actual)?.find((item) => item.id === recurringIncomeId)?.remind === false
+          ? null
+          : "reminder is still on",
+    },
+  ],
+  [
+    "dashboard hides the dismissed income reminder",
+    () => request("/dashboard"),
+    {
+      status: 200,
+      check: (actual) => {
+        // "Zostaje" proves the month screen rendered; without it the absence of the banner proves nothing.
+        if (!actual.body.includes("Zostaje")) return 'body has no "Zostaje"';
+        return actual.body.includes(INCOME_BANNER) ? "income reminder banner is still shown" : null;
+      },
+    },
+  ],
+  [
+    "recurring income endpoint changes the amount",
+    () => request(`/api/recurring-incomes/${recurringIncomeId}`, { method: "PATCH", json: { amount: "800" } }),
+    {
+      status: 200,
+      check: (actual) =>
+        recurringItems(actual)?.find((item) => item.id === recurringIncomeId)?.amountMinor === 80000
+          ? null
+          : "amount was not updated",
+    },
+  ],
+  [
+    "recurring income settings page renders for a signed-in user",
+    () => request("/settings/recurring?typ=przychody"),
+    {
+      status: 200,
+      check: (actual) => {
+        if (actual.body.includes("[object Object]")) return "body contains [object Object]";
+        // "Cykliczne" alone is also in the Topbar, so check a heading only the income manager renders.
+        return actual.body.includes("Twoje cykliczne przychody") ? null : 'body has no "Twoje cykliczne przychody"';
+      },
+    },
+  ],
+  [
+    "recurring income endpoint rejects an unknown source",
+    () =>
+      request("/api/recurring-incomes", {
+        method: "POST",
+        json: { source: "loteria", amount: "10", dayOfMonth: 1, months: 2 },
+      }),
+    { status: 400 },
+  ],
+  [
+    "recurring income endpoint rejects a day outside 1-31",
+    () =>
+      request("/api/recurring-incomes", {
+        method: "POST",
+        json: { source: "wynagrodzenie", amount: "10", dayOfMonth: 32, months: 2 },
+      }),
+    { status: 400 },
+  ],
+  [
+    "recurring income endpoint stops the definition",
+    () => request(`/api/recurring-incomes/${recurringIncomeId}`, { method: "DELETE" }),
+    { status: 200, check: (actual) => (recurringItems(actual)?.length === 0 ? null : "definition is still listed") },
+  ],
   [
     "expense endpoint rejects a zero amount",
     () => request("/api/expenses", { method: "POST", json: { amount: "0", categoryId } }),
@@ -347,6 +447,11 @@ const steps = [
     { status: 302, location: "/auth/signin" },
   ],
   [
+    "recurring income settings page redirects after signout",
+    () => request("/settings/recurring?typ=przychody"),
+    { status: 302, location: "/auth/signin" },
+  ],
+  [
     "signin rejects the old password after the change",
     () => request("/api/auth/signin", { method: "POST", form: { email, password } }),
     { status: 302, locationPrefix: "/auth/signin?error=" },
@@ -364,6 +469,11 @@ const steps = [
   [
     "recurring endpoint rejects an anonymous request",
     () => request("/api/recurring-expenses/00000000-0000-4000-8000-000000000000", { method: "DELETE" }),
+    { status: 401 },
+  ],
+  [
+    "recurring income endpoint rejects an anonymous request",
+    () => request("/api/recurring-incomes/00000000-0000-4000-8000-000000000000", { method: "DELETE" }),
     { status: 401 },
   ],
   // Kept before the anonymous expense request: that 401 leaves its JSON body unread, and the dev/preview server then

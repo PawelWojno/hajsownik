@@ -298,7 +298,9 @@ select is((select remind from public.list_recurring_incomes() where day_of_month
 
 reset role;
 
-create temp table a_def as select id from public.recurring_incomes where day_of_month = 10;
+create temp table a_def as
+  select id from public.recurring_incomes
+  where day_of_month = 10 and household_id = (select hid from ids where email = 'a@example.com');
 grant select on a_def to authenticated;
 
 -- ===== As user B: A's data is invisible, every operation on it fails =====

@@ -272,24 +272,24 @@ Migracja addytywna (nowa tabela, nowa nullowalna kolumna w `incomes`); bez backf
 
 #### Automated
 
-- [x] 3.1 `npm run lint` i `npx astro check` przechodzą
-- [x] 3.2 `npm run build` przechodzi
+- [x] 3.1 `npm run lint` i `npx astro check` przechodzą — 2c86710
+- [x] 3.2 `npm run build` przechodzi — 2c86710
 
 #### Manual
 
-- [x] 3.3 Przełączanie zakładek działa; dodanie, zmiana kwoty, przedłużenie, zatrzymanie przychodu działają, „Zostaje” rośnie o wpis z datą ≤ dziś
-- [x] 3.4 Podwójne kliknięcie „Dodaj” tworzy jedną definicję; identyczna druga pokazuje komunikat po polsku
-- [x] 3.5 Ekran 360 px: przełącznik i akcje mają min. 44 px; strona wydatków działa jak przed zmianą
+- [x] 3.3 Przełączanie zakładek działa; dodanie, zmiana kwoty, przedłużenie, zatrzymanie przychodu działają, „Zostaje” rośnie o wpis z datą ≤ dziś — 2c86710
+- [x] 3.4 Podwójne kliknięcie „Dodaj” tworzy jedną definicję; identyczna druga pokazuje komunikat po polsku — 2c86710
+- [x] 3.5 Ekran 360 px: przełącznik i akcje mają min. 44 px; strona wydatków działa jak przed zmianą — 2c86710
 
 ### Phase 4: Baner, smoke, domknięcie
 
 #### Automated
 
-- [ ] 4.1 `npm run lint`, `npx astro check`, `npm run build`
-- [ ] 4.2 `supabase test db` zielone
-- [ ] 4.3 `npm run smoke` przechodzi na buildzie (preview) z lokalnym Supabase
+- [x] 4.1 `npm run lint`, `npx astro check`, `npm run build`
+- [x] 4.2 `supabase test db` zielone
+- [x] 4.3 `npm run smoke` przechodzi na buildzie (preview) z lokalnym Supabase
 
 #### Manual
 
-- [ ] 4.4 Baner pojawia się dla definicji kończącej się w tym lub następnym miesiącu i można go zamknąć na stałe
+- [x] 4.4 Baner pojawia się dla definicji kończącej się w tym lub następnym miesiącu i można go zamknąć na stałe
 - [ ] 4.5 Na produkcji pełny cykl create → zmiana → zatrzymanie na telefonie; pomiar CPU poniżej 10 ms lub odnotowane odstępstwo
