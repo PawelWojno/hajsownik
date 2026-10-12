@@ -1,7 +1,7 @@
 ---
 change_id: recurring-income
 title: Recurring income
-status: impl_reviewed
+status: implemented
 created: 2026-10-12
 updated: 2026-10-12
 archived_at: null

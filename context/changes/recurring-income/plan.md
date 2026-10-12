@@ -239,6 +239,16 @@ Baner na ekranie miesiąca, kroki smoke, wdrożenie migracji, krótki pomiar CPU
 
 Każda akcja to jedno wywołanie `rpc` (≤ 24 wiersze). CPU Workera w S-04 mieścił się w 10 ms (maks. 8 ms przy pierwszym POST po deployu); przychody powinny być podobne, co potwierdza krótki pomiar w fazie 4.
 
+**Pomiar na produkcji (2026-10-12, krok 4.5)**, definicja na 24 miesiące, pełny cykl POST → PATCH → DELETE na `/api/recurring-incomes`. Limit darmowego planu: 10 ms CPU.
+
+| Źródło | POST | PATCH | DELETE |
+| --- | --- | --- | --- |
+| Panel Cloudflare (`cpuTimeMs`) | 6 ms | 9 ms | 6 ms |
+| `wrangler tail`, cykl 1 (`cpuTime`) | 10 ms | 14 ms | 6 ms |
+| `wrangler tail`, cykl 2 (`cpuTime`) | 8 ms | 6 ms | 5 ms |
+
+Wszystkie wywołania zakończyły się `outcome: ok` ze statusem 200; czas całkowity (`wallTime`) wynosił 200–1256 ms. **Odstępstwo:** w cyklu 1 z `tail` dwa wywołania miały CPU `>= 10` ms (POST 10 ms, PATCH 14 ms) i nie zostały przerwane; w panelu i w cyklu 2 wartości są niższe (5–9 ms). Panel i `tail` to różne pomiary tego samego mechanizmu, a pierwszy cykl po deployu bywa wolniejszy (w S-04 też najwyższy był pierwszy POST po deployu), więc nie mamy podstaw, by traktować to jako stały wynik. Mechanizm jest ten sam co w S-04 (jedno wywołanie `rpc`, operacje na wierszach robi baza). Jeśli takie wartości będą się powtarzać przy zwykłym użyciu, rozważyć plan płatny (30 s CPU, `infrastructure.md:96`).
+
 ## Migration Notes
 
 Migracja addytywna (nowa tabela, nowa nullowalna kolumna w `incomes`); bez backfillu. Brak wpływu na istniejące wpisy. Przy S-07 kolumna `source` w `recurring_incomes` zostanie zamieniona na `category_id`.
@@ -300,4 +310,4 @@ Migracja addytywna (nowa tabela, nowa nullowalna kolumna w `incomes`); bez backf
 #### Manual
 
 - [x] 4.4 Baner pojawia się dla definicji kończącej się w tym lub następnym miesiącu i można go zamknąć na stałe — b4840f9
-- [ ] 4.5 Na produkcji pełny cykl create → zmiana → zatrzymanie na telefonie; pomiar CPU poniżej 10 ms lub odnotowane odstępstwo
+- [x] 4.5 Na produkcji pełny cykl create → zmiana → zatrzymanie na telefonie; pomiar CPU poniżej 10 ms lub odnotowane odstępstwo
