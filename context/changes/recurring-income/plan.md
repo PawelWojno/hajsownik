@@ -261,25 +261,25 @@ Migracja addytywna (nowa tabela, nowa nullowalna kolumna w `incomes`); bez backf
 
 #### Automated
 
-- [x] 2.1 Typy i lint: `npm run lint` oraz `npx astro check`
-- [x] 2.2 Build przechodzi: `npm run build`
+- [x] 2.1 Typy i lint: `npm run lint` oraz `npx astro check` — e3ab842
+- [x] 2.2 Build przechodzi: `npm run build` — e3ab842
 
 #### Manual
 
-- [x] 2.3 `curl` z sesją: POST tworzy definicję, PATCH zmienia kwotę, DELETE zatrzymuje, zły `source` daje 400, nieistniejące id daje 404
+- [x] 2.3 `curl` z sesją: POST tworzy definicję, PATCH zmienia kwotę, DELETE zatrzymuje, zły `source` daje 400, nieistniejące id daje 404 — e3ab842
 
 ### Phase 3: Strona z przełącznikiem
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` i `npx astro check` przechodzą
-- [ ] 3.2 `npm run build` przechodzi
+- [x] 3.1 `npm run lint` i `npx astro check` przechodzą
+- [x] 3.2 `npm run build` przechodzi
 
 #### Manual
 
-- [ ] 3.3 Przełączanie zakładek działa; dodanie, zmiana kwoty, przedłużenie, zatrzymanie przychodu działają, „Zostaje” rośnie o wpis z datą ≤ dziś
-- [ ] 3.4 Podwójne kliknięcie „Dodaj” tworzy jedną definicję; identyczna druga pokazuje komunikat po polsku
-- [ ] 3.5 Ekran 360 px: przełącznik i akcje mają min. 44 px; strona wydatków działa jak przed zmianą
+- [x] 3.3 Przełączanie zakładek działa; dodanie, zmiana kwoty, przedłużenie, zatrzymanie przychodu działają, „Zostaje” rośnie o wpis z datą ≤ dziś
+- [x] 3.4 Podwójne kliknięcie „Dodaj” tworzy jedną definicję; identyczna druga pokazuje komunikat po polsku
+- [x] 3.5 Ekran 360 px: przełącznik i akcje mają min. 44 px; strona wydatków działa jak przed zmianą
 
 ### Phase 4: Baner, smoke, domknięcie
 
