@@ -250,23 +250,23 @@ Migracja addytywna (nowa tabela, nowa nullowalna kolumna w `incomes`); bez backf
 
 #### Automated
 
-- [x] 1.1 Migracja i testy przechodzą na lokalnej bazie: `npx supabase db reset && npx supabase test db`
-- [x] 1.2 Lint SQL/format nie psuje commita (husky + `npm run lint`)
+- [x] 1.1 Migracja i testy przechodzą na lokalnej bazie: `npx supabase db reset && npx supabase test db` — 923dff1
+- [x] 1.2 Lint SQL/format nie psuje commita (husky + `npm run lint`) — 923dff1
 
 #### Manual
 
-- [x] 1.3 W `supabase studio` widać `recurring_incomes` z włączonym RLS i polityki o oczekiwanych nazwach
+- [x] 1.3 W `supabase studio` widać `recurring_incomes` z włączonym RLS i polityki o oczekiwanych nazwach — 923dff1
 
 ### Phase 2: API i serwis
 
 #### Automated
 
-- [ ] 2.1 Typy i lint: `npm run lint` oraz `npx astro check`
-- [ ] 2.2 Build przechodzi: `npm run build`
+- [x] 2.1 Typy i lint: `npm run lint` oraz `npx astro check`
+- [x] 2.2 Build przechodzi: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 `curl` z sesją: POST tworzy definicję, PATCH zmienia kwotę, DELETE zatrzymuje, zły `source` daje 400, nieistniejące id daje 404
+- [x] 2.3 `curl` z sesją: POST tworzy definicję, PATCH zmienia kwotę, DELETE zatrzymuje, zły `source` daje 400, nieistniejące id daje 404
 
 ### Phase 3: Strona z przełącznikiem
 
