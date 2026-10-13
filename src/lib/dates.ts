@@ -39,13 +39,17 @@ export function formatMonthLabel(date: string): string {
   return monthNames.format(new Date(`${monthStartOf(date)}T00:00:00Z`));
 }
 
+/** Years accepted in `?month=` (and offered by the month picker). */
+export const MIN_MONTH_YEAR = 2000;
+export const MAX_MONTH_YEAR = 2100;
+
 /** `YYYY-MM` from a query string as the first day of that month (`YYYY-MM-01`); null when it is not a real month in 2000-2100. */
 export function parseMonthParam(value: string | null | undefined): string | null {
   const match = /^(\d{4})-(\d{2})$/.exec(value ?? "");
   if (!match) return null;
   const year = Number(match[1]);
   const month = Number(match[2]);
-  if (year < 2000 || year > 2100 || month < 1 || month > 12) return null;
+  if (year < MIN_MONTH_YEAR || year > MAX_MONTH_YEAR || month < 1 || month > 12) return null;
   return `${match[1]}-${match[2]}-01`;
 }
 

@@ -1,8 +1,9 @@
 ---
 import HistoryList from "@/components/history/HistoryList";
+import MonthPicker from "@/components/history/MonthPicker";
 import Topbar from "@/components/Topbar.astro";
 import Layout from "@/layouts/Layout.astro";
-import { formatMonthLabel, monthParam, shiftMonth } from "@/lib/dates";
+import { currentMonthStart, formatMonthLabel, monthParam, shiftMonth } from "@/lib/dates";
 import { parseHistoryParams, toHistoryQuery } from "@/lib/history-params";
 import { listCategories } from "@/lib/services/categories";
 import { listHistory } from "@/lib/services/entries";
@@ -54,8 +55,15 @@ const arrowClass =
         <a href={historyHref(shiftMonth(params.month, -1))} aria-label="Poprzedni miesiąc" class:list={[arrowClass]}>
           ‹
         </a>
-        <h1 class="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent">
-          {monthLabel}
+        <h1 class="text-center">
+          <MonthPicker
+            month={params.month}
+            label={monthLabel}
+            currentMonth={currentMonthStart()}
+            typ={params.typ}
+            categoryId={params.categoryId}
+            client:load
+          />
         </h1>
         <a href={historyHref(shiftMonth(params.month, 1))} aria-label="Następny miesiąc" class:list={[arrowClass]}>
           ›
