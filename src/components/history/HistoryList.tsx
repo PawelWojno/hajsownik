@@ -169,7 +169,7 @@ export default function HistoryList({ initial, params, categories }: Props) {
                   Edytuj
                 </Button>
                 <DeleteControl
-                  question={entry.recurring ? "Na pewno?\nNie zatrzymuje cyklu." : "Na pewno? Nie można cofnąć."}
+                  question={entry.recurring ? "Na pewno?\nNie zatrzymuje cyklu." : "Na pewno?\nNie można cofnąć."}
                   pending={pending}
                   onConfirm={() => remove(entry)}
                   onCancel={clearError}

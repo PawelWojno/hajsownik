@@ -358,17 +358,17 @@ Migracja jest addytywna (trigger, nowe polityki, zastąpienie dwóch wąskich po
 
 #### Automated
 
-- [x] 4.1 Linting przechodzi: `npm run lint`
-- [x] 4.2 Sprawdzenie typów przechodzi: `npx astro check`
-- [x] 4.3 Build przechodzi: `npm run build`
+- [x] 4.1 Linting przechodzi: `npm run lint` — 75f5d66
+- [x] 4.2 Sprawdzenie typów przechodzi: `npx astro check` — 75f5d66
+- [x] 4.3 Build przechodzi: `npm run build` — 75f5d66
 
 #### Manual
 
-- [x] 4.4 Edycja kwoty/daty/kategorii ręcznego wydatku i kwoty/źródła przychodu odświeża listę i sumy miesiąca
-- [x] 4.5 Wpis cykliczny pozwala zmienić tylko kwotę i opis; data i kategoria są tylko do odczytu
-- [x] 4.6 Usunięcie pojedynczego wpisu cyklicznego nie zatrzymuje definicji (kolejne wpisy dalej istnieją)
-- [x] 4.7 Edycja wpisu w zarchiwizowanej kategorii nie wymusza zmiany kategorii; wybór innej zarchiwizowanej jest odrzucony
-- [x] 4.8 Dodawanie wydatku z ekranu miesiąca działa jak wcześniej (reset i fokus po zapisie)
+- [x] 4.4 Edycja kwoty/daty/kategorii ręcznego wydatku i kwoty/źródła przychodu odświeża listę i sumy miesiąca — 75f5d66
+- [x] 4.5 Wpis cykliczny pozwala zmienić tylko kwotę i opis; data i kategoria są tylko do odczytu — 75f5d66
+- [x] 4.6 Usunięcie pojedynczego wpisu cyklicznego nie zatrzymuje definicji (kolejne wpisy dalej istnieją) — 75f5d66
+- [x] 4.7 Edycja wpisu w zarchiwizowanej kategorii nie wymusza zmiany kategorii; wybór innej zarchiwizowanej jest odrzucony — 75f5d66
+- [x] 4.8 Dodawanie wydatku z ekranu miesiąca działa jak wcześniej (reset i fokus po zapisie) — 75f5d66
 
 ### Phase 5: Podpowiedź w menedżerach cykli, smoke i domknięcie
 
