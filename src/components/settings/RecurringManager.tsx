@@ -173,7 +173,7 @@ export default function RecurringManager({ initialItems, categories, defaultDay 
       return <span className="font-semibold">{formatMinor(item.amountMinor)}</span>;
     }
     return (
-      <form onSubmit={handleChangeAmount} className="flex min-w-0 flex-1 items-center gap-1">
+      <form onSubmit={handleChangeAmount} className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
         <input
           autoFocus
           inputMode="decimal"
@@ -209,6 +209,7 @@ export default function RecurringManager({ initialItems, categories, defaultDay 
         >
           <X className="size-5" />
         </Button>
+        <p className="w-full text-xs text-red-300">Zmiana kwoty cyklu nadpisze przyszłe wpisy.</p>
       </form>
     );
   }

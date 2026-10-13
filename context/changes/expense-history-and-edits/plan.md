@@ -374,13 +374,13 @@ Migracja jest addytywna (trigger, nowe polityki, zastąpienie dwóch wąskich po
 
 #### Automated
 
-- [ ] 5.1 Linting przechodzi: `npm run lint`
-- [ ] 5.2 Sprawdzenie typów przechodzi: `npx astro check`
-- [ ] 5.3 Build przechodzi: `npm run build`
-- [ ] 5.4 Testy pgTAP przechodzą: `npx supabase test db`
-- [ ] 5.5 Smoke przechodzi na działającym serwerze: `npm run smoke`
+- [x] 5.1 Linting przechodzi: `npm run lint`
+- [x] 5.2 Sprawdzenie typów przechodzi: `npx astro check`
+- [x] 5.3 Build przechodzi: `npm run build`
+- [x] 5.4 Testy pgTAP przechodzą: `npx supabase test db`
+- [x] 5.5 Smoke przechodzi na działającym serwerze: `npm run smoke`
 
 #### Manual
 
-- [ ] 5.6 W edycji kwoty cyklu (wydatki i przychody) widać „Zmiana kwoty cyklu nadpisze przyszłe wpisy.”; po zmianie kwoty przyszłe wpisy, także poprawione ręcznie, mają kwotę definicji
+- [x] 5.6 W edycji kwoty cyklu (wydatki i przychody) widać „Zmiana kwoty cyklu nadpisze przyszłe wpisy.”; po zmianie kwoty przyszłe wpisy, także poprawione ręcznie, mają kwotę definicji
 - [ ] 5.7 Cały przepływ działa na telefonie (dodanie, historia, edycja, usunięcie)
