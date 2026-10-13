@@ -332,26 +332,26 @@ Migracja jest addytywna (trigger, nowe polityki, zastąpienie dwóch wąskich po
 
 #### Automated
 
-- [x] 2.1 Linting przechodzi: `npm run lint`
-- [x] 2.2 Sprawdzenie typów przechodzi: `npx astro check`
-- [x] 2.3 Build przechodzi: `npm run build`
+- [x] 2.1 Linting przechodzi: `npm run lint` — bca474f
+- [x] 2.2 Sprawdzenie typów przechodzi: `npx astro check` — bca474f
+- [x] 2.3 Build przechodzi: `npm run build` — bca474f
 
 #### Manual
 
-- [x] 2.4 Zalogowany użytkownik otwiera `/api/history?typ=wydatki&month=2026-10` i dostaje JSON z wpisami oraz sumami miesiąca
+- [x] 2.4 Zalogowany użytkownik otwiera `/api/history?typ=wydatki&month=2026-10` i dostaje JSON z wpisami oraz sumami miesiąca — bca474f
 
 ### Phase 3: Nawigacja i strona historii (SSR, odczyt)
 
 #### Automated
 
-- [ ] 3.1 Linting przechodzi: `npm run lint`
-- [ ] 3.2 Sprawdzenie typów przechodzi: `npx astro check`
-- [ ] 3.3 Build przechodzi: `npm run build`
+- [x] 3.1 Linting przechodzi: `npm run lint`
+- [x] 3.2 Sprawdzenie typów przechodzi: `npx astro check`
+- [x] 3.3 Build przechodzi: `npm run build`
 
 #### Manual
 
-- [ ] 3.4 Strzałki zmieniają miesiąc na `/history` (także na przyszłe miesiące i przez granicę roku), a tytuł na `/dashboard` prowadzi do historii bieżącego miesiąca
-- [ ] 3.5 Filtr kategorii zawęża wydatki; zarchiwizowana kategoria jest oznaczona; wpisy cykliczne w przyszłości mają „zaplanowany”
+- [x] 3.4 Strzałki zmieniają miesiąc na `/history` (także na przyszłe miesiące i przez granicę roku), a tytuł na `/dashboard` prowadzi do historii bieżącego miesiąca
+- [x] 3.5 Filtr kategorii zawęża wydatki; zarchiwizowana kategoria jest oznaczona; wpisy cykliczne w przyszłości mają „zaplanowany”
 - [ ] 3.6 Widok jest czytelny na telefonie bez poziomego przewijania
 
 ### Phase 4: Edycja i usuwanie w UI
