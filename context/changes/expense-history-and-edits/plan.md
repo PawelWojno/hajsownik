@@ -344,15 +344,15 @@ Migracja jest addytywna (trigger, nowe polityki, zastąpienie dwóch wąskich po
 
 #### Automated
 
-- [x] 3.1 Linting przechodzi: `npm run lint`
-- [x] 3.2 Sprawdzenie typów przechodzi: `npx astro check`
-- [x] 3.3 Build przechodzi: `npm run build`
+- [x] 3.1 Linting przechodzi: `npm run lint` — f729be7
+- [x] 3.2 Sprawdzenie typów przechodzi: `npx astro check` — f729be7
+- [x] 3.3 Build przechodzi: `npm run build` — f729be7
 
 #### Manual
 
-- [x] 3.4 Strzałki zmieniają miesiąc na `/history` (także na przyszłe miesiące i przez granicę roku), a tytuł na `/dashboard` prowadzi do historii bieżącego miesiąca
-- [x] 3.5 Filtr kategorii zawęża wydatki; zarchiwizowana kategoria jest oznaczona; wpisy cykliczne w przyszłości mają „zaplanowany”
-- [ ] 3.6 Widok jest czytelny na telefonie bez poziomego przewijania
+- [x] 3.4 Strzałki zmieniają miesiąc na `/history` (także na przyszłe miesiące i przez granicę roku), a tytuł na `/dashboard` prowadzi do historii bieżącego miesiąca — f729be7
+- [x] 3.5 Filtr kategorii zawęża wydatki; zarchiwizowana kategoria jest oznaczona; wpisy cykliczne w przyszłości mają „zaplanowany” — f729be7
+- [x] 3.6 Widok jest czytelny na telefonie bez poziomego przewijania
 
 ### Phase 4: Edycja i usuwanie w UI
 
