@@ -9,6 +9,7 @@ import {
   MIN_MONTHS,
   MONTHS_ERROR,
 } from "@/lib/recurring-limits";
+import { INCOME_SOURCES } from "@/types";
 
 const DATE_ERROR = "Podaj poprawną datę";
 const FUTURE_DATE_ERROR = "Data nie może być z przyszłości";
@@ -52,3 +53,30 @@ export const categoryNameField = z
   .trim()
   .min(1, "Podaj nazwę kategorii")
   .max(50, "Nazwa może mieć maksymalnie 50 znaków");
+
+export const expenseCreateSchema = z.object({
+  amount: amountField,
+  categoryId: z.uuid("Wybierz kategorię"),
+  date: dateField.optional(),
+  description: descriptionField.optional(),
+});
+
+export const incomeCreateSchema = z.object({
+  amount: amountField,
+  source: z.enum(INCOME_SOURCES, "Wybierz źródło przychodu"),
+  date: dateField.optional(),
+});
+
+/** Edit of an expense: the amount is always sent, the rest only when it changes (an entry from a cycle sends just the amount and description). */
+export const expensePatchSchema = z.object({
+  amount: amountField,
+  categoryId: z.uuid("Wybierz kategorię").optional(),
+  date: dateField.optional(),
+  description: descriptionField.optional(),
+});
+
+export const incomePatchSchema = z.object({
+  amount: amountField,
+  source: z.enum(INCOME_SOURCES, "Wybierz źródło przychodu").optional(),
+  date: dateField.optional(),
+});

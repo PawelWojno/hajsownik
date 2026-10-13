@@ -321,24 +321,24 @@ Migracja jest addytywna (trigger, nowe polityki, zastąpienie dwóch wąskich po
 
 #### Automated
 
-- [x] 1.1 Migracja stosuje się czysto: `npx supabase db reset`
-- [x] 1.2 Testy pgTAP przechodzą: `npx supabase test db`
+- [x] 1.1 Migracja stosuje się czysto: `npx supabase db reset` — 3565473
+- [x] 1.2 Testy pgTAP przechodzą: `npx supabase test db` — 3565473
 
 #### Manual
 
-- [x] 1.3 W Supabase Studio: UPDATE kwoty wygenerowanego wpisu przechodzi, a UPDATE jego daty kończy się błędem `22023`
+- [x] 1.3 W Supabase Studio: UPDATE kwoty wygenerowanego wpisu przechodzi, a UPDATE jego daty kończy się błędem `22023` — 3565473
 
 ### Phase 2: Warstwa serwerowa (serwis, trasy, typy)
 
 #### Automated
 
-- [ ] 2.1 Linting przechodzi: `npm run lint`
-- [ ] 2.2 Sprawdzenie typów przechodzi: `npx astro check`
-- [ ] 2.3 Build przechodzi: `npm run build`
+- [x] 2.1 Linting przechodzi: `npm run lint`
+- [x] 2.2 Sprawdzenie typów przechodzi: `npx astro check`
+- [x] 2.3 Build przechodzi: `npm run build`
 
 #### Manual
 
-- [ ] 2.4 Zalogowany użytkownik otwiera `/api/history?typ=wydatki&month=2026-10` i dostaje JSON z wpisami oraz sumami miesiąca
+- [x] 2.4 Zalogowany użytkownik otwiera `/api/history?typ=wydatki&month=2026-10` i dostaje JSON z wpisami oraz sumami miesiąca
 
 ### Phase 3: Nawigacja i strona historii (SSR, odczyt)
 
