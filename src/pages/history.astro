@@ -111,7 +111,7 @@ const arrowClass =
 
     <div class="mt-4">
       {history?.entries ? (
-        <HistoryList entries={history.entries} summary={history.summary} truncated={history.truncated} client:load />
+        <HistoryList initial={history} params={params} categories={categories} client:load />
       ) : (
         <p
           role="alert"

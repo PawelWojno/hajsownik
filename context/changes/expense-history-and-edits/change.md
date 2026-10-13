@@ -13,3 +13,4 @@ archived_at: null
 
 - Faza 4: dodać `autoComplete="off"` do pola opisu w `EntrySheet.tsx` (przeglądarka podpowiada poprzednie opisy; decyzja 2026-10-13).
 - Do rozważenia przy fazie 5/redakcji tekstów: opis wpisu cyklicznego jest tracony po zmianie kwoty cyklu; opis w definicji cyklu planowany w przyszłości.
+- Do poprawy przy redakcji tekstów/komunikatów: przy aktywnym filtrze kategorii zmiana kategorii wpisu usuwa go z listy bez komunikatu (jest tylko „Przeniesiono: miesiąc” dla zmiany miesiąca).

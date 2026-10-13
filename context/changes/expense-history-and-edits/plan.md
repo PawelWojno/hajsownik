@@ -352,23 +352,23 @@ Migracja jest addytywna (trigger, nowe polityki, zastąpienie dwóch wąskich po
 
 - [x] 3.4 Strzałki zmieniają miesiąc na `/history` (także na przyszłe miesiące i przez granicę roku), a tytuł na `/dashboard` prowadzi do historii bieżącego miesiąca — f729be7
 - [x] 3.5 Filtr kategorii zawęża wydatki; zarchiwizowana kategoria jest oznaczona; wpisy cykliczne w przyszłości mają „zaplanowany” — f729be7
-- [x] 3.6 Widok jest czytelny na telefonie bez poziomego przewijania
+- [x] 3.6 Widok jest czytelny na telefonie bez poziomego przewijania — ea75e1a
 
 ### Phase 4: Edycja i usuwanie w UI
 
 #### Automated
 
-- [ ] 4.1 Linting przechodzi: `npm run lint`
-- [ ] 4.2 Sprawdzenie typów przechodzi: `npx astro check`
-- [ ] 4.3 Build przechodzi: `npm run build`
+- [x] 4.1 Linting przechodzi: `npm run lint`
+- [x] 4.2 Sprawdzenie typów przechodzi: `npx astro check`
+- [x] 4.3 Build przechodzi: `npm run build`
 
 #### Manual
 
-- [ ] 4.4 Edycja kwoty/daty/kategorii ręcznego wydatku i kwoty/źródła przychodu odświeża listę i sumy miesiąca
-- [ ] 4.5 Wpis cykliczny pozwala zmienić tylko kwotę i opis; data i kategoria są tylko do odczytu
-- [ ] 4.6 Usunięcie pojedynczego wpisu cyklicznego nie zatrzymuje definicji (kolejne wpisy dalej istnieją)
-- [ ] 4.7 Edycja wpisu w zarchiwizowanej kategorii nie wymusza zmiany kategorii; wybór innej zarchiwizowanej jest odrzucony
-- [ ] 4.8 Dodawanie wydatku z ekranu miesiąca działa jak wcześniej (reset i fokus po zapisie)
+- [x] 4.4 Edycja kwoty/daty/kategorii ręcznego wydatku i kwoty/źródła przychodu odświeża listę i sumy miesiąca
+- [x] 4.5 Wpis cykliczny pozwala zmienić tylko kwotę i opis; data i kategoria są tylko do odczytu
+- [x] 4.6 Usunięcie pojedynczego wpisu cyklicznego nie zatrzymuje definicji (kolejne wpisy dalej istnieją)
+- [x] 4.7 Edycja wpisu w zarchiwizowanej kategorii nie wymusza zmiany kategorii; wybór innej zarchiwizowanej jest odrzucony
+- [x] 4.8 Dodawanie wydatku z ekranu miesiąca działa jak wcześniej (reset i fokus po zapisie)
 
 ### Phase 5: Podpowiedź w menedżerach cykli, smoke i domknięcie
 
