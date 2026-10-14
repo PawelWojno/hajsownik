@@ -313,6 +313,23 @@ Migracja jest addytywna (trigger, nowe polityki, zastąpienie dwóch wąskich po
 - RPC cykliczne: `supabase/migrations/20261011130000_recurring_expenses.sql:143-233`, `20261012100000_recurring_incomes.sql:103-193`
 - Lekcje: `context/foundation/lessons.md`
 
+## Addendum (impl-review 2026-10-14)
+
+- **Wybór miesiąca w historii (41530f4):** tytuł „Miesiąc Rok” na `/history` jest przyciskiem otwierającym panel
+  (`MonthPicker`, Drawer) z rokiem (‹ ›, 2000–2100) i siatką 12 miesięcy oraz linkiem „Bieżący miesiąc”. Strzałki `‹ ›`
+  z kontraktu fazy 3 zostają; panel zachowuje `typ` i `kategoria`. `/dashboard` bez zmian.
+- **Przebudowa Topbar (ea75e1a, krok 3.6):** sam link „Historia” przepełniał pasek na telefonie. Wiersz 1: nazwa
+  gospodarstwa (odczyt `households` przez RLS, zapas „Hajsownik”) i „Wyloguj” z ikoną; na wąskim ekranie hamburger
+  (`<details>`) z panelem Miesiąc / Historia / rozwijane Ustawienia. Wiersz 2 od `sm:`: równe przyciski
+  Miesiąc / Historia / Ustawienia ▾ o stałej szerokości (`max-w-md`), aktywna strona podświetlona.
+- **Komunikaty potwierdzenia usunięcia (15ec58e, decyzja użytkownika — krótkie teksty):** wpis z cyklu
+  „Na pewno? / Nie zatrzymuje cyklu.”, wpis ręczny „Na pewno? / Nie można cofnąć.” (dwie linie, `whitespace-pre-line`).
+  Zastępują dłuższe teksty z fazy 4. Wskazówka „Ustawienia → Cykliczne” — do redakcji tekstów.
+- **Drobne dodatki bez zmiany kontraktu:** `src/lib/history-params.ts` (wspólny parser `typ`/`month`/`kategoria` dla
+  strony i API), `REVOKE EXECUTE` na funkcjach triggerów, w smoke anonimowe `GET /history` → 302 i `GET /api/history`
+  → 401, `autoComplete="off"` na polu opisu. Po review: ogólny komunikat „Przeniesiono”, gdy edytowany wpis wypadł z
+  listy (inny miesiąc lub kategoria poza filtrem), w miejsce „Przeniesiono do {miesiąc}”.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles. See `references/progress-format.md`.
@@ -374,13 +391,13 @@ Migracja jest addytywna (trigger, nowe polityki, zastąpienie dwóch wąskich po
 
 #### Automated
 
-- [x] 5.1 Linting przechodzi: `npm run lint`
-- [x] 5.2 Sprawdzenie typów przechodzi: `npx astro check`
-- [x] 5.3 Build przechodzi: `npm run build`
-- [x] 5.4 Testy pgTAP przechodzą: `npx supabase test db`
-- [x] 5.5 Smoke przechodzi na działającym serwerze: `npm run smoke`
+- [x] 5.1 Linting przechodzi: `npm run lint` — 10dc384
+- [x] 5.2 Sprawdzenie typów przechodzi: `npx astro check` — 10dc384
+- [x] 5.3 Build przechodzi: `npm run build` — 10dc384
+- [x] 5.4 Testy pgTAP przechodzą: `npx supabase test db` — 10dc384
+- [x] 5.5 Smoke przechodzi na działającym serwerze: `npm run smoke` — 10dc384
 
 #### Manual
 
-- [x] 5.6 W edycji kwoty cyklu (wydatki i przychody) widać „Zmiana kwoty cyklu nadpisze przyszłe wpisy.”; po zmianie kwoty przyszłe wpisy, także poprawione ręcznie, mają kwotę definicji
+- [x] 5.6 W edycji kwoty cyklu (wydatki i przychody) widać „Zmiana kwoty cyklu nadpisze przyszłe wpisy.”; po zmianie kwoty przyszłe wpisy, także poprawione ręcznie, mają kwotę definicji — 10dc384
 - [ ] 5.7 Cały przepływ działa na telefonie (dodanie, historia, edycja, usunięcie)

@@ -3,7 +3,7 @@ project: Hajsownik
 version: 1
 status: draft
 created: 2026-10-07
-updated: 2026-10-12
+updated: 2026-10-13
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -47,7 +47,7 @@ Today, a household budget lives "in someone's head" — there's no reliable, low
 | S-03 | password-reset                 | reset their password by email if locked out                        | —              | FR-003                        | done |
 | S-04 | recurring-expenses              | define/edit/stop a recurring expense over a fixed horizon          | S-01           | FR-014, FR-015                | done |
 | S-05 | recurring-income                | define/edit/stop a recurring income over a fixed horizon           | S-01           | FR-016, FR-017                | done |
-| S-06 | expense-history-and-edits       | view history (filter by month/category) and edit/delete any entry  | S-01, S-04, S-05 | FR-018, FR-019, FR-020      | proposed |
+| S-06 | expense-history-and-edits       | view history (filter by month/category) and edit/delete any entry  | S-01, S-04, S-05 | FR-018, FR-019, FR-020      | in-progress |
 | S-07 | income-categories               | (post-MVP) manage their own list of income categories, one shared add form for expense and income | S-02, S-05, S-06 | FR-012 (changes it; PRD v2) | proposed |
 
 ## Streams
@@ -166,7 +166,7 @@ What's already in place in the codebase as of `2026-10-07` (verified via direct 
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** PRD's own Socratic note on FR-018 ties history and edit/delete together ("a history view with no way to edit or delete... is only half useful"), which is why this slice bundles both rather than shipping a read-only history first. Depends on both recurring slices because its acceptance criteria specifically cover auto-generated entries.
-- **Status:** proposed
+- **Status:** in-progress
 - **GitHub:** #7
 
 ### S-07: Income categories (post-MVP)
