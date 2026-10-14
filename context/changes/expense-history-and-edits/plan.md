@@ -400,4 +400,4 @@ Migracja jest addytywna (trigger, nowe polityki, zastąpienie dwóch wąskich po
 #### Manual
 
 - [x] 5.6 W edycji kwoty cyklu (wydatki i przychody) widać „Zmiana kwoty cyklu nadpisze przyszłe wpisy.”; po zmianie kwoty przyszłe wpisy, także poprawione ręcznie, mają kwotę definicji — 10dc384
-- [x] 5.7 Cały przepływ działa na telefonie (dodanie, historia, edycja, usunięcie)
+- [x] 5.7 Cały przepływ działa na telefonie (dodanie, historia, edycja, usunięcie) — 5c0af89
