@@ -66,9 +66,11 @@ export function useHistoryActions(initial: HistoryResponse, params: HistoryParam
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<{ target: string; message: string } | null>(null);
 
-  async function refresh(): Promise<void> {
+  /** Resolves to the fresh list (null when the page is reloading instead). */
+  async function refresh(): Promise<HistoryEntry[] | null> {
     const query = new URLSearchParams({ typ: params.typ, month: monthParam(params.month) });
     if (params.categoryId) query.set("kategoria", params.categoryId);
+    setPending(true);
     try {
       const response = await fetch(`/api/history?${query.toString()}`);
       const body: unknown = await response.json().catch(() => null);
@@ -76,12 +78,15 @@ export function useHistoryActions(initial: HistoryResponse, params: HistoryParam
         setEntries(body.entries);
         setSummary(body.summary);
         setTruncated(body.truncated);
-        return;
+        return body.entries;
       }
     } catch {
       // Falls through to the reload below.
+    } finally {
+      setPending(false);
     }
     window.location.reload();
+    return null;
   }
 
   /** Resolves to true when the entry was deleted. */

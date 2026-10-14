@@ -4,7 +4,6 @@ import { ServerError } from "@/components/auth/ServerError";
 import { EntrySheet } from "@/components/month/EntrySheet";
 import { Button } from "@/components/ui/button";
 import { useHistoryActions } from "@/hooks/useHistoryActions";
-import { formatMonthLabel, monthStartOf } from "@/lib/dates";
 import type { HistoryParams } from "@/lib/history-params";
 import { formatMinor } from "@/lib/money";
 import { cn } from "@/lib/utils";
@@ -97,10 +96,12 @@ export default function HistoryList({ initial, params, categories }: Props) {
     setSheetOpen(true);
   }
 
-  async function handleEdited(date: string) {
-    await refresh();
-    // An edit that moved the entry to another month removes it from this list: say where it went.
-    setMoved(monthStartOf(date) === params.month ? null : `Przeniesiono: ${formatMonthLabel(date)}`);
+  async function handleEdited() {
+    const editedId = editing?.id;
+    const fresh = await refresh();
+    // An edit can move the entry out of this list (another month, or another category under the filter): say so
+    // instead of letting it silently disappear.
+    setMoved(fresh && editedId && !fresh.some((entry) => entry.id === editedId) ? "Przeniesiono" : null);
   }
 
   // The panel offers the active categories plus the one the entry already has, even when that one is archived.
@@ -191,7 +192,7 @@ export default function HistoryList({ initial, params, categories }: Props) {
         entry={editing ?? undefined}
         categories={editableCategories}
         onOpenChange={setSheetOpen}
-        onEdited={(date) => void handleEdited(date)}
+        onEdited={() => void handleEdited()}
       />
     </div>
   );
