@@ -39,6 +39,7 @@ async function request(path, { method = "GET", form, json } = {}) {
   return {
     status: response.status,
     location: response.headers.get("location") ?? "",
+    cacheControl: response.headers.get("cache-control") ?? "",
     body: await response.text(),
   };
 }
@@ -119,6 +120,17 @@ const steps = [
     "forgot-password answers the same for an unknown email",
     () => request("/api/auth/forgot-password", { method: "POST", form: { email: `nobody-${Date.now()}@example.com` } }),
     { status: 302, location: "/auth/forgot-password?sent=1" },
+  ],
+  // The auth endpoints act on POST only; a GET (e.g. "Request desktop site" re-requesting the page after a form
+  // redirect) only redirects. See src/lib/auth-get.ts.
+  [
+    "auth endpoint GET redirects an anonymous user to sign-in",
+    () => request("/api/auth/signin"),
+    {
+      status: 302,
+      location: "/auth/signin",
+      check: (actual) => (actual.cacheControl.includes("no-store") ? null : "GET redirect is not marked no-store"),
+    },
   ],
   [
     "update-password page redirects anonymous user",
@@ -201,6 +213,14 @@ const steps = [
     { status: 302, location: "/dashboard" },
   ],
   ["home redirects signed-in user to the month screen", () => request("/"), { status: 302, location: "/dashboard" }],
+  [
+    "auth endpoint GET redirects a signed-in user to the month screen",
+    () => request("/api/auth/signup"),
+    { status: 302, location: "/dashboard" },
+  ],
+  // A GET must never act: a GET on signout only redirects and the session stays signed in.
+  ["signout GET only redirects", () => request("/api/auth/signout"), { status: 302, location: "/dashboard" }],
+  ["session survives a GET on signout", () => request("/dashboard"), { status: 200 }],
   [
     "dashboard renders the month screen for signed-in user",
     async () => {
