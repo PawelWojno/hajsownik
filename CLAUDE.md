@@ -50,6 +50,15 @@ Full server-side rendering (`output: "server"` in astro.config.mjs). All pages a
 - Cloudflare local dev: secrets go in `.dev.vars` (gitignored)
 - Deploy: `npx wrangler deploy` (requires Cloudflare account + `wrangler` auth)
 
+## UI
+
+- Colors and corner radii are defined only in `src/styles/global.css` (`:root`, `.dark`, `@theme inline`). A new color = a new token in that file (together with its `-foreground` pair), published in `@theme inline`. Never hardcode colors in views (`bg-purple-600`, `text-emerald-300`, `#...`); use semantic classes (`bg-primary`, `text-muted-foreground`, `text-destructive`).
+- Base components live in `src/components/ui/`. Before writing your own button, input, card or dialog, check that directory. Add missing components from the shadcn registry (`npx shadcn@latest add <name>`) instead of writing them from scratch.
+- Fix a styling problem in the component it affects. Do not change global tokens to mask a local bug.
+- Every interactive element must handle these states: default, hover, focus (visible for keyboard users), disabled (a real `disabled` attribute), error, empty and loading.
+- Run visual changes as a regular 10x change: `/10x-ui <view>` → `/10x-new` → `/10x-research` → `/10x-plan` → `/10x-implement` → `/10x-impl-review`.
+- For screenshots and visual checks in the browser, use the Playwright plugin (`playwright@claude-plugins-official`). Take a screenshot on desktop and at phone width (about 390 px).
+
 ## CI
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs two jobs on every push and PR to master:
@@ -80,53 +89,48 @@ Maintained by hand outside the `10x-cli` managed block below, since that block i
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
-## Zestaw narzędzi AI 10xDevs — Moduł 2, Lekcja 4
+## Zestaw narzędzi AI 10xDevs — Moduł 2, Lekcja 5
 
-Przygotuj się na trudniejszy strumień implementacji z **łańcuchem planowania opartym na badaniach**:
+Rozszerz cykl pojedynczej zmiany na pracę równoległą za pomocą **worktrees, delegowania ukierunkowanego na cel i orkiestracji wielu sesji**:
 
 ```
-internal research (/10x-research) + external research (exa.ai, Context7) -> /10x-plan -> /10x-implement -> success
+worktree per change -> /goal or claude -p -> PR -> review -> merge
 ```
 
-Lekcja koncentruje się na rozróżnianiu badań wewnętrznych od zewnętrznych oraz wykorzystywaniu dowodów do uzasadniania decyzji planistycznych.
+Lekcja koncentruje się na bezpiecznej przepustowości: izolowanych kontekstach, wyborze właściwego trybu wykonania oraz ograniczaniu równoległości do możliwości przeglądu.
 
 ### Router zadań — od czego zacząć
 
-| Umiejętność | Użyj jej, gdy |
+| Umiejętność | Użyj, gdy |
 | --- | --- |
-| **Badania wewnętrzne (temat lekcji)** | |
-| `/10x-research <change-id>` | Potrzebujesz dowodów z istniejącej bazy kodu — wzorców, konwencji, punktów integracji lub istniejących implementacji. Uruchamia równoległe subagentów w repozytorium i zapisuje ustrukturyzowane ustalenia w `research.md`. |
-| **Badania zewnętrzne (temat lekcji)** | |
-| exa.ai | Potrzebujesz natywnego dla AI wyszukiwania w sieci do porównywania bibliotek, sprawdzonych praktyk lub kontekstu ekosystemu, na które baza kodu nie może odpowiedzieć. |
-| Context7 (`resolve-library-id` → `get-library-docs`) | Potrzebujesz aktualnej, bieżącej dokumentacji dla konkretnej biblioteki lub frameworka. Najpierw rozwiązuje identyfikator biblioteki, a następnie pobiera odpowiednie strony dokumentacji. |
-| **Koło zapasowe do ramowania problemu** | |
-| `/10x-frame <change-id>` | Plan nie może się ustabilizować, plan nie przynosi oczekiwanych rezultatów lub utrzymujący się dryf ciągle psuje implementację. Użyj jako wyjścia awaryjnego dla osobnego problemu (zademonstrowanego na przykładzie Space Explorers), a nie jako rytuału przed badaniami. |
-| **Planowanie i wykonanie** | |
-| `/10x-plan <change-id>` / `/10x-implement <change-id> phase <n>` | Użyj tego samego łańcucha planowania i wykonania co w Lekcji 2, teraz z dowodami z wcześniejszych badań zasilającymi plan. |
+| **Izolacja kodu** | |
+| `git worktree add` | Potrzebujesz osobnego katalogu roboczego dla równoległej zmiany. Jedna zmiana na worktree, jeden świeży kontekst agenta na worktree. |
+| **Złożone zmiany** | |
+| `/10x-implement <change-id> phase <n>` | Zmiana ma wiele faz, wymaga ręcznych bramek lub korzysta z interaktywnego podejmowania decyzji podczas wykonania. |
+| **Proste zmiany** | |
+| `/goal` | Masz jasne, ograniczone zadanie i chcesz delegowania ukierunkowanego na cel. Agent pracuje autonomicznie w kierunku określonego celu z warunkiem zatrzymania. |
+| `claude -p` | Chcesz bezobsługowego wykonania dobrze zdefiniowanego zadania. Pętla Ralph Wiggum (uruchom, sprawdź, ponów próbę) jest uniwersalnym autonomicznym wzorcem. |
+| **Orkiestracja wielu sesji** | |
+| Superset / Conductor / Antigravity / VS Code Agent View | Uruchamiasz równolegle wiele sesji agentów i potrzebujesz wglądu, koordynacji lub zarządzania sesjami między nimi. |
 
-### Dyscyplina badawcza
+### Zasady pracy równoległej
 
-- Badania wewnętrzne (`/10x-research`) odpowiadają na pytanie „co nasza baza kodu już robi?” — wzorce, schematy, konwencje, punkty integracji.
-- Badania zewnętrzne (exa.ai, Context7) odpowiadają na pytanie „co powinniśmy zrobić?” — możliwości bibliotek, dokumentacja API, sprawdzone praktyki ekosystemu.
-- Połącz oba rodzaje jako dane wejściowe do `/10x-plan` poparte dowodami. Plan bez dowodów badawczych dla nietrywialnego strumienia to zgadywanie.
-- Dokumentacja przyjazna agentom (`llms.txt`, markdown-for-agents, endpointy `/md`) jest sygnałem jakości przy wyborze biblioteki — biblioteki publikujące dokumentację czytelną dla agentów integrują się szybciej.
+- Jedna zmiana na worktree lub izolowaną przestrzeń roboczą. Jeden świeży kontekst agenta na zmianę.
+- Wybieraj interaktywne `/10x-implement` dla złożonych zmian, a `/goal` lub `claude -p` dla prostych.
+- Równoległość jest ograniczona przez możliwości przeglądu. Więcej agentów bez przeglądu oznacza więcej nieprzejrzanego kodu, a nie większą przepustowość.
+- Problem z jakością wynikający z szybszego dostarczania jest celowy — stanowi przejście do bramek testowych w Module 3.
 
-### `/10x-frame` jako koło zapasowe
+### Granice lekcji
 
-Trzy sygnały, że należy sięgnąć po `/10x-frame`:
-1. Plan nie może się ustabilizować — badania otwierają coraz więcej pytań zamiast zawężać je do kontraktu.
-2. Plan nie przynosi rezultatów — implementacja wielokrotnie nie spełnia kryteriów sukcesu.
-3. Utrzymujący się dryf — implementacja ciągle odbiega od planu w sposób sugerujący, że problem został błędnie ujęty.
+- Nie omawiaj ponownie interaktywnych `/10x-implement` ani `/10x-impl-review`; to Lekcje 2 i 3.
+- Nie wprowadzaj tutaj strategii testowania. Problem z jakością jest motywacją dla Modułu 3.
+- Worktrees są mechanizmem izolacji, a nie tematem pełnego samouczka git.
 
-Zademonstrowano na przykładzie Space Explorers, a nie na ścieżce SRS. Jest to wyjście awaryjne, a nie obowiązkowy krok.
+### Ścieżki używane przez tę lekcję
 
-### Ścieżki używane w tej lekcji
+- `context/changes/<change-id>/` - folder aktywnej zmiany
+- `context/changes/<change-id>/plan.md` - dane wejściowe implementacji dla dowolnego trybu wykonania
 
-- `context/changes/<change-id>/research.md` - wynik badań wewnętrznych
-- `context/changes/<change-id>/frame.md` - wynik ramowania problemu, gdy jest potrzebny
-- `context/changes/<change-id>/plan.md` - kontrakt implementacyjny poparty dowodami
-- `context/foundation/lessons.md` - powtarzające się reguły i pułapki
-
-Umiejętności nie mogą zapisywać do `context/archive/`. Zarchiwizowane zmiany są niezmienne; jeśli rozwiązana ścieżka docelowa zaczyna się od `context/archive/`, przerwij z komunikatem: „This change is archived. Open a new change with `/10x-new` instead.”
+Umiejętności nie mogą zapisywać do `context/archive/`. Zarchiwizowane zmiany są niezmienne; jeśli rozstrzygnięta ścieżka docelowa zaczyna się od `context/archive/`, przerwij z komunikatem: „This change is archived. Open a new change with `/10x-new` instead.”
 
 <!-- END @przeprogramowani/10x-cli -->
