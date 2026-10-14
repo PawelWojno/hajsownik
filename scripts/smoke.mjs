@@ -70,6 +70,40 @@ function leftFrom(actual) {
   }
 }
 
+// Set by the history steps.
+let otherCategoryId = "";
+let historyEntryId = "";
+let historyLabel = "";
+let cycleId = "";
+let cycleEntryId = "";
+
+function historyEntries(actual) {
+  try {
+    return JSON.parse(actual.body).entries;
+  } catch {
+    return undefined;
+  }
+}
+
+// Current and next month as YYYY-MM, in Warsaw like the server ("today" there is not UTC today).
+const warsawNow = Object.fromEntries(
+  new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Warsaw", year: "numeric", month: "2-digit" })
+    .formatToParts(new Date())
+    .map((part) => [part.type, part.value]),
+);
+const currentMonth = `${warsawNow.year}-${warsawNow.month}`;
+const nextMonth = new Date(Date.UTC(Number(warsawNow.year), Number(warsawNow.month), 1)).toISOString().slice(0, 7);
+const currentMonthLabel = (() => {
+  const label = new Intl.DateTimeFormat("pl-PL", { month: "long", year: "numeric", timeZone: "UTC" }).format(
+    new Date(`${currentMonth}-01T00:00:00Z`),
+  );
+  return label.charAt(0).toUpperCase() + label.slice(1);
+})();
+
+function escapeHtml(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 // Each step: [name, run, expected]. `location` must match exactly, `locationPrefix` only by prefix, and `check`
 // returns a failure message (or null) for anything the status and redirect cannot express.
 const steps = [
@@ -173,6 +207,8 @@ const steps = [
       const actual = await request("/dashboard");
       // The category buttons exist only while the panel is open; the page root lists the ids for this test.
       categoryId = /data-category-ids="([^",]+)/.exec(actual.body)?.[1] ?? "";
+      // A second category, to try moving a cycle entry between categories.
+      otherCategoryId = /data-category-ids="[^",]+,([^",]+)/.exec(actual.body)?.[1] ?? "";
       return actual;
     },
     {
@@ -434,7 +470,126 @@ const steps = [
     () => request("/api/categories/00000000-0000-4000-8000-000000000000", { method: "DELETE" }),
     { status: 404 },
   ],
+  // History steps. They come after the leftFrom assertions above, which assume an empty current month.
+  [
+    "expense endpoint saves an expense for the history steps",
+    () => request("/api/expenses", { method: "POST", json: { amount: "7,77", categoryId } }),
+    { status: 200 },
+  ],
+  [
+    "history endpoint lists the new expense",
+    async () => {
+      const actual = await request(`/api/history?month=${currentMonth}`);
+      const entry = historyEntries(actual)?.find((e) => e.kind === "expense" && e.amountMinor === 777);
+      historyEntryId = entry?.id ?? "";
+      historyLabel = entry?.label ?? "";
+      return actual;
+    },
+    { status: 200, check: () => (historyEntryId ? null : "new expense not in the history list") },
+  ],
+  [
+    "history endpoint changes the amount of an expense",
+    () => request(`/api/expenses/${historyEntryId}`, { method: "PATCH", json: { amount: "8,88" } }),
+    { status: 200 },
+  ],
+  [
+    "history endpoint shows the changed amount",
+    () => request(`/api/history?month=${currentMonth}`),
+    {
+      status: 200,
+      check: (actual) =>
+        historyEntries(actual)?.find((e) => e.id === historyEntryId)?.amountMinor === 888
+          ? null
+          : "amount was not updated",
+    },
+  ],
+  [
+    "history page renders the month label, a category and an amount",
+    () => request(`/history?month=${currentMonth}`),
+    {
+      status: 200,
+      check: (actual) => {
+        if (actual.body.includes("[object Object]")) return "body contains [object Object]";
+        // The Topbar also says "Historia" and "Miesiąc", so check the month label that only the page title renders.
+        if (!actual.body.includes(currentMonthLabel)) return `body has no "${currentMonthLabel}"`;
+        if (!historyLabel || !actual.body.includes(escapeHtml(historyLabel))) return "body has no category name";
+        // formatMinor may separate the currency with a non-breaking space, so compare with plain spaces.
+        return actual.body.replace(/[\u00a0\u202f]/g, " ").includes("8,88") ? null : 'body has no "8,88"';
+      },
+    },
+  ],
+  [
+    "history endpoint deletes an expense",
+    () => request(`/api/expenses/${historyEntryId}`, { method: "DELETE" }),
+    { status: 200 },
+  ],
+  [
+    "history endpoint no longer lists the deleted expense",
+    () => request(`/api/history?month=${currentMonth}`),
+    {
+      status: 200,
+      check: (actual) => {
+        const entries = historyEntries(actual);
+        if (!entries) return "no entries in the response";
+        return entries.some((e) => e.id === historyEntryId) ? "deleted expense is still listed" : null;
+      },
+    },
+  ],
+  [
+    "recurring endpoint creates a definition for the history steps",
+    async () => {
+      const actual = await request("/api/recurring-expenses", {
+        method: "POST",
+        json: { categoryId, amount: "33,33", dayOfMonth: 1, months: 2 },
+      });
+      cycleId = recurringItems(actual)?.find((item) => item.amountMinor === 3333)?.id ?? "";
+      return actual;
+    },
+    { status: 200, check: () => (cycleId ? null : "new definition not in the returned list") },
+  ],
+  [
+    "history endpoint lists the cycle entry of next month",
+    async () => {
+      const actual = await request(`/api/history?month=${nextMonth}`);
+      cycleEntryId = historyEntries(actual)?.find((e) => e.amountMinor === 3333 && e.recurring)?.id ?? "";
+      return actual;
+    },
+    { status: 200, check: () => (cycleEntryId ? null : "cycle entry not in next month's history") },
+  ],
+  [
+    "history endpoint rejects a category change of a cycle entry",
+    () =>
+      request(`/api/expenses/${cycleEntryId}`, {
+        method: "PATCH",
+        json: { amount: "33,33", categoryId: otherCategoryId },
+      }),
+    {
+      status: 400,
+      check: () => (otherCategoryId ? null : "no second category id found in data-category-ids"),
+    },
+  ],
+  [
+    "history endpoint changes the amount of a cycle entry",
+    () => request(`/api/expenses/${cycleEntryId}`, { method: "PATCH", json: { amount: "44,44" } }),
+    { status: 200 },
+  ],
+  [
+    "recurring endpoint stops the definition of the history steps",
+    () => request(`/api/recurring-expenses/${cycleId}`, { method: "DELETE" }),
+    { status: 200, check: (actual) => (recurringItems(actual)?.length === 0 ? null : "definition is still listed") },
+  ],
+  [
+    "dashboard links to the history of the current month",
+    () => request("/dashboard"),
+    {
+      status: 200,
+      check: (actual) =>
+        actual.body.includes(`/history?month=${currentMonth}`) ? null : "no link to the current month's history",
+    },
+  ],
   ["signout clears session", () => request("/api/auth/signout", { method: "POST" }), { status: 302, location: "/" }],
+  ["history page redirects after signout", () => request("/history"), { status: 302, location: "/auth/signin" }],
+  ["history endpoint rejects an anonymous request", () => request("/api/history"), { status: 401 }],
   ["dashboard redirects after signout", () => request("/dashboard"), { status: 302, location: "/auth/signin" }],
   [
     "category settings page redirects after signout",

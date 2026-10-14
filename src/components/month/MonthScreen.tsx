@@ -10,6 +10,8 @@ import type { Category, MonthSummary, RecurringExpense, RecurringIncome } from "
 
 interface Props {
   monthLabel: string;
+  /** The title links to the history of the current month. */
+  historyHref: string;
   initialSummary: MonthSummary;
   categories: Category[];
   /** All recurring expenses; the reminder banner picks the ones whose horizon is about to end. */
@@ -18,7 +20,14 @@ interface Props {
   recurringIncomes: RecurringIncome[];
 }
 
-export default function MonthScreen({ monthLabel, initialSummary, categories, recurring, recurringIncomes }: Props) {
+export default function MonthScreen({
+  monthLabel,
+  historyHref,
+  initialSummary,
+  categories,
+  recurring,
+  recurringIncomes,
+}: Props) {
   const [summary, setSummary] = useState(initialSummary);
   const [mode, setMode] = useState<EntryMode>("expense");
   const [open, setOpen] = useState(false);
@@ -35,7 +44,9 @@ export default function MonthScreen({ monthLabel, initialSummary, categories, re
       data-category-ids={categories.map((category) => category.id).join(",")}
     >
       <h1 className="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-3xl font-bold text-transparent">
-        {monthLabel}
+        <a href={historyHref} className="block min-h-11 hover:underline">
+          {monthLabel}
+        </a>
       </h1>
 
       <RecurringReminders initialItems={recurring} />

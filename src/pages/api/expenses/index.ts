@@ -1,21 +1,13 @@
 import type { APIRoute } from "astro";
-import { z } from "zod";
 import { todayInWarsaw } from "@/lib/dates";
 import { INVALID_REQUEST, SAVE_FAILED, UNAUTHORIZED, json } from "@/lib/http";
 import { buildSavedResponse } from "@/lib/services/month";
 import { createClient } from "@/lib/supabase";
-import { amountField, dateField, descriptionField } from "@/lib/validation";
+import { expenseCreateSchema } from "@/lib/validation";
 
 export const prerender = false;
 
 const FOREIGN_KEY_VIOLATION = "23503";
-
-const expenseSchema = z.object({
-  amount: amountField,
-  categoryId: z.uuid("Wybierz kategorię"),
-  date: dateField.optional(),
-  description: descriptionField.optional(),
-});
 
 export const POST: APIRoute = async (context) => {
   if (!context.locals.user) return json({ error: UNAUTHORIZED }, 401);
@@ -30,7 +22,7 @@ export const POST: APIRoute = async (context) => {
     return json({ error: INVALID_REQUEST }, 400);
   }
 
-  const parsed = expenseSchema.safeParse(body);
+  const parsed = expenseCreateSchema.safeParse(body);
   if (!parsed.success) return json({ error: parsed.error.issues[0].message }, 400);
   const { amount, categoryId, description } = parsed.data;
   const date = parsed.data.date ?? todayInWarsaw();

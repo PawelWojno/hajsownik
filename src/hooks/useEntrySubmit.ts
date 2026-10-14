@@ -1,9 +1,11 @@
 import { useState } from "react";
-import type { ApiError, MonthSummary, SavedEntryResponse } from "@/types";
+import type { ApiError, EntryOkResponse, MonthSummary, SavedEntryResponse } from "@/types";
 
 type EntryKind = "expenses" | "incomes";
 
 export type SubmitResult = { ok: true; data: SavedEntryResponse } | { ok: false; error: string };
+
+export type EditResult = { ok: true } | { ok: false; error: string };
 
 const CONNECTION_ERROR = "Brak połączenia. Spróbuj ponownie.";
 const UNEXPECTED_ERROR = "Nie udało się zapisać. Spróbuj ponownie.";
@@ -27,11 +29,18 @@ function isSavedEntry(value: unknown): value is SavedEntryResponse {
   );
 }
 
+function isEntryOk(value: unknown): value is EntryOkResponse {
+  return isRecord(value) && value.ok === true;
+}
+
 function isApiError(value: unknown): value is ApiError {
   return isRecord(value) && typeof value.error === "string";
 }
 
-/** POSTs an entry to /api/expenses or /api/incomes and reports the outcome; exposes `pending` to block double submits. */
+/**
+ * POSTs an entry to /api/expenses or /api/incomes (`submit`) or edits one with PATCH (`edit`) and reports the outcome;
+ * exposes `pending` to block double submits.
+ */
 export function useEntrySubmit() {
   const [pending, setPending] = useState(false);
 
@@ -54,5 +63,24 @@ export function useEntrySubmit() {
     }
   }
 
-  return { submit, pending };
+  async function edit(kind: EntryKind, id: string, payload: Record<string, string>): Promise<EditResult> {
+    setPending(true);
+    try {
+      const response = await fetch(`/api/${kind}/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body: unknown = await response.json().catch(() => null);
+
+      if (response.ok && isEntryOk(body)) return { ok: true };
+      return { ok: false, error: isApiError(body) ? body.error : UNEXPECTED_ERROR };
+    } catch {
+      return { ok: false, error: CONNECTION_ERROR };
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return { submit, edit, pending };
 }

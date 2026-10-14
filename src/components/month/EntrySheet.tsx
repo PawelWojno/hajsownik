@@ -15,9 +15,9 @@ import {
 import { useEntrySubmit } from "@/hooks/useEntrySubmit";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { formatMonthLabel, todayInWarsaw } from "@/lib/dates";
-import { AMOUNT_ERROR, filterAmountInput, formatMinor, parseAmountToMinor } from "@/lib/money";
+import { AMOUNT_ERROR, filterAmountInput, formatMinor, formatMinorForInput, parseAmountToMinor } from "@/lib/money";
 import { cn } from "@/lib/utils";
-import { INCOME_SOURCES, type Category, type IncomeSource, type MonthSummary } from "@/types";
+import { INCOME_SOURCES, type Category, type HistoryEntry, type IncomeSource, type MonthSummary } from "@/types";
 
 export type EntryMode = "expense" | "income";
 
@@ -28,14 +28,18 @@ interface SheetProps {
   open: boolean;
   mode: EntryMode;
   categories: Category[];
-  /** Current "zostaje", repeated in the header because the panel can cover the sums on a phone. */
-  left: number;
+  /** Current "zostaje", repeated in the header because the panel can cover the sums on a phone. Not used when editing. */
+  left?: number;
+  /** When set, the panel edits this entry instead of adding a new one (`mode` is then ignored). */
+  entry?: HistoryEntry;
   onOpenChange: (open: boolean) => void;
-  onSaved: (summary: MonthSummary) => void;
+  onSaved?: (summary: MonthSummary) => void;
+  /** Called after a saved edit with the entry's date (YYYY-MM-DD), so the list can tell if it left the month. */
+  onEdited?: (date: string) => void;
 }
 
 /** Bottom sheet on phones, side panel from `md` up. Closes on X, swipe, Esc and a tap on the backdrop. */
-export function EntrySheet({ open, mode, categories, left, onOpenChange, onSaved }: SheetProps) {
+export function EntrySheet({ open, mode, categories, left, entry, onOpenChange, onSaved, onEdited }: SheetProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   return (
@@ -58,11 +62,16 @@ export function EntrySheet({ open, mode, categories, left, onOpenChange, onSaved
         <DrawerHeader className="flex-row items-center justify-between pb-2">
           <div className="text-left">
             <DrawerTitle className="text-lg text-white">
-              {mode === "expense" ? "Dodaj wydatek" : "Dodaj przychód"}
+              {entry ? "Edytuj wpis" : mode === "expense" ? "Dodaj wydatek" : "Dodaj przychód"}
             </DrawerTitle>
-            <DrawerDescription className="text-blue-100/70">
-              Zostaje w tym miesiącu: <span className="font-semibold text-white tabular-nums">{formatMinor(left)}</span>
-            </DrawerDescription>
+            {entry || left === undefined ? (
+              <DrawerDescription className="sr-only">{entry?.label}</DrawerDescription>
+            ) : (
+              <DrawerDescription className="text-blue-100/70">
+                Zostaje w tym miesiącu:{" "}
+                <span className="font-semibold text-white tabular-nums">{formatMinor(left)}</span>
+              </DrawerDescription>
+            )}
           </div>
           <DrawerClose asChild>
             <Button
@@ -75,7 +84,19 @@ export function EntrySheet({ open, mode, categories, left, onOpenChange, onSaved
             </Button>
           </DrawerClose>
         </DrawerHeader>
-        <EntryForm key={mode} mode={mode} categories={categories} onSaved={onSaved} />
+        {entry ? (
+          <EditForm
+            key={entry.id}
+            entry={entry}
+            categories={categories}
+            onDone={(date) => {
+              onOpenChange(false);
+              onEdited?.(date);
+            }}
+          />
+        ) : (
+          <EntryForm key={mode} mode={mode} categories={categories} onSaved={onSaved} />
+        )}
       </DrawerContent>
     </Drawer>
   );
@@ -84,7 +105,7 @@ export function EntrySheet({ open, mode, categories, left, onOpenChange, onSaved
 interface FormProps {
   mode: EntryMode;
   categories: Category[];
-  onSaved: (summary: MonthSummary) => void;
+  onSaved?: (summary: MonthSummary) => void;
 }
 
 /** A click anywhere in a date field opens the calendar (by default only the small icon does). */
@@ -149,7 +170,7 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
       // Saved, but the sums are stale: say so, otherwise the user would retry and double the entry.
       setNotice("Zapisano, ale nie udało się odświeżyć sum. Odśwież stronę.");
     } else {
-      onSaved(result.data.summary);
+      onSaved?.(result.data.summary);
       setNotice(
         result.data.inCurrentMonth
           ? `Zapisano ${formatMinor(minor)} · ${label ?? ""}`
@@ -259,6 +280,7 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
                 <input
                   id="description"
                   type="text"
+                  autoComplete="off"
                   maxLength={200}
                   value={description}
                   onChange={(event) => {
@@ -276,6 +298,187 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
       <p role="status" className="min-h-5 text-sm text-emerald-300">
         {notice}
       </p>
+
+      <Button
+        type="submit"
+        disabled={pending}
+        className="min-h-11 w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white hover:bg-purple-500"
+      >
+        {pending ? "Zapisuję…" : "Zapisz"}
+      </Button>
+    </form>
+  );
+}
+
+interface EditFormProps {
+  entry: HistoryEntry;
+  categories: Category[];
+  onDone: (date: string) => void;
+}
+
+/** DD.MM.YYYY from a YYYY-MM-DD date, for the read-only fields of an entry from a cycle. */
+function longDate(date: string): string {
+  return `${date.slice(8)}.${date.slice(5, 7)}.${date.slice(0, 4)}`;
+}
+
+/**
+ * Edit form of one entry. An entry from a cycle keeps its date and category (the database enforces it), so those are
+ * shown as text; its amount, and the description of an expense, can change.
+ */
+function EditForm({ entry, categories, onDone }: EditFormProps) {
+  const today = todayInWarsaw();
+  const isExpense = entry.kind === "expense";
+  const amountRef = useRef<HTMLInputElement>(null);
+  const [amount, setAmount] = useState(formatMinorForInput(entry.amountMinor));
+  const [categoryId, setCategoryId] = useState<string | null>(entry.categoryId);
+  const [source, setSource] = useState<IncomeSource>(
+    INCOME_SOURCES.find((value) => value === entry.label) ?? INCOME_SOURCES[0],
+  );
+  const [date, setDate] = useState(entry.date);
+  const [description, setDescription] = useState(entry.description ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const { edit, pending } = useEntrySubmit();
+
+  useEffect(() => {
+    amountRef.current?.focus();
+  }, []);
+
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (pending) return;
+
+    if (parseAmountToMinor(amount) === null) {
+      setError(AMOUNT_ERROR);
+      return;
+    }
+    if (isExpense && !entry.recurring && !categoryId) {
+      setError("Wybierz kategorię");
+      return;
+    }
+
+    // The raw text is sent as typed; the API converts it to grosze. An entry from a cycle sends only what may change.
+    const payload: Record<string, string> = { amount };
+    if (isExpense) payload.description = description;
+    if (!entry.recurring) {
+      if (date) payload.date = date;
+      if (isExpense) payload.categoryId = categoryId ?? "";
+      else payload.source = source;
+    }
+
+    setError(null);
+    const result = await edit(isExpense ? "expenses" : "incomes", entry.id, payload);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    onDone(entry.recurring ? entry.date : date || entry.date);
+  }
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 overflow-y-auto px-4 pb-4">
+      <div>
+        <label htmlFor="amount" className="mb-1 block text-sm text-blue-100/80">
+          Kwota (zł)
+        </label>
+        <input
+          ref={amountRef}
+          id="amount"
+          name="amount"
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          placeholder="0,00"
+          value={amount}
+          onChange={(event) => {
+            setAmount(filterAmountInput(event.target.value));
+            setError(null);
+          }}
+          className={cn(fieldClass, "text-2xl")}
+        />
+      </div>
+
+      {entry.recurring ? (
+        <dl className="space-y-1 rounded-lg border border-white/10 bg-white/5 p-3 text-sm">
+          <div className="flex justify-between gap-4">
+            <dt className="text-blue-100/70">Data</dt>
+            <dd>{longDate(entry.date)}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-blue-100/70">{isExpense ? "Kategoria" : "Źródło"}</dt>
+            <dd className="text-right break-words">{entry.label}</dd>
+          </div>
+        </dl>
+      ) : (
+        <>
+          {isExpense ? (
+            <CategoryGrid
+              categories={categories}
+              selectedId={categoryId}
+              onSelect={(id) => {
+                setCategoryId(id);
+                setError(null);
+              }}
+            />
+          ) : (
+            <div>
+              <label htmlFor="source" className="mb-1 block text-sm text-blue-100/80">
+                Źródło
+              </label>
+              <select
+                id="source"
+                value={source}
+                onChange={(event) => {
+                  setSource(event.target.value as IncomeSource);
+                }}
+                className={cn(fieldClass, "min-h-11")}
+              >
+                {INCOME_SOURCES.map((value) => (
+                  <option key={value} value={value} className="text-black">
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div>
+            <label htmlFor="date" className="mb-1 block text-sm text-blue-100/80">
+              Data
+            </label>
+            <input
+              id="date"
+              type="date"
+              max={today}
+              value={date}
+              onChange={(event) => {
+                setDate(event.target.value);
+              }}
+              onClick={openDatePicker}
+              className={cn(fieldClass, "min-h-11 [color-scheme:dark]")}
+            />
+          </div>
+        </>
+      )}
+
+      {isExpense && (
+        <div>
+          <label htmlFor="description" className="mb-1 block text-sm text-blue-100/80">
+            Opis (opcjonalnie)
+          </label>
+          <input
+            id="description"
+            type="text"
+            autoComplete="off"
+            maxLength={200}
+            value={description}
+            onChange={(event) => {
+              setDescription(event.target.value);
+            }}
+            className={cn(fieldClass, "min-h-11")}
+          />
+        </div>
+      )}
+
+      <ServerError message={error} />
 
       <Button
         type="submit"

@@ -1,0 +1,142 @@
+---
+import HistoryList from "@/components/history/HistoryList";
+import MonthPicker from "@/components/history/MonthPicker";
+import Topbar from "@/components/Topbar.astro";
+import Layout from "@/layouts/Layout.astro";
+import { currentMonthStart, formatMonthLabel, monthParam, shiftMonth } from "@/lib/dates";
+import { parseHistoryParams, toHistoryQuery } from "@/lib/history-params";
+import { listCategories } from "@/lib/services/categories";
+import { listHistory } from "@/lib/services/entries";
+import { createClient } from "@/lib/supabase";
+import type { HistoryResponse, ManagedCategory } from "@/types";
+
+const params = parseHistoryParams(Astro.url.searchParams);
+const showIncomes = params.typ === "przychody";
+
+let history: HistoryResponse | null = null;
+let categories: ManagedCategory[] = [];
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+if (supabase) {
+  try {
+    // The categories only feed the filter, which exists on the expenses tab.
+    [history, categories] = await Promise.all([
+      listHistory(supabase, toHistoryQuery(params)),
+      showIncomes ? Promise.resolve([]) : listCategories(supabase),
+    ]);
+  } catch {
+    history = null;
+  }
+}
+
+const label = formatMonthLabel(params.month);
+const monthLabel = label.charAt(0).toUpperCase() + label.slice(1);
+
+// Month arrows and tabs keep the rest of the query (tab, and the category filter on the expenses tab).
+function historyHref(month: string, typ = params.typ): string {
+  const query = new URLSearchParams({ typ, month: monthParam(month) });
+  if (typ === "wydatki" && params.categoryId) query.set("kategoria", params.categoryId);
+  return `/history?${query.toString()}`;
+}
+
+const tabClass =
+  "flex min-h-11 flex-1 items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors";
+const activeTabClass = "bg-purple-600 text-white";
+const inactiveTabClass = "text-purple-300 hover:bg-white/10 hover:text-purple-100";
+const arrowClass =
+  "flex min-h-11 min-w-11 items-center justify-center rounded-lg text-2xl text-purple-300 transition-colors hover:bg-white/10 hover:text-purple-100";
+---
+
+<Layout title={`Hajsownik — historia, ${monthLabel}`}>
+  <div class="bg-cosmic min-h-screen p-4 sm:p-8">
+    <Topbar />
+    <div class="mx-auto flex w-full max-w-md flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <a href={historyHref(shiftMonth(params.month, -1))} aria-label="Poprzedni miesiąc" class:list={[arrowClass]}>
+          ‹
+        </a>
+        <h1 class="text-center">
+          <MonthPicker
+            month={params.month}
+            label={monthLabel}
+            currentMonth={currentMonthStart()}
+            typ={params.typ}
+            categoryId={params.categoryId}
+            client:load
+          />
+        </h1>
+        <a href={historyHref(shiftMonth(params.month, 1))} aria-label="Następny miesiąc" class:list={[arrowClass]}>
+          ›
+        </a>
+      </div>
+
+      <nav aria-label="Rodzaj wpisów" class="flex gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
+        <a
+          href={historyHref(params.month, "wydatki")}
+          aria-current={showIncomes ? undefined : "page"}
+          class:list={[tabClass, showIncomes ? inactiveTabClass : activeTabClass]}
+        >
+          Wydatki
+        </a>
+        <a
+          href={historyHref(params.month, "przychody")}
+          aria-current={showIncomes ? "page" : undefined}
+          class:list={[tabClass, showIncomes ? activeTabClass : inactiveTabClass]}
+        >
+          Przychody
+        </a>
+      </nav>
+
+      {!showIncomes && categories.length > 0 && (
+        <form method="get" action="/history" class="flex gap-2">
+          <input type="hidden" name="typ" value="wydatki" />
+          <input type="hidden" name="month" value={monthParam(params.month)} />
+          <label for="kategoria" class="sr-only">
+            Kategoria
+          </label>
+          <select
+            id="kategoria"
+            name="kategoria"
+            class="min-h-11 min-w-0 flex-1 rounded-lg border border-white/20 bg-slate-900 px-3 text-white"
+          >
+            <option value="">Wszystkie kategorie</option>
+            {categories.map((category) => (
+              <option value={category.id} selected={category.id === params.categoryId}>
+                {category.name}
+                {category.archived ? " (zarchiwizowana)" : ""}
+              </option>
+            ))}
+          </select>
+          <!-- Picking a category filters right away (script below); the button is only needed without JavaScript. -->
+          <noscript>
+            <button
+              type="submit"
+              class="min-h-11 rounded-lg bg-purple-600 px-4 text-sm font-medium text-white transition-colors hover:bg-purple-500"
+            >
+              Filtruj
+            </button>
+          </noscript>
+        </form>
+      )}
+    </div>
+
+    <div class="mt-4">
+      {history?.entries ? (
+        <HistoryList initial={history} params={params} categories={categories} client:load />
+      ) : (
+        <p
+          role="alert"
+          class="mx-auto max-w-md rounded-lg border border-red-500/30 bg-red-900/30 px-3 py-2 text-sm text-red-300"
+        >
+          Nie udało się wczytać historii. Odśwież stronę.
+        </p>
+      )}
+    </div>
+  </div>
+</Layout>
+
+<script>
+  document.getElementById("kategoria")?.addEventListener("change", (event) => {
+    (event.currentTarget as HTMLSelectElement).form?.requestSubmit();
+  });
+</script>

@@ -173,11 +173,11 @@ select throws_ok(
   'P0002', null, 'a stopped definition cannot change its amount'
 );
 
--- manual entries stay protected: the DELETE policy only covers generated rows, there is still no UPDATE policy
-with del as (delete from public.incomes where recurring_income_id is null returning 1)
-select is((select count(*) from del), 0::bigint, 'A DELETE on manual incomes matches zero rows (default-deny)');
-with upd as (update public.incomes set amount_minor = 1 returning 1)
-select is((select count(*) from upd), 0::bigint, 'A UPDATE on incomes matches zero rows (default-deny)');
+-- S-06: manual incomes can be edited and deleted too (the manual future entry from above is the target)
+with upd as (update public.incomes set amount_minor = 112 where recurring_income_id is null and amount_minor = 111 returning 1)
+select is((select count(*) from upd), 1::bigint, 'A can UPDATE a manual income (household UPDATE policy)');
+with del as (delete from public.incomes where recurring_income_id is null and amount_minor = 112 returning 1)
+select is((select count(*) from del), 1::bigint, 'A can DELETE a manual income (household DELETE policy)');
 
 -- an identical active definition from the same month is a double submit; a stopped one no longer blocks
 select lives_ok(
@@ -265,7 +265,7 @@ with del as (
                        where x.recurring_income_id = (select id from public.recurring_incomes where day_of_month = 15))
   returning 1
 )
-select is((select count(*) from del), 1::bigint, 'A can delete a generated entry directly (narrow DELETE policy)');
+select is((select count(*) from del), 1::bigint, 'A can delete a generated entry directly (household DELETE policy)');
 
 -- D4: a lapsed definition restarts at the current month
 select lives_ok(

@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(29);
+select plan(30);
 
 -- Fixture: two real signups (exercises on_auth_user_created -> households + default categories).
 insert into auth.users (id, email, raw_user_meta_data) values
@@ -97,11 +97,17 @@ select throws_ok(
   'income source must come from the predefined list'
 );
 
--- A's own rows exist, so 0 affected rows proves default-deny (no UPDATE/DELETE policy), not invisibility.
-with upd as (update public.expenses set amount_minor = 1 returning 1)
-select is((select count(*) from upd), 0::bigint, 'A UPDATE on own expenses matches zero rows (default-deny)');
-with del as (delete from public.expenses returning 1)
-select is((select count(*) from del), 0::bigint, 'A DELETE on own expenses matches zero rows (default-deny)');
+-- S-06: A may edit and delete their own manual entries. A dedicated row, targeted by id, keeps the other
+-- assertions (3 expenses, month sums) untouched.
+select lives_ok(
+  $$ insert into public.expenses (id, category_id, amount_minor, spent_on)
+     values ('cccccccc-cccc-cccc-cccc-cccccccccccc', (select cid from ids where email = 'a@example.com'), 5, '2026-10-06') $$,
+  'A can insert a throwaway expense for the edit / delete checks'
+);
+with upd as (update public.expenses set amount_minor = 6 where id = 'cccccccc-cccc-cccc-cccc-cccccccccccc' returning 1)
+select is((select count(*) from upd), 1::bigint, 'A can UPDATE their own manual expense');
+with del as (delete from public.expenses where id = 'cccccccc-cccc-cccc-cccc-cccccccccccc' returning 1)
+select is((select count(*) from del), 1::bigint, 'A can DELETE their own manual expense');
 
 select is((select count(*) from public.expenses), 3::bigint, 'A sees exactly their 3 expenses');
 
