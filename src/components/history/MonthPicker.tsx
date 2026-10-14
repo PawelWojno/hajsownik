@@ -65,7 +65,10 @@ export default function MonthPicker({ month, label, currentMonth, typ, categoryI
         <ChevronDown aria-hidden="true" className="size-5 text-purple-300" />
       </button>
 
-      <Drawer open={open} onOpenChange={setOpen} direction={isDesktop ? "right" : "bottom"}>
+      {/* autoFocus: vaul skips moving focus into the panel by default, so the title button kept focus while the dialog
+          marked the rest of the page aria-hidden (Chrome blocks that and warns). Focus now moves into the panel and
+          returns to the title on close. */}
+      <Drawer open={open} onOpenChange={setOpen} direction={isDesktop ? "right" : "bottom"} autoFocus>
         <DrawerContent className="border-white/10 bg-slate-900 text-white data-[vaul-drawer-direction=bottom]:max-h-[70dvh] data-[vaul-drawer-direction=right]:sm:max-w-sm">
           <DrawerHeader className="flex-row items-center justify-between pb-2">
             <div className="text-left">
