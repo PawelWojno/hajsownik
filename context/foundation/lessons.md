@@ -22,3 +22,10 @@
 - **Problem**: Podwójny submit lub dwie karty wywołują tworzenie dwa razy: powstają dwie identyczne definicje i podwójna liczba wpisów, co zawyża sumy miesiąca, a zatrzymanie jednej zostawia drugą. Sama blokada przycisku nie chroni przed dwiema kartami ani ręcznym wywołaniem API.
 - **Rule**: Każdą operację tworzącą zabezpiecz dwiema warstwami: wyłącz przycisk na czas żądania (stan `pending` w hooku) i dodaj w bazie częściowy indeks unikalny na parametrach definicji dla aktywnych wierszy (np. `where stopped_at is null`), z mapowaniem błędu 23505 na komunikat po polsku w API.
 - **Applies to**: plan, plan-review, implement, impl-review
+
+## Endpoint formularza z przekierowaniem potrzebuje GET, który tylko przekierowuje
+
+- **Context**: src/pages/api/auth/*.ts (formularze POST z redirectem), src/lib/auth-get.ts
+- **Problem**: Przeglądarka zapamiętuje endpoint POST jako pierwotny adres strony, na którą przekierował. „Wersja na komputer” w Brave/Chrome na Androidzie przeładowuje go jako GET, a trasa bez GET zwraca 404.
+- **Rule**: Każdy nowy endpoint formularza HTML (method="POST" + redirect) eksportuje `GET = redirectOnGet` z `src/lib/auth-get.ts` albo własny GET, który tylko przekierowuje na stały adres, z `no-store`. GET nigdy nie wykonuje akcji ani nie czyta danych wejściowych.
+- **Applies to**: plan, implement, impl-review
