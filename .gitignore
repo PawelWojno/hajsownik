@@ -38,3 +38,5 @@ supabase/snippets/
 
 # Playwright MCP plugin output (snapshots, console logs, screenshots)
 .playwright-mcp/
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
