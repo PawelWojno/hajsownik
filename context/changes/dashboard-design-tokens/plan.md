@@ -79,6 +79,7 @@ Ustawić wartości tokenów tak, by `.dark` odtwarzało dzisiejszy wygląd, a no
 **Intent**: przenieść dzisiejsze kolory widoku do tokenów w `:root` i `.dark`, publikując nowe w `@theme inline`.
 
 **Contract**:
+
 - `--primary` (+ `--primary-foreground`) = oklch odpowiadające `purple-600`; `--card`/`--popover` = powierzchnie dzisiejszego `white/10` i `slate-900`; `--border`, `--input`, `--muted-foreground` (zastępuje `blue-100/70..90`), `--ring` (fiolet jak `purple-400`).
 - Nowe tokeny z parą `-foreground`: `--success` (kwota dodatnia, dziś `emerald-300`), `--warning` (przypomnienia, dziś `amber-*`); `--title-from`, `--title-to` (gradient tytułu); tokeny tła strony zastępujące 3 hexy w `@utility bg-cosmic`.
 - `color-scheme: dark` dla `.dark` w CSS (zastępuje klasy `[color-scheme:dark]`).
@@ -132,6 +133,14 @@ Zastąpić literały tokenami i komponentami (C1, C2).
 **Intent**: `fieldClass` → `Input`/`Select`/`Label` (6 pól i 2 selecty, w obu formularzach); karta sum → `Card`; `Button` bez nadpisań koloru; fokus `focus-visible:ring-ring/50` na „Wyloguj” i „Więcej opcji”.
 
 **Contract**: zachować `data-category-ids`, `aria-*` i `id` pól (smoke test i dostępność); usunąć `focus:ring-purple-400` (komponent `Input` ma `focus-visible`). Do `Input` i `Select` przekazać `className="dark:bg-card"`, bo domyślne `dark:bg-input/30` daje ok. 6% bieli zamiast dzisiejszych 10% (impl-review fazy 2, F1).
+
+#### Addendum (decyzje po porównaniu screenów; impl-review fazy 3, F1 i F2)
+
+**File**: `src/styles/global.css`, `src/components/ui/button.tsx`, `context/changes/dashboard-design-tokens/tokens.md`
+
+**Intent**: przywrócić wygląd sprzed zmiany tam, gdzie domyślne wartości startera shadcn go zmieniały.
+
+**Contract**: tokeny `--link`/`--link-hover` (dawne `purple-300`/`purple-100`: linki, menu, „Wyloguj”, „Dodaj przychód”, „Więcej opcji”); `--accent` w `.dark` = `oklch(1 0 0 / 10%)` (dawne `hover:bg-white/10`) i wariant `ghost` z `dark:hover:bg-accent` zamiast `/50`; token `--primary-hover` (dawne `hover:bg-purple-500`) i wariant `default` z `hover:bg-primary-hover` zamiast `hover:bg-primary/90`. `--accent` i oba warianty `Button` są globalne, więc dotyczą też widoków poza dashboardem (history i settings obejrzane po zmianie `--accent`).
 
 ### Success Criteria:
 
@@ -264,7 +273,7 @@ Brak danych do migracji. Wycofanie: revert commitów faz; `<html class="dark">` 
 
 #### Manual
 
-- [x] 1.3 Select działa w wyspie React i w Drawer (albo decyzja o natywnym fallbacku)
+- [x] 1.3 Select działa w wyspie React i w Drawer (albo decyzja o natywnym fallbacku) — f44bec5
 
 ### Phase 2: Wartości tokenów
 
@@ -283,14 +292,14 @@ Brak danych do migracji. Wycofanie: revert commitów faz; `<html class="dark">` 
 
 #### Automated
 
-- [x] 3.1 Skan hardcodów na 7 plikach widoku zwraca 0 trafień
-- [x] 3.2 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build`
-- [x] 3.3 Smoke test przechodzi: `npm run smoke`
+- [x] 3.1 Skan hardcodów na 7 plikach widoku zwraca 0 trafień — f44bec5
+- [x] 3.2 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build` — f44bec5
+- [x] 3.3 Smoke test przechodzi: `npm run smoke` — f44bec5
 
 #### Manual
 
-- [x] 3.4 Zrzuty desktop i 390 px zgodne z wyglądem sprzed zmiany
-- [x] 3.5 Fokus klawiatury widoczny na każdej kontrolce, w tym „Wyloguj” i „Więcej opcji”
+- [x] 3.4 Zrzuty desktop i 390 px zgodne z wyglądem sprzed zmiany — f44bec5
+- [x] 3.5 Fokus klawiatury widoczny na każdej kontrolce, w tym „Wyloguj” i „Więcej opcji” — f44bec5
 
 ### Phase 4: Stany i bramka wizualna
 
