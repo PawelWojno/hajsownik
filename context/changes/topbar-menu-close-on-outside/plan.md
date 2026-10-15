@@ -162,10 +162,10 @@ Brak. Wycofanie: revert commitu fazy 1.
 
 #### Automated
 
-- [x] 2.1 Skrypty przeglądarkowe Playwright potwierdzają zamykanie po kliknięciu poza i po Esc (skrypt i zrzuty zapisane w `context/changes/topbar-menu-close-on-outside/screenshots/`)
+- [x] 2.1 Skrypty przeglądarkowe Playwright potwierdzają zamykanie po kliknięciu poza i po Esc (skrypt i zrzuty zapisane w `context/changes/topbar-menu-close-on-outside/screenshots/`) — fafdaf8
 
 #### Manual
 
-- [x] 2.2 Hamburger na telefonie (390 px): klik poza, Esc i Tab poza menu zamykają menu; zagnieżdżone „Ustawienia” działa
-- [x] 2.3 Desktop („Ustawienia”): klik poza, Esc i Tab poza menu zamykają menu
-- [x] 2.4 Wygląd otwartego menu (zrzut „po”) zgodny z dotychczasowym, bez nowych elementów
+- [x] 2.2 Hamburger na telefonie (390 px): klik poza, Esc i Tab poza menu zamykają menu; zagnieżdżone „Ustawienia” działa — fafdaf8
+- [x] 2.3 Desktop („Ustawienia”): klik poza, Esc i Tab poza menu zamykają menu — fafdaf8
+- [x] 2.4 Wygląd otwartego menu (zrzut „po”) zgodny z dotychczasowym, bez nowych elementów — fafdaf8
