@@ -305,12 +305,12 @@ Brak danych do migracji. Wycofanie: revert commitów faz; `<html class="dark">` 
 
 #### Automated
 
-- [x] 4.1 Kitchen-sink zwraca 404 w buildzie produkcyjnym (`npm run preview`)
+- [x] 4.1 Kitchen-sink zwraca 404 w buildzie produkcyjnym (`npm run preview`) — 481a479
 
 #### Manual
 
-- [x] 4.2 7-stanowa macierz: każda komórka pokazana lub N/A z powodem
-- [x] 4.3 Zrzuty kitchen-sink desktop i 390 px zapisane w folderze zmiany
+- [x] 4.2 7-stanowa macierz: każda komórka pokazana lub N/A z powodem — 481a479
+- [x] 4.3 Zrzuty kitchen-sink desktop i 390 px zapisane w folderze zmiany — 481a479
 
 ### Phase 5: Zabezpieczenie
 
