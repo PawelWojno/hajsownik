@@ -79,7 +79,7 @@ const scriptsConfig = defineConfig({
 
 export default defineConfig(
   includeIgnoreFile(gitignorePath),
-  { ignores: [".agents/**", ".claude/skills/**"] },
+  { ignores: [".agents/**", ".claude/skills/**", "context/**/screenshots/**"] },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
