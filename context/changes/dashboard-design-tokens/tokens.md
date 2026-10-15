@@ -1,0 +1,26 @@
+# Tokens: dashboard-design-tokens
+
+Source of values: Tailwind v4 palette used by the dashboard view before this change. Defined in `src/styles/global.css` (`:root` = light, `.dark` = dark; the app applies `.dark` permanently on `<html>`). Light values are not visually verified in this change.
+
+| Token | Light (`:root`) | Dark (`.dark`) | Replaces |
+| --- | --- | --- | --- |
+| `--primary` | `oklch(0.558 0.288 302.321)` | same | `bg-purple-600` (accent) |
+| `--primary-foreground` | `oklch(1 0 0)` | same | `text-white` on accent |
+| `--background` | `oklch(1 0 0)` (unchanged) | `oklch(0.166 0.026 269.371)` | page background (`#0a0e1a`) |
+| `--foreground` | unchanged | `oklch(1 0 0)` | `text-white` |
+| `--card` / `--card-foreground` | `oklch(1 0 0)` (unchanged) / unchanged | `oklch(1 0 0 / 10%)` / `oklch(1 0 0)` | `bg-white/10` |
+| `--popover` / `--popover-foreground` | unchanged | `oklch(0.208 0.042 265.755)` / `oklch(1 0 0)` | `bg-slate-900` (drawer, menus) |
+| `--muted-foreground` | unchanged | `oklch(0.932 0.032 255.585 / 80%)` | `text-blue-100/70..90` |
+| `--border` | unchanged | `oklch(1 0 0 / 10%)` (unchanged) | `border-white/10` |
+| `--input` | unchanged | `oklch(1 0 0 / 20%)` | field border `white/20` |
+| `--ring` | `oklch(0.714 0.203 305.504)` | same | `ring-purple-400` |
+| `--success` / `--success-foreground` | `oklch(0.508 0.118 165.612)` / `oklch(1 0 0)` | `oklch(0.845 0.143 164.978)` / `oklch(0.145 0 0)` | `text-emerald-300` (positive amount) |
+| `--warning` (background) | `oklch(0.962 0.059 95.617)` | `oklch(0.414 0.112 45.904 / 20%)` | `bg-amber-900/20` |
+| `--warning-foreground` (text) | `oklch(0.414 0.112 45.904)` | `oklch(0.962 0.059 95.617)` | `text-amber-100` |
+| `--warning-border` | `oklch(0.879 0.169 91.605 / 60%)` | `oklch(0.879 0.169 91.605 / 30%)` | `border-amber-300/30` |
+| `--title-from` | `oklch(0.488 0.243 264.376)` | `oklch(0.882 0.059 254.128)` | `from-blue-200` |
+| `--title-to` | `oklch(0.496 0.265 301.924)` | `oklch(0.902 0.063 306.703)` | `to-purple-200` |
+| `--cosmic-edge` | `oklch(0.166 0.026 269.371)` | same | `#0a0e1a` in `bg-cosmic` |
+| `--cosmic-mid` | `oklch(0.201 0.041 269.806)` | same | `#0f1529` in `bg-cosmic` |
+
+Other changes: `.dark` sets `color-scheme: dark` (replaces `[color-scheme:dark]` in views); `@utility bg-cosmic` reads `var(--cosmic-edge/--cosmic-mid)`; all new tokens are published in `@theme inline` as `--color-*`. Sidebar and chart tokens are untouched.

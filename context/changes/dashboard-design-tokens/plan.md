@@ -103,6 +103,7 @@ Ustawić wartości tokenów tak, by `.dark` odtwarzało dzisiejszy wygląd, a no
 
 - Dashboard wygląda jak przed zmianą (ciemny, fioletowy akcent), Drawer ciemny bez nadpisań
 - Zrzuty auth/settings/history bez regresji po zmianie `--primary`
+- EntrySheet po podbiciu Radix pod vaul: zapis, zamknięcie X i Esc, wybór daty nie zamyka panelu
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation from the human that the manual testing was successful before proceeding to the next phase. Phase blocks use plain bullets — the corresponding `- [ ]` checkboxes for these items live in the `## Progress` section at the bottom of the plan.
 
@@ -258,8 +259,8 @@ Brak danych do migracji. Wycofanie: revert commitów faz; `<html class="dark">` 
 
 #### Automated
 
-- [x] 1.1 Lint i build przechodzą: `npm run lint && npm run build`
-- [x] 1.2 Pliki `ui/input.tsx`, `ui/select.tsx`, `ui/card.tsx`, `ui/label.tsx` istnieją
+- [x] 1.1 Lint i build przechodzą: `npm run lint && npm run build` — 4cdf8ab
+- [x] 1.2 Pliki `ui/input.tsx`, `ui/select.tsx`, `ui/card.tsx`, `ui/label.tsx` istnieją — 4cdf8ab
 
 #### Manual
 
@@ -269,13 +270,14 @@ Brak danych do migracji. Wycofanie: revert commitów faz; `<html class="dark">` 
 
 #### Automated
 
-- [ ] 2.1 Build i typy przechodzą: `npm run build && npx astro check`
-- [ ] 2.2 `global.css` nie zawiera hexów poza blokiem wartości tokenów (skan)
+- [x] 2.1 Build i typy przechodzą: `npm run build && npx astro check`
+- [x] 2.2 `global.css` nie zawiera hexów poza blokiem wartości tokenów (skan)
 
 #### Manual
 
-- [ ] 2.3 Dashboard wygląda jak przed zmianą (ciemny, fioletowy akcent), Drawer ciemny bez nadpisań
-- [ ] 2.4 Zrzuty auth/settings/history bez regresji po zmianie `--primary`
+- [x] 2.3 Dashboard wygląda jak przed zmianą (ciemny, fioletowy akcent), Drawer ciemny bez nadpisań
+- [x] 2.4 Zrzuty auth/settings/history bez regresji po zmianie `--primary`
+- [x] 2.5 EntrySheet po podbiciu Radix pod vaul: zapis, zamknięcie X i Esc, wybór daty nie zamyka panelu
 
 ### Phase 3: Widok dashboard
 
