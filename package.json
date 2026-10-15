@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "check:ui": "node scripts/check-ui-tokens.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
@@ -28,6 +29,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.14.0",
+    "radix-ui": "^1.8.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "tailwind-merge": "^3.5.0",
@@ -58,7 +60,8 @@
   },
   "lint-staged": {
     "*.{ts,tsx,astro}": [
-      "eslint --fix"
+      "eslint --fix",
+      "node scripts/check-ui-tokens.mjs"
     ],
     "*.{json,css,md}": [
       "prettier --write"

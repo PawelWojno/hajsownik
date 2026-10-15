@@ -28,7 +28,7 @@ export function RecurringReminders({ initialItems }: Props) {
       {due.map((item) => {
         const itemLabel = `${item.categoryName}, ${formatMinor(item.amountMinor)}`;
         return (
-          <div key={item.id} className="rounded-xl border border-amber-300/30 bg-amber-900/20 p-3 text-amber-100">
+          <div key={item.id} className="border-warning-border bg-warning text-warning-foreground rounded-xl border p-3">
             <p className="text-sm">
               <span className="font-semibold">
                 {item.categoryName}, {formatMinor(item.amountMinor)}, dzień {item.dayOfMonth}:
@@ -41,7 +41,7 @@ export function RecurringReminders({ initialItems }: Props) {
                 disabled={pending}
                 aria-label={`Przedłuż o ${EXTEND_MONTHS} mies.: ${itemLabel}`}
                 onClick={() => void extend(item.id, EXTEND_MONTHS)}
-                className="min-h-11 bg-purple-600 text-white hover:bg-purple-500"
+                className="min-h-11"
               >
                 Przedłuż o {EXTEND_MONTHS} mies.
               </Button>
@@ -51,7 +51,7 @@ export function RecurringReminders({ initialItems }: Props) {
                 disabled={pending}
                 aria-label={`Nie przypominaj: ${itemLabel}`}
                 onClick={() => void dismissReminder(item.id)}
-                className="min-h-11 text-amber-100 hover:bg-white/10 hover:text-white"
+                className="text-warning-foreground min-h-11"
               >
                 Nie przypominaj
               </Button>

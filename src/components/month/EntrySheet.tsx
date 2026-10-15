@@ -12,6 +12,9 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEntrySubmit } from "@/hooks/useEntrySubmit";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { formatMonthLabel, todayInWarsaw } from "@/lib/dates";
@@ -21,8 +24,10 @@ import { INCOME_SOURCES, type Category, type HistoryEntry, type IncomeSource, ty
 
 export type EntryMode = "expense" | "income";
 
-const fieldClass =
-  "w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/40 transition-colors focus:ring-2 focus:ring-purple-400 focus:outline-none";
+/** The select hands back a plain string; only a known income source is accepted. */
+function parseIncomeSource(value: string): IncomeSource | undefined {
+  return INCOME_SOURCES.find((source) => source === value);
+}
 
 interface SheetProps {
   open: boolean;
@@ -48,7 +53,7 @@ export function EntrySheet({ open, mode, categories, left, entry, onOpenChange, 
     // resizes the layout for the keyboard instead (see interactive-widget in Layout.astro).
     <Drawer open={open} onOpenChange={onOpenChange} direction={isDesktop ? "right" : "bottom"} repositionInputs={false}>
       <DrawerContent
-        className="border-white/10 bg-slate-900 text-white data-[vaul-drawer-direction=bottom]:max-h-[70dvh] data-[vaul-drawer-direction=right]:sm:max-w-sm"
+        className="border-border bg-popover text-popover-foreground data-[vaul-drawer-direction=bottom]:max-h-[70dvh] data-[vaul-drawer-direction=right]:sm:max-w-sm"
         // The form focuses the amount field itself; stop the dialog from focusing the close button first.
         onOpenAutoFocus={(event) => {
           event.preventDefault();
@@ -61,25 +66,20 @@ export function EntrySheet({ open, mode, categories, left, entry, onOpenChange, 
       >
         <DrawerHeader className="flex-row items-center justify-between pb-2">
           <div className="text-left">
-            <DrawerTitle className="text-lg text-white">
+            <DrawerTitle className="text-lg">
               {entry ? "Edytuj wpis" : mode === "expense" ? "Dodaj wydatek" : "Dodaj przychód"}
             </DrawerTitle>
             {entry || left === undefined ? (
               <DrawerDescription className="sr-only">{entry?.label}</DrawerDescription>
             ) : (
-              <DrawerDescription className="text-blue-100/70">
+              <DrawerDescription>
                 Zostaje w tym miesiącu:{" "}
-                <span className="font-semibold text-white tabular-nums">{formatMinor(left)}</span>
+                <span className="text-foreground font-semibold tabular-nums">{formatMinor(left)}</span>
               </DrawerDescription>
             )}
           </div>
           <DrawerClose asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Zamknij"
-              className="min-h-11 min-w-11 text-white hover:bg-white/10"
-            >
+            <Button variant="ghost" size="icon" aria-label="Zamknij" className="min-h-11 min-w-11">
               <X className="size-5" />
             </Button>
           </DrawerClose>
@@ -190,10 +190,10 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 overflow-y-auto px-4 pb-4">
       <div>
-        <label htmlFor="amount" className="mb-1 block text-sm text-blue-100/80">
+        <Label htmlFor="amount" className="text-muted-foreground mb-1 font-normal">
           Kwota (zł)
-        </label>
-        <input
+        </Label>
+        <Input
           ref={amountRef}
           id="amount"
           name="amount"
@@ -206,7 +206,7 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
             setAmount(filterAmountInput(event.target.value));
             setError(null);
           }}
-          className={cn(fieldClass, "text-2xl")}
+          className="dark:bg-card h-auto py-2 text-2xl md:text-2xl"
         />
       </div>
 
@@ -221,23 +221,27 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
         />
       ) : (
         <div>
-          <label htmlFor="source" className="mb-1 block text-sm text-blue-100/80">
+          <Label htmlFor="source" className="text-muted-foreground mb-1 font-normal">
             Źródło
-          </label>
-          <select
-            id="source"
+          </Label>
+          <Select
             value={source}
-            onChange={(event) => {
-              setSource(event.target.value as IncomeSource);
+            onValueChange={(value) => {
+              setSource(parseIncomeSource(value) ?? source);
             }}
-            className={cn(fieldClass, "min-h-11")}
           >
-            {INCOME_SOURCES.map((value) => (
-              <option key={value} value={value} className="text-black">
-                {value}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="source" className="dark:bg-card min-h-11 w-full">
+              <SelectValue />
+            </SelectTrigger>
+            {/* popper: the list opens under the field instead of over it, which suits a panel on a phone. */}
+            <SelectContent position="popper">
+              {INCOME_SOURCES.map((value) => (
+                <SelectItem key={value} value={value}>
+                  {value}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
 
@@ -248,7 +252,7 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
           onClick={() => {
             setShowMore(!showMore);
           }}
-          className="flex min-h-11 items-center gap-1 text-sm text-purple-300 hover:text-purple-100"
+          className="text-link hover:text-link-hover focus-visible:ring-ring/50 flex min-h-11 items-center gap-1 rounded-md text-sm outline-none focus-visible:ring-3"
         >
           Więcej opcji
           <ChevronDown className={cn("size-4 transition-transform", showMore && "rotate-180")} />
@@ -256,10 +260,10 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
         {showMore && (
           <div className="mt-2 flex flex-col gap-3">
             <div>
-              <label htmlFor="date" className="mb-1 block text-sm text-blue-100/80">
+              <Label htmlFor="date" className="text-muted-foreground mb-1 font-normal">
                 Data
-              </label>
-              <input
+              </Label>
+              <Input
                 id="date"
                 type="date"
                 max={today}
@@ -268,16 +272,15 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
                   setDate(event.target.value);
                 }}
                 onClick={openDatePicker}
-                // color-scheme: dark makes the browser draw the calendar icon and the picker for a dark background.
-                className={cn(fieldClass, "min-h-11 [color-scheme:dark]")}
+                className="dark:bg-card min-h-11"
               />
             </div>
             {mode === "expense" && (
               <div>
-                <label htmlFor="description" className="mb-1 block text-sm text-blue-100/80">
+                <Label htmlFor="description" className="text-muted-foreground mb-1 font-normal">
                   Opis (opcjonalnie)
-                </label>
-                <input
+                </Label>
+                <Input
                   id="description"
                   type="text"
                   autoComplete="off"
@@ -286,7 +289,7 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
                   onChange={(event) => {
                     setDescription(event.target.value);
                   }}
-                  className={cn(fieldClass, "min-h-11")}
+                  className="dark:bg-card min-h-11"
                 />
               </div>
             )}
@@ -295,15 +298,11 @@ function EntryForm({ mode, categories, onSaved }: FormProps) {
       </div>
 
       <ServerError message={error} />
-      <p role="status" className="min-h-5 text-sm text-emerald-300">
+      <p role="status" className="text-success min-h-5 text-sm">
         {notice}
       </p>
 
-      <Button
-        type="submit"
-        disabled={pending}
-        className="min-h-11 w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white hover:bg-purple-500"
-      >
+      <Button type="submit" disabled={pending} className="min-h-11 w-full rounded-lg">
         {pending ? "Zapisuję…" : "Zapisz"}
       </Button>
     </form>
@@ -377,10 +376,10 @@ function EditForm({ entry, categories, onDone }: EditFormProps) {
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 overflow-y-auto px-4 pb-4">
       <div>
-        <label htmlFor="amount" className="mb-1 block text-sm text-blue-100/80">
+        <Label htmlFor="amount" className="text-muted-foreground mb-1 font-normal">
           Kwota (zł)
-        </label>
-        <input
+        </Label>
+        <Input
           ref={amountRef}
           id="amount"
           name="amount"
@@ -393,18 +392,18 @@ function EditForm({ entry, categories, onDone }: EditFormProps) {
             setAmount(filterAmountInput(event.target.value));
             setError(null);
           }}
-          className={cn(fieldClass, "text-2xl")}
+          className="dark:bg-card h-auto py-2 text-2xl md:text-2xl"
         />
       </div>
 
       {entry.recurring ? (
-        <dl className="space-y-1 rounded-lg border border-white/10 bg-white/5 p-3 text-sm">
+        <dl className="border-border bg-card space-y-1 rounded-lg border p-3 text-sm">
           <div className="flex justify-between gap-4">
-            <dt className="text-blue-100/70">Data</dt>
+            <dt className="text-muted-foreground">Data</dt>
             <dd>{longDate(entry.date)}</dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-blue-100/70">{isExpense ? "Kategoria" : "Źródło"}</dt>
+            <dt className="text-muted-foreground">{isExpense ? "Kategoria" : "Źródło"}</dt>
             <dd className="text-right break-words">{entry.label}</dd>
           </div>
         </dl>
@@ -421,30 +420,34 @@ function EditForm({ entry, categories, onDone }: EditFormProps) {
             />
           ) : (
             <div>
-              <label htmlFor="source" className="mb-1 block text-sm text-blue-100/80">
+              <Label htmlFor="source" className="text-muted-foreground mb-1 font-normal">
                 Źródło
-              </label>
-              <select
-                id="source"
+              </Label>
+              <Select
                 value={source}
-                onChange={(event) => {
-                  setSource(event.target.value as IncomeSource);
+                onValueChange={(value) => {
+                  setSource(parseIncomeSource(value) ?? source);
                 }}
-                className={cn(fieldClass, "min-h-11")}
               >
-                {INCOME_SOURCES.map((value) => (
-                  <option key={value} value={value} className="text-black">
-                    {value}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="source" className="dark:bg-card min-h-11 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                {/* popper: the list opens under the field instead of over it, which suits a panel on a phone. */}
+                <SelectContent position="popper">
+                  {INCOME_SOURCES.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
           <div>
-            <label htmlFor="date" className="mb-1 block text-sm text-blue-100/80">
+            <Label htmlFor="date" className="text-muted-foreground mb-1 font-normal">
               Data
-            </label>
-            <input
+            </Label>
+            <Input
               id="date"
               type="date"
               max={today}
@@ -453,7 +456,7 @@ function EditForm({ entry, categories, onDone }: EditFormProps) {
                 setDate(event.target.value);
               }}
               onClick={openDatePicker}
-              className={cn(fieldClass, "min-h-11 [color-scheme:dark]")}
+              className="dark:bg-card min-h-11"
             />
           </div>
         </>
@@ -461,10 +464,10 @@ function EditForm({ entry, categories, onDone }: EditFormProps) {
 
       {isExpense && (
         <div>
-          <label htmlFor="description" className="mb-1 block text-sm text-blue-100/80">
+          <Label htmlFor="description" className="text-muted-foreground mb-1 font-normal">
             Opis (opcjonalnie)
-          </label>
-          <input
+          </Label>
+          <Input
             id="description"
             type="text"
             autoComplete="off"
@@ -473,18 +476,14 @@ function EditForm({ entry, categories, onDone }: EditFormProps) {
             onChange={(event) => {
               setDescription(event.target.value);
             }}
-            className={cn(fieldClass, "min-h-11")}
+            className="dark:bg-card min-h-11"
           />
         </div>
       )}
 
       <ServerError message={error} />
 
-      <Button
-        type="submit"
-        disabled={pending}
-        className="min-h-11 w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white hover:bg-purple-500"
-      >
+      <Button type="submit" disabled={pending} className="min-h-11 w-full rounded-lg">
         {pending ? "Zapisuję…" : "Zapisz"}
       </Button>
     </form>

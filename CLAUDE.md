@@ -52,9 +52,12 @@ Full server-side rendering (`output: "server"` in astro.config.mjs). All pages a
 
 ## UI
 
-- Colors and corner radii are defined only in `src/styles/global.css` (`:root`, `.dark`, `@theme inline`). A new color = a new token in that file (together with its `-foreground` pair), published in `@theme inline`. Never hardcode colors in views (`bg-purple-600`, `text-emerald-300`, `#...`); use semantic classes (`bg-primary`, `text-muted-foreground`, `text-destructive`).
+- Colors and corner radii are defined only in `src/styles/global.css` (`:root`, `.dark`, `@theme inline`). A new color = a new token in that file (a background role gets its `-foreground` pair; text, border and page-background tokens such as `link`, `warning-border` or `cosmic-*` need none), published in `@theme inline`. Never hardcode colors in views (`bg-purple-600`, `text-emerald-300`, `#...`); use semantic classes (`bg-primary`, `text-muted-foreground`, `text-destructive`).
 - Base components live in `src/components/ui/`. Before writing your own button, input, card or dialog, check that directory. Add missing components from the shadcn registry (`npx shadcn@latest add <name>`) instead of writing them from scratch.
-- Fix a styling problem in the component it affects. Do not change global tokens to mask a local bug.
+- Tokens: `src/styles/global.css`. Besides the shadcn set it defines `primary-hover`, `link`/`link-hover` (accent text), `success`, `warning`, `title-from`/`title-to`, `cosmic-*` (page background); each value and what it replaced is listed in `context/changes/dashboard-design-tokens/tokens.md`. The app is dark by design: `<html class="dark">` in `Layout.astro`; `.dark` holds the dark values, `:root` the light ones (no theme switch yet).
+- No palette classes (`bg-purple-600`, `text-blue-100/80`), hex/rgb/oklch values or arbitrary `[13px]` values in views. `npm run check:ui` scans the views already migrated to tokens (`CLEAN_PATHS` in `scripts/check-ui-tokens.mjs`); the pre-commit hook runs the same check on staged files from that list. When you migrate another view, add it to `CLEAN_PATHS`. Corner radii: `rounded-lg`/`rounded-xl` follow `--radius`, but scale classes such as `rounded-2xl` are not covered by the check yet. Never write a rule or comment that suggests one-off values for "precise designs".
+- Visual evidence for the dashboard: dev-only page `/dev/dashboard-states` (all 7 states, HTTP 404 in production). Extend it instead of building another one.
+- Fix a styling problem in the component it affects. Do not change global tokens to mask a local bug. Exception: when the shadcn starter's default value of a token is simply wrong for this app (e.g. `--accent` was opaque grey while every hover here was `white/10`), correct the value in `global.css` and record it in the change's `tokens.md`.
 - Every interactive element must handle these states: default, hover, focus (visible for keyboard users), disabled (a real `disabled` attribute), error, empty and loading.
 - Run visual changes as a regular 10x change: `/10x-ui <view>` → `/10x-new` → `/10x-research` → `/10x-plan` → `/10x-implement` → `/10x-impl-review`.
 - For screenshots and visual checks in the browser, use the Playwright plugin (`playwright@claude-plugins-official`). Take a screenshot on desktop and at phone width (about 390 px).
@@ -62,6 +65,7 @@ Full server-side rendering (`output: "server"` in astro.config.mjs). All pages a
 ## CI
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs two jobs on every push and PR to master:
+
 - `ci` — `npm ci` → `astro sync` → lint → `astro check` → build. Requires `SUPABASE_URL` and `SUPABASE_KEY` repository secrets.
 - `smoke` — spins up a local Supabase CLI instance, builds, runs `npm run preview`, then `scripts/smoke.mjs` against it. No secrets needed.
 
@@ -101,17 +105,17 @@ Lekcja koncentruje się na bezpiecznej przepustowości: izolowanych kontekstach,
 
 ### Router zadań — od czego zacząć
 
-| Umiejętność | Użyj, gdy |
-| --- | --- |
-| **Izolacja kodu** | |
-| `git worktree add` | Potrzebujesz osobnego katalogu roboczego dla równoległej zmiany. Jedna zmiana na worktree, jeden świeży kontekst agenta na worktree. |
-| **Złożone zmiany** | |
-| `/10x-implement <change-id> phase <n>` | Zmiana ma wiele faz, wymaga ręcznych bramek lub korzysta z interaktywnego podejmowania decyzji podczas wykonania. |
-| **Proste zmiany** | |
-| `/goal` | Masz jasne, ograniczone zadanie i chcesz delegowania ukierunkowanego na cel. Agent pracuje autonomicznie w kierunku określonego celu z warunkiem zatrzymania. |
-| `claude -p` | Chcesz bezobsługowego wykonania dobrze zdefiniowanego zadania. Pętla Ralph Wiggum (uruchom, sprawdź, ponów próbę) jest uniwersalnym autonomicznym wzorcem. |
-| **Orkiestracja wielu sesji** | |
-| Superset / Conductor / Antigravity / VS Code Agent View | Uruchamiasz równolegle wiele sesji agentów i potrzebujesz wglądu, koordynacji lub zarządzania sesjami między nimi. |
+| Umiejętność                                             | Użyj, gdy                                                                                                                                                     |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Izolacja kodu**                                       |                                                                                                                                                               |
+| `git worktree add`                                      | Potrzebujesz osobnego katalogu roboczego dla równoległej zmiany. Jedna zmiana na worktree, jeden świeży kontekst agenta na worktree.                          |
+| **Złożone zmiany**                                      |                                                                                                                                                               |
+| `/10x-implement <change-id> phase <n>`                  | Zmiana ma wiele faz, wymaga ręcznych bramek lub korzysta z interaktywnego podejmowania decyzji podczas wykonania.                                             |
+| **Proste zmiany**                                       |                                                                                                                                                               |
+| `/goal`                                                 | Masz jasne, ograniczone zadanie i chcesz delegowania ukierunkowanego na cel. Agent pracuje autonomicznie w kierunku określonego celu z warunkiem zatrzymania. |
+| `claude -p`                                             | Chcesz bezobsługowego wykonania dobrze zdefiniowanego zadania. Pętla Ralph Wiggum (uruchom, sprawdź, ponów próbę) jest uniwersalnym autonomicznym wzorcem.    |
+| **Orkiestracja wielu sesji**                            |                                                                                                                                                               |
+| Superset / Conductor / Antigravity / VS Code Agent View | Uruchamiasz równolegle wiele sesji agentów i potrzebujesz wglądu, koordynacji lub zarządzania sesjami między nimi.                                            |
 
 ### Zasady pracy równoległej
 
