@@ -1,11 +1,12 @@
 // UI contract check: fails when a view file hardcodes colors (hex, rgb/hsl/oklch, Tailwind palette classes) or
 // arbitrary px/rem values instead of using the tokens from src/styles/global.css.
 // Zero dependencies on purpose (same as smoke.mjs).
-//   node scripts/check-ui-tokens.mjs [file ...]   checks the given files (lint-staged passes the staged ones)
 //   node scripts/check-ui-tokens.mjs              checks CLEAN_PATHS below (npm run check:ui)
-// Add a view here once it is migrated to tokens, and add the same path to "lint-staged" in package.json.
+//   node scripts/check-ui-tokens.mjs [file ...]   checks the given files that belong to CLEAN_PATHS; lint-staged passes
+//                                                 every staged .ts/.tsx/.astro file and the rest is skipped
+// CLEAN_PATHS is the only list: add a view here once it is migrated to tokens.
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 const CLEAN_PATHS = [
   "src/pages/dashboard.astro",
@@ -30,8 +31,11 @@ function expand(path) {
     .map((name) => join(path, name));
 }
 
+const clean = CLEAN_PATHS.flatMap(expand);
+const cleanSet = new Set(clean.map((file) => resolve(file).toLowerCase()));
 const args = process.argv.slice(2);
-const files = (args.length > 0 ? args : CLEAN_PATHS).flatMap(expand);
+// Windows paths are case-insensitive, so the comparison is too.
+const files = args.length > 0 ? args.filter((file) => cleanSet.has(resolve(file).toLowerCase())) : clean;
 
 let hits = 0;
 for (const file of files) {

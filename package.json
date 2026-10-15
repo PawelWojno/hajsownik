@@ -60,13 +60,11 @@
   },
   "lint-staged": {
     "*.{ts,tsx,astro}": [
-      "eslint --fix"
+      "eslint --fix",
+      "node scripts/check-ui-tokens.mjs"
     ],
     "*.{json,css,md}": [
       "prettier --write"
-    ],
-    "{src/pages/dashboard.astro,src/pages/dev/dashboard-states.astro,src/components/Topbar.astro,src/components/auth/ServerError.tsx,src/components/dev/*.tsx,src/components/month/*.tsx}": [
-      "node scripts/check-ui-tokens.mjs"
     ]
   },
   "overrides": {

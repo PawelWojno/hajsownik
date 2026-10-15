@@ -29,3 +29,10 @@
 - **Problem**: Przeglądarka zapamiętuje endpoint POST jako pierwotny adres strony, na którą przekierował. „Wersja na komputer” w Brave/Chrome na Androidzie przeładowuje go jako GET, a trasa bez GET zwraca 404.
 - **Rule**: Każdy nowy endpoint formularza HTML (method="POST" + redirect) eksportuje `GET = redirectOnGet` z `src/lib/auth-get.ts` albo własny GET, który tylko przekierowuje na stały adres, z `no-store`. GET nigdy nie wykonuje akcji ani nie czyta danych wejściowych.
 - **Applies to**: plan, implement, impl-review
+
+## Jasny motyw (:root) trzeba utrzymywać razem z ciemnym (.dark)
+
+- **Context**: src/styles/global.css (`:root`), src/layouts/Layout.astro:14 (`<html class="dark">`)
+- **Problem**: Aplikacja jest ciemna przez `<html class="dark">`, a jasne `:root` czeka na przełącznik motywu. Obecnie `:root` łączy białe `--background`/`--card` z ciemnymi `--cosmic-*` (tło `bg-cosmic`) i neutralnym `--muted-foreground`, więc usunięcie klasy `dark` dałoby nieczytelny miks. Jasne wartości nie były nigdy oglądane.
+- **Rule**: Każdy nowy lub zmieniony token dostaje wartość w `:root` i w `.dark` w tej samej zmianie. Zmiana, która włącza jasny motyw lub przełącznik, najpierw sprawdza całe `:root` na stronie `/dev/dashboard-states` w obu motywach.
+- **Applies to**: plan, implement, impl-review (każda zmiana w `src/styles/global.css`)

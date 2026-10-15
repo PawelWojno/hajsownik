@@ -140,7 +140,7 @@ Zastąpić literały tokenami i komponentami (C1, C2).
 
 **Intent**: przywrócić wygląd sprzed zmiany tam, gdzie domyślne wartości startera shadcn go zmieniały.
 
-**Contract**: tokeny `--link`/`--link-hover` (dawne `purple-300`/`purple-100`: linki, menu, „Wyloguj”, „Dodaj przychód”, „Więcej opcji”); `--accent` w `.dark` = `oklch(1 0 0 / 10%)` (dawne `hover:bg-white/10`) i wariant `ghost` z `dark:hover:bg-accent` zamiast `/50`; token `--primary-hover` (dawne `hover:bg-purple-500`) i wariant `default` z `hover:bg-primary-hover` zamiast `hover:bg-primary/90`. `--accent` i oba warianty `Button` są globalne, więc dotyczą też widoków poza dashboardem (history i settings obejrzane po zmianie `--accent`).
+**Contract**: tokeny `--link`/`--link-hover` (dawne `purple-300`/`purple-100`: linki, menu, „Wyloguj”, „Dodaj przychód”, „Więcej opcji”); `--accent` w `.dark` = `oklch(1 0 0 / 10%)` (dawne `hover:bg-white/10`) i wariant `ghost` z `dark:hover:bg-accent` zamiast `/50`; token `--primary-hover` (dawne `hover:bg-purple-500`) i wariant `default` z `hover:bg-primary-hover` zamiast `hover:bg-primary/90`. `--accent` i oba warianty `Button` są globalne, więc dotyczą też widoków poza dashboardem (history i settings obejrzane po zmianie `--accent`). Skan i `check:ui` obejmują ostatecznie 10 plików, nie 7: siedem plików widoku, `ServerError.tsx` oraz stronę dev i `DisabledSelectDemo.tsx` z fazy 4 (kryteria 3.1 i 5.1 mówią o 7; impl-review całości, F2).
 
 ### Success Criteria:
 
