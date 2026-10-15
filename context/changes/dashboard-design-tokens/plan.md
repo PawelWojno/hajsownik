@@ -316,10 +316,10 @@ Brak danych do migracji. Wycofanie: revert commitów faz; `<html class="dark">` 
 
 #### Automated
 
-- [ ] 5.1 `node scripts/check-ui-tokens.mjs` na 7 plikach widoku zwraca 0
-- [ ] 5.2 Skrypt zwraca 1 na pliku testowym z `bg-purple-600`
-- [ ] 5.3 `lint-staged` uruchamia kontrolę dla oczyszczonych plików
+- [x] 5.1 `node scripts/check-ui-tokens.mjs` na 7 plikach widoku zwraca 0
+- [x] 5.2 Skrypt zwraca 1 na pliku testowym z `bg-purple-600`
+- [x] 5.3 `lint-staged` uruchamia kontrolę dla oczyszczonych plików
 
 #### Manual
 
-- [ ] 5.4 Blok UI w `CLAUDE.md` poza blokiem zarządzanym przez CLI
+- [x] 5.4 Blok UI w `CLAUDE.md` poza blokiem zarządzanym przez CLI
