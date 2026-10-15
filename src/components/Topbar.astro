@@ -34,7 +34,7 @@ const itemClass = `block rounded-md px-3 py-2 text-link transition-colors hover:
   <header class="relative mb-4">
     <div class="flex items-center justify-between gap-2 rounded-xl border border-border bg-card px-2 py-1 text-sm">
       <div class="flex min-w-0 items-center gap-1">
-        <details class="sm:hidden">
+        <details class="sm:hidden" data-topbar-menu>
           <summary
             aria-label="Menu"
             class:list={[
@@ -141,7 +141,7 @@ const itemClass = `block rounded-md px-3 py-2 text-link transition-colors hover:
           {link.label}
         </a>
       ))}
-      <details class="relative flex-1">
+      <details class="relative flex-1" data-topbar-menu>
         <summary
           class:list={[buttonClass, "cursor-pointer list-none justify-center", inSettings ? activeClass : idleClass]}
         >
@@ -178,3 +178,33 @@ const itemClass = `block rounded-md px-3 py-2 text-link transition-colors hover:
     </div>
   </div>
 )}
+
+<script>
+  // Native <details> only toggles on its own <summary>; close the top-level menus on outside press, Esc and focus leaving.
+  const menus = document.querySelectorAll<HTMLDetailsElement>("details[data-topbar-menu]");
+
+  // pointerdown, not click: on iOS Safari a click on a non-interactive page background does not reach document.
+  document.addEventListener("pointerdown", (event) => {
+    if (!(event.target instanceof Node)) return;
+    for (const menu of menus) {
+      if (menu.open && !menu.contains(event.target)) menu.open = false;
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    for (const menu of menus) {
+      if (!menu.open) continue;
+      const hadFocus = menu.contains(document.activeElement);
+      menu.open = false;
+      if (hadFocus) menu.querySelector<HTMLElement>(":scope > summary")?.focus();
+    }
+  });
+
+  for (const menu of menus) {
+    menu.addEventListener("focusout", (event) => {
+      // A null relatedTarget (click on a non-focusable spot, alt-tab) must not close the menu; pointerdown handles clicks.
+      if (event.relatedTarget instanceof Node && !menu.contains(event.relatedTarget)) menu.open = false;
+    });
+  }
+</script>
