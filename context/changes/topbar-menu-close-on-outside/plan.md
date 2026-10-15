@@ -150,22 +150,22 @@ Brak. Wycofanie: revert commitu fazy 1.
 
 #### Automated
 
-- [x] 1.1 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build`
-- [x] 1.2 Kontrola tokenów przechodzi: `npm run check:ui`
-- [x] 1.3 Smoke test przechodzi: `npm run smoke`
+- [x] 1.1 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build` — 26636dd
+- [x] 1.2 Kontrola tokenów przechodzi: `npm run check:ui` — 26636dd
+- [x] 1.3 Smoke test przechodzi: `npm run smoke` — 26636dd
 
 #### Manual
 
-- [x] 1.4 Kliknięcie poza otwartym menu zamyka je (telefon i desktop); szybka bramka na dev serwerze przed pełnym testem Playwright w fazie 2 (Esc i Tab sprawdza faza 2)
+- [x] 1.4 Kliknięcie poza otwartym menu zamyka je (telefon i desktop); szybka bramka na dev serwerze przed pełnym testem Playwright w fazie 2 (Esc i Tab sprawdza faza 2) — 26636dd
 
 ### Phase 2: Weryfikacja w przeglądarce
 
 #### Automated
 
-- [ ] 2.1 Skrypty przeglądarkowe Playwright potwierdzają zamykanie po kliknięciu poza i po Esc (skrypt i zrzuty zapisane w `context/changes/topbar-menu-close-on-outside/screenshots/`)
+- [x] 2.1 Skrypty przeglądarkowe Playwright potwierdzają zamykanie po kliknięciu poza i po Esc (skrypt i zrzuty zapisane w `context/changes/topbar-menu-close-on-outside/screenshots/`)
 
 #### Manual
 
-- [ ] 2.2 Hamburger na telefonie (390 px): klik poza, Esc i Tab poza menu zamykają menu; zagnieżdżone „Ustawienia” działa
-- [ ] 2.3 Desktop („Ustawienia”): klik poza, Esc i Tab poza menu zamykają menu
-- [ ] 2.4 Wygląd otwartego menu (zrzut „po”) zgodny z dotychczasowym, bez nowych elementów
+- [x] 2.2 Hamburger na telefonie (390 px): klik poza, Esc i Tab poza menu zamykają menu; zagnieżdżone „Ustawienia” działa
+- [x] 2.3 Desktop („Ustawienia”): klik poza, Esc i Tab poza menu zamykają menu
+- [x] 2.4 Wygląd otwartego menu (zrzut „po”) zgodny z dotychczasowym, bez nowych elementów
