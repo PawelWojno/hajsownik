@@ -1,10 +1,10 @@
 ---
 change_id: dashboard-design-tokens
 title: Dashboard design tokens
-status: impl_reviewed
+status: archived
 created: 2026-10-15
 updated: 2026-10-15
-archived_at: null
+archived_at: 2026-10-15T21:28:18Z
 ---
 
 ## Notes
