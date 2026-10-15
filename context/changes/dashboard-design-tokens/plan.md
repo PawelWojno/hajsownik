@@ -131,7 +131,7 @@ Zastąpić literały tokenami i komponentami (C1, C2).
 
 **Intent**: `fieldClass` → `Input`/`Select`/`Label` (6 pól i 2 selecty, w obu formularzach); karta sum → `Card`; `Button` bez nadpisań koloru; fokus `focus-visible:ring-ring/50` na „Wyloguj” i „Więcej opcji”.
 
-**Contract**: zachować `data-category-ids`, `aria-*` i `id` pól (smoke test i dostępność); usunąć `focus:ring-purple-400` (komponent `Input` ma `focus-visible`).
+**Contract**: zachować `data-category-ids`, `aria-*` i `id` pól (smoke test i dostępność); usunąć `focus:ring-purple-400` (komponent `Input` ma `focus-visible`). Do `Input` i `Select` przekazać `className="dark:bg-card"`, bo domyślne `dark:bg-input/30` daje ok. 6% bieli zamiast dzisiejszych 10% (impl-review fazy 2, F1).
 
 ### Success Criteria:
 
@@ -264,33 +264,33 @@ Brak danych do migracji. Wycofanie: revert commitów faz; `<html class="dark">` 
 
 #### Manual
 
-- [ ] 1.3 Select działa w wyspie React i w Drawer (albo decyzja o natywnym fallbacku)
+- [x] 1.3 Select działa w wyspie React i w Drawer (albo decyzja o natywnym fallbacku)
 
 ### Phase 2: Wartości tokenów
 
 #### Automated
 
-- [x] 2.1 Build i typy przechodzą: `npm run build && npx astro check`
-- [x] 2.2 `global.css` nie zawiera hexów poza blokiem wartości tokenów (skan)
+- [x] 2.1 Build i typy przechodzą: `npm run build && npx astro check` — afb9550
+- [x] 2.2 `global.css` nie zawiera hexów poza blokiem wartości tokenów (skan) — afb9550
 
 #### Manual
 
-- [x] 2.3 Dashboard wygląda jak przed zmianą (ciemny, fioletowy akcent), Drawer ciemny bez nadpisań
-- [x] 2.4 Zrzuty auth/settings/history bez regresji po zmianie `--primary`
-- [x] 2.5 EntrySheet po podbiciu Radix pod vaul: zapis, zamknięcie X i Esc, wybór daty nie zamyka panelu
+- [x] 2.3 Dashboard wygląda jak przed zmianą (ciemny, fioletowy akcent), Drawer ciemny bez nadpisań — afb9550
+- [x] 2.4 Zrzuty auth/settings/history bez regresji po zmianie `--primary` — afb9550
+- [x] 2.5 EntrySheet po podbiciu Radix pod vaul: zapis, zamknięcie X i Esc, wybór daty nie zamyka panelu — afb9550
 
 ### Phase 3: Widok dashboard
 
 #### Automated
 
-- [ ] 3.1 Skan hardcodów na 7 plikach widoku zwraca 0 trafień
-- [ ] 3.2 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build`
-- [ ] 3.3 Smoke test przechodzi: `npm run smoke`
+- [x] 3.1 Skan hardcodów na 7 plikach widoku zwraca 0 trafień
+- [x] 3.2 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build`
+- [x] 3.3 Smoke test przechodzi: `npm run smoke`
 
 #### Manual
 
-- [ ] 3.4 Zrzuty desktop i 390 px zgodne z wyglądem sprzed zmiany
-- [ ] 3.5 Fokus klawiatury widoczny na każdej kontrolce, w tym „Wyloguj” i „Więcej opcji”
+- [x] 3.4 Zrzuty desktop i 390 px zgodne z wyglądem sprzed zmiany
+- [x] 3.5 Fokus klawiatury widoczny na każdej kontrolce, w tym „Wyloguj” i „Więcej opcji”
 
 ### Phase 4: Stany i bramka wizualna
 

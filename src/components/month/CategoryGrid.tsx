@@ -22,10 +22,10 @@ export function CategoryGrid({ categories, selectedId, onSelect }: Props) {
               onSelect(category.id);
             }}
             className={cn(
-              "min-h-11 rounded-lg border px-2 py-1 text-sm leading-tight transition-colors focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none",
+              "focus-visible:border-ring focus-visible:ring-ring/50 min-h-11 rounded-lg border px-2 py-1 text-sm leading-tight transition-colors outline-none focus-visible:ring-3",
               selected
-                ? "border-purple-400 bg-purple-600 text-white"
-                : "border-white/20 bg-white/10 text-blue-100/90 hover:bg-white/20",
+                ? "border-ring bg-primary text-primary-foreground"
+                : "border-input bg-card text-muted-foreground hover:bg-input",
             )}
           >
             {category.name}

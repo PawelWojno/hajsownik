@@ -22,21 +22,26 @@ const settingsLinks = [
 ];
 const inSettings = path.startsWith("/settings");
 
-const buttonClass = "flex min-h-11 items-center rounded-lg px-4 text-sm font-medium transition-colors";
-const activeClass = "bg-purple-600 text-white";
-const idleClass = "text-purple-300 hover:bg-white/10 hover:text-purple-100";
-const itemClass =
-  "block rounded-md px-3 py-2 text-purple-300 transition-colors hover:bg-white/10 hover:text-purple-100";
+// Visible keyboard focus, the same ring as ui/button.tsx.
+const focusClass = "outline-none focus-visible:ring-3 focus-visible:ring-ring/50";
+const buttonClass = `flex min-h-11 items-center rounded-lg px-4 text-sm font-medium transition-colors ${focusClass}`;
+const activeClass = "bg-primary text-primary-foreground";
+const idleClass = "text-link hover:bg-card hover:text-link-hover";
+const itemClass = `block rounded-md px-3 py-2 text-link transition-colors hover:bg-card hover:text-link-hover ${focusClass}`;
 ---
 
 {user ? (
   <header class="relative mb-4">
-    <div class="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-2 py-1 text-sm">
+    <div class="flex items-center justify-between gap-2 rounded-xl border border-border bg-card px-2 py-1 text-sm">
       <div class="flex min-w-0 items-center gap-1">
         <details class="sm:hidden">
           <summary
             aria-label="Menu"
-            class="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-lg text-purple-300 transition-colors hover:bg-white/10 hover:text-purple-100"
+            class:list={[
+              "flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-lg transition-colors",
+              idleClass,
+              focusClass,
+            ]}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +62,7 @@ const itemClass =
           </summary>
           <nav
             aria-label="Menu główne"
-            class="absolute inset-x-0 top-full z-10 mt-1 flex flex-col gap-1 rounded-xl border border-white/10 bg-slate-900 p-2 shadow-lg"
+            class="absolute inset-x-0 top-full z-10 mt-1 flex flex-col gap-1 rounded-xl border border-border bg-popover p-2 shadow-lg"
           >
             {links.map((link) => (
               <a
@@ -95,12 +100,12 @@ const itemClass =
             </details>
           </nav>
         </details>
-        <span class="truncate px-2 font-medium text-white/90">{householdName}</span>
+        <span class="truncate px-2 font-medium text-foreground">{householdName}</span>
       </div>
       <form method="POST" action="/api/auth/signout">
         <button
           type="submit"
-          class="flex min-h-11 items-center gap-2 rounded-lg px-3 text-purple-300 transition-colors hover:bg-white/10 hover:text-purple-100"
+          class:list={["flex min-h-11 items-center gap-2 rounded-lg px-3 transition-colors", idleClass, focusClass]}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +130,7 @@ const itemClass =
 
     <nav
       aria-label="Menu główne"
-      class="mx-auto mt-1 hidden w-full max-w-md gap-1 rounded-xl border border-white/10 bg-white/5 p-1 sm:flex"
+      class="mx-auto mt-1 hidden w-full max-w-md gap-1 rounded-xl border border-border bg-card p-1 sm:flex"
     >
       {links.map((link) => (
         <a
@@ -142,7 +147,7 @@ const itemClass =
         >
           Ustawienia ▾
         </summary>
-        <ul class="absolute right-0 z-10 mt-2 min-w-48 rounded-lg border border-white/10 bg-slate-900 p-1 shadow-lg">
+        <ul class="absolute right-0 z-10 mt-2 min-w-48 rounded-lg border border-border bg-popover p-1 shadow-lg">
           {settingsLinks.map((link) => (
             <li>
               <a href={link.href} class:list={[itemClass]}>
@@ -155,13 +160,19 @@ const itemClass =
     </nav>
   </header>
 ) : (
-  <div class="mb-4 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
-    <span class="text-blue-100/70">Niezalogowano</span>
+  <div class="mb-4 flex items-center justify-between rounded-xl border border-border bg-card px-4 py-2 text-sm text-muted-foreground">
+    <span>Niezalogowano</span>
     <div class="flex gap-3">
-      <a href="/auth/signin" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+      <a
+        href="/auth/signin"
+        class:list={["rounded-sm text-link transition-colors hover:text-link-hover hover:underline", focusClass]}
+      >
         Zaloguj się
       </a>
-      <a href="/auth/signup" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+      <a
+        href="/auth/signup"
+        class:list={["rounded-sm text-link transition-colors hover:text-link-hover hover:underline", focusClass]}
+      >
         Załóż konto
       </a>
     </div>

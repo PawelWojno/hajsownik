@@ -4,6 +4,7 @@ import { EntrySheet, type EntryMode } from "@/components/month/EntrySheet";
 import { RecurringIncomeReminders } from "@/components/month/RecurringIncomeReminders";
 import { RecurringReminders } from "@/components/month/RecurringReminders";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { formatMinor } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import type { Category, MonthSummary, RecurringExpense, RecurringIncome } from "@/types";
@@ -43,7 +44,7 @@ export default function MonthScreen({
       className="mx-auto flex w-full max-w-md flex-col gap-6"
       data-category-ids={categories.map((category) => category.id).join(",")}
     >
-      <h1 className="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-3xl font-bold text-transparent">
+      <h1 className="from-title-from to-title-to bg-gradient-to-r bg-clip-text text-center text-3xl font-bold text-transparent">
         <a href={historyHref} className="block min-h-11 hover:underline">
           {monthLabel}
         </a>
@@ -52,23 +53,20 @@ export default function MonthScreen({
       <RecurringReminders initialItems={recurring} />
       <RecurringIncomeReminders initialItems={recurringIncomes} />
 
-      <section
-        aria-live="polite"
-        className="rounded-2xl border border-white/10 bg-white/10 p-6 text-white backdrop-blur-xl"
-      >
+      <Card aria-live="polite" className="gap-0 rounded-2xl p-6 shadow-none backdrop-blur-xl">
         <dl className="space-y-3">
           <Row label="Przychody" value={formatMinor(summary.incomeTotal)} />
           <Row label="Wydatki" value={formatMinor(summary.expenseTotal)} />
-          <div className="border-t border-white/10 pt-3">
+          <div className="border-border border-t pt-3">
             <Row
               label="Zostaje"
               value={formatMinor(summary.left)}
               emphasis
-              valueClass={summary.left < 0 ? "text-red-300" : "text-emerald-300"}
+              valueClass={summary.left < 0 ? "text-destructive" : "text-success"}
             />
           </div>
         </dl>
-      </section>
+      </Card>
 
       <div className="flex flex-col items-center gap-3">
         <Button
@@ -76,7 +74,7 @@ export default function MonthScreen({
           onClick={() => {
             openSheet("expense");
           }}
-          className="min-h-14 w-full rounded-xl bg-purple-600 text-lg font-semibold text-white hover:bg-purple-500"
+          className="min-h-14 w-full rounded-xl text-lg font-semibold"
         >
           <Plus className="size-5" />
           Dodaj wydatek
@@ -87,7 +85,7 @@ export default function MonthScreen({
           onClick={() => {
             openSheet("income");
           }}
-          className="min-h-11 text-purple-300 hover:bg-white/10 hover:text-purple-100"
+          className="text-link hover:text-link-hover min-h-11"
         >
           <Plus className="size-4" />
           Dodaj przychód
@@ -116,7 +114,7 @@ interface RowProps {
 function Row({ label, value, emphasis, valueClass }: RowProps) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <dt className={cn("text-blue-100/80", emphasis && "text-lg font-semibold text-white")}>{label}</dt>
+      <dt className={cn("text-muted-foreground", emphasis && "text-foreground text-lg font-semibold")}>{label}</dt>
       <dd className={cn("tabular-nums", emphasis ? "text-2xl font-bold" : "text-lg", valueClass)}>{value}</dd>
     </div>
   );
