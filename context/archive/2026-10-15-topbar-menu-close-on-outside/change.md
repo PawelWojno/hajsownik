@@ -1,10 +1,10 @@
 ---
 change_id: topbar-menu-close-on-outside
 title: Zamykanie menu w Topbar po kliknięciu poza nim
-status: impl_reviewed
+status: archived
 created: 2026-10-15
-updated: 2026-10-16
-archived_at: null
+updated: 2026-10-15
+archived_at: 2026-10-15T23:06:49Z
 ---
 
 ## Notes
