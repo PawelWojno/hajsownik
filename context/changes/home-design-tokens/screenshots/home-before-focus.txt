@@ -1,0 +1,9 @@
+Fokus klawiatury na CTA hero "Zaloguj się" PRZED zmianą (home-before.check.js, dev serwer 4401, 2026-10-16)
+Pomiar na elemencie z sekcji hero (rodzic h1), nie na linku Topbara; Tab dotarł do niego po 3 naciśnięciach na obu szerokościach.
+
+390 px:  reachedByTab=true tabsPressed=3 outline-style=auto outline-width=1px outline-color=oklab(0.714 0.117894 -0.165257 / 0.5) box-shadow=none
+1280 px: reachedByTab=true tabsPressed=3 outline-style=auto outline-width=1px outline-color=oklab(0.714 0.117894 -0.165257 / 0.5) box-shadow=none
+
+Wniosek: CTA ma widoczny, ale cienki i półprzezroczysty domyślny obrys przeglądarki w kolorze --ring/50 (global.css base: outline-ring/50), bez jawnego pierścienia focus-visible.
+Po zmianie (buttonVariants) oczekiwany jest pierścień ring-[3px] z komponentu ui/button.
+Błędy konsoli podczas pomiaru: brak.
