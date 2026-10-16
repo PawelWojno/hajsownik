@@ -1,41 +1,52 @@
 ---
 import Topbar from "@/components/Topbar.astro";
+import { buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+// Hero CTA geometry, kept from the page before it moved to tokens. cn() (tailwind-merge) lets it win over the
+// size classes in buttonVariants; cva alone does not resolve conflicting utilities.
+const cta = "h-auto px-6 py-3 text-base rounded-lg shadow-none";
+const primaryCta = cn(buttonVariants({ variant: "default" }), cta);
+const secondaryCta = cn(buttonVariants({ variant: "outline" }), cta);
+
+// Icons as SVG path data (24x24 viewBox, stroke icons); rendered as <path>, no set:html.
+const features = [
+  {
+    title: "Szybki wpis",
+    text: "Kwota, kategoria, zapisz. Reszta, jak data czy opis, jest opcjonalna.",
+    paths: ["M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z", "M7 11V7a5 5 0 0 1 10 0v4"],
+  },
+  {
+    title: "Ile zostaje",
+    text: "Przychody minus wydatki w tym miesiącu, odświeżane po każdym wpisie.",
+    paths: ["M12 2 2 7l10 5 10-5-10-5Z", "m2 17 10 5 10-5", "m2 12 10 5 10-5"],
+  },
+  {
+    title: "Jeden dom, jedne dane",
+    text: "Dane należą do gospodarstwa domowego i są niewidoczne dla innych użytkowników.",
+    paths: ["m16 18 6-6-6-6", "m8 6-6 6 6 6"],
+  },
+];
 ---
 
 <div class="bg-cosmic relative min-h-screen w-full overflow-hidden">
-  <!-- Cosmic orbs -->
-  <div class="pointer-events-none absolute top-1/4 -left-24 h-[350px] w-[350px] rounded-full bg-purple-500/20 blur-[120px]"></div>
-  <div class="pointer-events-none absolute top-2/3 -right-16 h-[250px] w-[250px] rounded-full bg-blue-500/15 blur-[100px]"></div>
-  <div class="pointer-events-none absolute top-0 left-1/2 h-[300px] w-[300px] -translate-x-1/2 rounded-full bg-indigo-400/10 blur-[140px]"></div>
-
-  <!-- Star field -->
-  <div
-    class="pointer-events-none absolute inset-0"
-    style="background-image: radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px), radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px), radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 200px 200px, 150px 150px, 100px 100px; background-position: 0 0, 40px 60px, 80px 30px;"
-  ></div>
-
   <div class="relative z-10 p-4 sm:p-8">
     <Topbar />
 
     <!-- Hero section -->
     <div class="mx-auto flex max-w-4xl flex-col items-center justify-center px-4 py-24 text-center sm:py-32 lg:py-40">
-      <h1 class="mb-6 bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 bg-clip-text text-5xl leading-tight font-bold text-transparent sm:text-6xl lg:text-7xl">
+      <h1 class="from-title-from to-title-to mb-6 bg-gradient-to-r bg-clip-text text-5xl leading-tight font-bold text-transparent sm:text-6xl lg:text-7xl">
         Hajsownik
       </h1>
-      <p class="mb-10 max-w-2xl text-lg text-blue-100/70 sm:text-xl">
+      <p class="text-muted-foreground mb-10 max-w-2xl text-lg sm:text-xl">
         Budżet domowy bez wysiłku: wpisz wydatek w kilka sekund i od razu zobacz, ile zostaje w tym miesiącu.
       </p>
       <div class="flex flex-col gap-4 sm:flex-row">
-        <a
-          href="/auth/signin"
-          class="inline-flex items-center justify-center rounded-lg bg-purple-600 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-purple-500"
-        >
+        <a href="/auth/signin" class:list={[primaryCta]}>
           Zaloguj się
         </a>
-        <a
-          href="/auth/signup"
-          class="inline-flex items-center justify-center rounded-lg border border-white/20 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-white/10"
-        >
+        <a href="/auth/signup" class:list={[secondaryCta]}>
           Załóż konto
         </a>
       </div>
@@ -43,72 +54,28 @@ import Topbar from "@/components/Topbar.astro";
 
     <!-- Feature cards -->
     <div class="mx-auto grid max-w-4xl grid-cols-1 gap-6 px-4 pb-24 sm:grid-cols-3">
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mb-4 text-purple-300"
-        >
-          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        <h3 class="mb-2 text-lg font-semibold text-white">Szybki wpis</h3>
-        <p class="text-sm leading-relaxed text-blue-100/60">
-          Kwota, kategoria, zapisz. Reszta, jak data czy opis, jest opcjonalna.
-        </p>
-      </div>
-
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mb-4 text-purple-300"
-        >
-          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-          <polyline points="2 17 12 22 22 17"></polyline>
-          <polyline points="2 12 12 17 22 12"></polyline>
-        </svg>
-        <h3 class="mb-2 text-lg font-semibold text-white">Ile zostaje</h3>
-        <p class="text-sm leading-relaxed text-blue-100/60">
-          Przychody minus wydatki w tym miesiącu, odświeżane po każdym wpisie.
-        </p>
-      </div>
-
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="mb-4 text-purple-300"
-        >
-          <polyline points="16 18 22 12 16 6"></polyline>
-          <polyline points="8 6 2 12 8 18"></polyline>
-        </svg>
-        <h3 class="mb-2 text-lg font-semibold text-white">Jeden dom, jedne dane</h3>
-        <p class="text-sm leading-relaxed text-blue-100/60">
-          Dane należą do gospodarstwa domowego i są niewidoczne dla innych użytkowników.
-        </p>
-      </div>
+      {features.map((feature) => (
+        <Card className="gap-0 p-6 shadow-none backdrop-blur-xl">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-link mb-4"
+          >
+            {feature.paths.map((d) => (
+              <path d={d} />
+            ))}
+          </svg>
+          <h3 class="text-foreground mb-2 text-lg font-semibold">{feature.title}</h3>
+          <p class="text-muted-foreground text-sm leading-relaxed">{feature.text}</p>
+        </Card>
+      ))}
     </div>
   </div>
 </div>

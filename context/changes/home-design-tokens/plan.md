@@ -218,23 +218,23 @@ Brak migracji. Wycofanie: revert commitów zmiany (`git revert -m 1 <merge>` po 
 
 #### Automated
 
-- [x] 1.1 Zrzuty bazowe istnieją: `ls context/changes/home-design-tokens/screenshots/home-before-390.png context/changes/home-design-tokens/screenshots/home-before-1280.png`
-- [x] 1.2 Wynik fokusu „przed" zapisany w pliku: `ls context/changes/home-design-tokens/screenshots/home-before-focus.txt`
+- [x] 1.1 Zrzuty bazowe istnieją: `ls context/changes/home-design-tokens/screenshots/home-before-390.png context/changes/home-design-tokens/screenshots/home-before-1280.png` — 4f1950d
+- [x] 1.2 Wynik fokusu „przed" zapisany w pliku: `ls context/changes/home-design-tokens/screenshots/home-before-focus.txt` — 4f1950d
 
 #### Manual
 
-- [x] 1.3 Zrzuty „przed" pokazują dzisiejszą stronę (orby, gwiazdy, tytuł, 2 CTA, 3 karty), a konsola przeglądarki jest bez błędów
+- [x] 1.3 Zrzuty „przed" pokazują dzisiejszą stronę (orby, gwiazdy, tytuł, 2 CTA, 3 karty), a konsola przeglądarki jest bez błędów — 4f1950d
 
 ### Phase 2: Widok na tokenach
 
 #### Automated
 
-- [ ] 2.1 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build`
-- [ ] 2.2 Skan wartości na widoku daje 0 trafień (komenda grep z `10x-ui` na `Welcome.astro` i `index.astro`)
+- [x] 2.1 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build`
+- [x] 2.2 Skan wartości na widoku daje 0 trafień (komenda grep z `10x-ui` na `Welcome.astro` i `index.astro`)
 
 #### Manual
 
-- [ ] 2.3 Strona `/` na dev serwerze (390 i 1280 px) wygląda poprawnie: bez orbów i gwiazd, tytuł z gradientem, dwa CTA, trzy karty, konsola bez błędów
+- [x] 2.3 Strona `/` na dev serwerze (390 i 1280 px) wygląda poprawnie: bez orbów i gwiazd, tytuł z gradientem, dwa CTA, trzy karty, konsola bez błędów
 
 ### Phase 3: Stany, bramka wizualna i zabezpieczenie
 
