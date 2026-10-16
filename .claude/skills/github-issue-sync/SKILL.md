@@ -1,6 +1,6 @@
 ---
 name: github-issue-sync
-description: Close or create the GitHub issue matching a roadmap Change ID — close after /10x-archive, or create one for a roadmap item that doesn't have one yet — and offer to move the issue on the GitHub Project board (Status column). Takes exactly one argument, a Change ID. Use when the user explicitly invokes /github-issue-sync <change-id>.
+description: Close or create the GitHub issue matching a Change ID — create one right after /10x-plan (for a roadmap item or for a standalone change with no roadmap entry), close it after /10x-archive — and offer to move the issue on the GitHub Project board (Status column). Takes exactly one argument, a Change ID. Use when the user explicitly invokes /github-issue-sync <change-id>.
 disable-model-invocation: true
 ---
 
@@ -8,11 +8,16 @@ Hand-authored, project-specific skill — not installed/managed by `10x-cli`. It
 
 ## What this is
 
-A human-confirmed bridge between `context/foundation/roadmap.md` (source of truth for Status) and this repo's GitHub Issues. One-way only: this skill reads `roadmap.md` and writes to GitHub, never the reverse. It never touches a roadmap item's `Status` field — that stays the exclusive job of `/10x-plan`, `/10x-implement`, `/10x-archive`. The only thing it writes back into `roadmap.md` is a bookkeeping field, `**GitHub:** #N`, recording which issue a Change ID maps to. At the end it also offers (never silently) to move the issue's card on the GitHub Project board (Step 4).
+A human-confirmed bridge between the project's change tracking and this repo's GitHub Issues. A Change ID comes from one of two **sources**, resolved in Step 0:
+
+- **roadmap** — the ID is a roadmap item in `context/foundation/roadmap.md`, the source of truth for its Status.
+- **change** — the ID has no roadmap item but has a change folder (`context/changes/<id>/` or `context/archive/<created>-<id>/`); Status comes from that folder's `change.md`. This covers standalone changes such as UI fixes or follow-ups.
+
+One-way only: this skill reads the roadmap / change folder and writes to GitHub, never the reverse. It never touches a `Status` field — that stays the exclusive job of `/10x-plan`, `/10x-implement`, `/10x-archive`. The only things it writes back are bookkeeping fields recording which issue a Change ID maps to: `**GitHub:** #N` in `roadmap.md` (source roadmap) or `github_issue: N` in the frontmatter of `change.md` (source change, only while the folder is still under `context/changes/`). At the end it also offers (never silently) to move the issue's card on the GitHub Project board (Step 4).
 
 ## When to use, when to skip
 
-**Use when**: the user runs `/github-issue-sync <change-id>` — typically right after `/10x-archive <change-id>` (to close the matching issue) or when starting work on a roadmap item that has no issue yet (to create one). Always invoked explicitly by the user — never call this skill on your own initiative after seeing an archive happen.
+**Use when**: the user runs `/github-issue-sync <change-id>` — typically right after `/10x-plan <change-id>` (to create the issue, so the card exists with the plan summary before implementation starts) and again right after `/10x-archive <change-id>` (to close it). Always invoked explicitly by the user — never call this skill on your own initiative after seeing a plan or an archive happen.
 
 **Skip when**: no argument is given (ask for one, don't guess which change-id the user means) or `gh` isn't usable (see Step 1).
 
@@ -22,17 +27,27 @@ A human-confirmed bridge between `context/foundation/roadmap.md` (source of trut
 
 `$ARGUMENTS` must be exactly one Change ID (kebab-case, e.g. `first-expense-and-income`). If empty, ask the user for it in plain text — do not guess from "most recently archived" or any other inference.
 
-Verify it exists in the roadmap:
+Resolve the **source** of the ID. Roadmap first:
 
 ```bash
-grep -nE '\*\*Change ID:\*\* `?'"$CHANGE_ID"'`?[[:space:]]*$' context/foundation/roadmap.md
+grep -nE '\*\*Change ID:\*\* `?'"$CHANGE_ID"'`?[[:space:]]*$' context/foundation/roadmap.md 2>/dev/null
 ```
 
-The backticks are optional on purpose: `roadmap.md` writes `- **Change ID:** <id>` without them, while issue bodies (Step 2/5) write it with them.
+The backticks are optional on purpose: `roadmap.md` writes `- **Change ID:** <id>` without them, while issue bodies (Step 2/5) write it with them. A missing `roadmap.md` is not an error here — it just means "no roadmap item".
 
-If not found, stop and report: `✗ No roadmap item with Change ID "<change-id>" found in context/foundation/roadmap.md.` Do not proceed — every later step needs this item's Outcome/PRD refs/Status/Roadmap ID, and there's nothing to base a title or body on without it.
+- **Found** → `SOURCE=roadmap`. Read the full item block (from its `### F-NN:`/`### S-NN:` heading to the next `###` or `##`) to capture: Roadmap ID, Outcome, PRD refs, Prerequisites, Status, and whether a `**GitHub:** #N` line already exists in the block.
+- **Not found** → look for a change folder:
 
-If found, read the full item block (from its `### F-NN:`/`### S-NN:` heading to the next `###` or `##`) to capture: Roadmap ID, Outcome, PRD refs, Prerequisites, Status, and whether a `**GitHub:** #N` line already exists in the block.
+  ```bash
+  CHANGE_DIR=$(ls -d "context/changes/$CHANGE_ID" context/archive/*-"$CHANGE_ID" 2>/dev/null | head -1)
+  ```
+
+  Folder with a `change.md` found → `SOURCE=change`. Read its frontmatter (`title`, `status`, `created`, and `github_issue` if present) and remember whether the folder is archived (`CHANGE_DIR` starts with `context/archive/`). If `plan-brief.md` / `plan.md` exist next to it, they feed the issue body in Step 5.
+- **Neither** → stop and report: `✗ No roadmap item and no change folder for Change ID "<change-id>" (checked context/foundation/roadmap.md, context/changes/, context/archive/).` Do not proceed — there's nothing to base a title or body on without one of them.
+
+For `SOURCE=roadmap` also resolve `CHANGE_DIR` the same way (it may be empty — an item that is not planned yet has no folder); Step 5 uses it for the plan summary.
+
+Print one line saying which source was used, e.g. `ℹ Source: change (no roadmap item) — context/changes/<id>/`.
 
 ### Step 1 — Check `gh` availability
 
@@ -50,7 +65,7 @@ REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
 
 ### Step 2 — Find the existing issue, if any
 
-**If the item block already has `**GitHub:** #N`:**
+**If a number is already stored** — `**GitHub:** #N` in the roadmap item block (source roadmap) or `github_issue: N` in `change.md` (source change):
 
 ```bash
 gh issue view <N> --repo "$REPO" --json number,title,url,state
@@ -60,7 +75,7 @@ gh issue view <N> --repo "$REPO" --json number,title,url,state
 - `state: CLOSED` → report `ℹ Issue #<N> is already closed.` and go to Step 4 (the board card may still need moving).
 - 404 / not found → the stored number is stale (issue deleted). Warn `⚠ Stored GitHub:#<N> no longer exists — treating as no issue.` and fall through to the search below.
 
-**If no `**GitHub:** #N` line (or it was stale):**
+**If nothing is stored (or the stored number was stale):**
 
 ```bash
 gh issue list --repo "$REPO" --state all --search "\"$CHANGE_ID\"" --json number,title,url,body,state
@@ -71,23 +86,31 @@ gh issue list --repo "$REPO" --state all --search "\"$CHANGE_ID\"" --json number
 This is a broad text search — do not trust it directly. Filter the results client-side for an exact match of the literal pattern `` **Change ID:** `<change-id>` `` inside each candidate's `body`. This avoids false positives from loose full-text search matching an unrelated issue that happens to mention the string.
 
 - **Zero** exact matches → go to Step 5 (create mode).
-- **Exactly one** exact match → this is the issue, regardless of its `state`. Backfill `**GitHub:** #N` into the item's block in `roadmap.md` now (one `Edit`, immediately after the `**Status:**` line of that item) so future runs skip the search. Then branch on `state`: `OPEN` → go to Step 3 (close mode) with this issue; `CLOSED` → report `ℹ Issue #<N> is already closed.` and go to Step 4 (do not reopen it, do not offer to create a new one).
+- **Exactly one** exact match → this is the issue, regardless of its `state`. Backfill the number now so future runs skip the search — see "Where the number is written back" below. Then branch on `state`: `OPEN` → go to Step 3 (close mode) with this issue; `CLOSED` → report `ℹ Issue #<N> is already closed.` and go to Step 4 (do not reopen it, do not offer to create a new one).
 - **More than one** exact match → print all matches (number, title, url, state) and STOP. Do not guess which one is authoritative — report `✗ Multiple issues match Change ID "<change-id>" — resolve manually.`
+
+#### Where the number is written back
+
+Used by the backfill above and by Step 5 after creating an issue. One `Edit`, never more:
+
+- **Source roadmap** → add `**GitHub:** #<N>` to the item's block in `roadmap.md`, immediately after that item's `**Status:**` line.
+- **Source change, folder under `context/changes/`** → add `github_issue: <N>` to the `change.md` frontmatter, on the line after `status:`. Other 10x skills read only the keys they know, so an extra key is safe.
+- **Source change, folder under `context/archive/`** → **do not write.** Archived folders are read-only by convention (every 10x skill refuses to write there). Skip the backfill; the body-anchor search above finds the issue again on the next run, and the reference stays correct because the number is already in the issue itself.
 
 ### Step 3 — Close mode: ask before closing
 
 ```
 AskUserQuestion:
-  question: "Issue #<N> (\"<title>\") jest otwarty dla \"<change-id>\" (roadmap status: <status>). Zamknąć?"
+  question: "Issue #<N> (\"<title>\") jest otwarty dla \"<change-id>\" (<roadmap|change> status: <status>). Zamknąć?"
   header: "GitHub"
   options:
     - label: "Zamknij issue (Recommended)"
-      description: "gh issue close. roadmap.md jest już źródłem prawdy; to tylko kopia na GitHubie."
+      description: "gh issue close. Źródłem prawdy jest roadmap.md / change.md; to tylko kopia na GitHubie."
     - label: "Zostaw otwarte"
       description: "Issue zostaje OPEN. Nic się nie zmienia."
 ```
 
-Note the roadmap `Status` in the question itself (don't hard-gate on `Status: done` — just show it, so the user decides with full information; closing before `done` is a valid call if they ask for it).
+Note the `Status` (roadmap item, or `change.md` for source change) in the question itself (don't hard-gate on `done` / `archived` — just show it, so the user decides with full information; closing earlier is a valid call if they ask for it).
 
 **On "Zamknij issue":**
 
@@ -95,14 +118,24 @@ Note the roadmap `Status` in the question itself (don't hard-gate on `Status: do
 ARCHIVE_DIR=$(ls context/archive/ 2>/dev/null | grep -- "$CHANGE_ID" | head -1)
 ```
 
-- If found: `gh issue close <N> --repo "$REPO" --comment "Archived via /10x-archive → context/archive/${ARCHIVE_DIR}/. See roadmap.md ## Done."`
-- If not found (closing without an archive having happened): `gh issue close <N> --repo "$REPO" --comment "Closed via github-issue-sync — see context/foundation/roadmap.md."`
+- If found: `gh issue close <N> --repo "$REPO" --comment "Archived via /10x-archive → context/archive/${ARCHIVE_DIR}/."` — for source roadmap append ` See roadmap.md ## Done.`
+- If not found (closing without an archive having happened): `gh issue close <N> --repo "$REPO" --comment "Closed via github-issue-sync."` — for source roadmap append ` See context/foundation/roadmap.md.`
 
 Print the issue URL, then go to Step 4 with this issue (now closed).
 
 **On "Zostaw otwarte":** do not touch the issue. Report that it stays open, then go to Step 4 with this issue (still open) — moving the card to "In Progress" without closing is a normal use.
 
 ### Step 5 — Create mode: ask before creating
+
+**Plan summary (both sources).** If `plan-brief.md` exists next to the roadmap item's change folder or in `CHANGE_DIR`, build a short plan section for the body — a pointer, not a copy of the plan:
+
+- **Summary**: the first paragraph under `## What & Why` in `plan-brief.md`.
+- **Phases**: the titles of the `### Phase N:` / `### Faza N:` headings in the `## Progress` section of `plan.md`, as a numbered list.
+- No plan files yet → omit this section and end the body with `Plan this with /10x-plan <change-id>.` instead (issue created before planning).
+
+Do not link to plan files: the folder moves from `context/changes/` to `context/archive/<created>-<id>/` on archive, so a link would rot. Name the folder in backticks instead (see the body templates).
+
+#### Source roadmap
 
 Gather everything needed from `roadmap.md`:
 
@@ -124,10 +157,35 @@ Body format (mirrors the issues already created in this repo — keep it a point
 
 Full detail: [`context/foundation/roadmap.md` § <Roadmap ID>](https://github.com/<REPO>/blob/master/context/foundation/roadmap.md#<anchor>)
 
-Plan this with `/10x-plan <change-id>`.
+<plan summary section from above, if plan files exist; otherwise: Plan this with `/10x-plan <change-id>`.>
 ```
 
-Ask before creating:
+#### Source change (no roadmap item)
+
+- **Title**: `title` from `change.md`.
+- **Label**: no roadmap Roadmap ID to derive one from, so offer one of the repo's existing labels in the confirmation question below: `enhancement` (default), `bug`, `documentation`. Never invent a label; if the chosen one does not exist (`gh label list`), create the issue without a label and say so.
+- **Milestone**: none. The open milestone describes a roadmap scope; a standalone change does not belong to it unless the user says so. Say `ℹ Milestone pominięty (zmiana spoza roadmapy).`
+- **Depends on**: none.
+
+Body format — the first line must contain `**Change ID:** `<change-id>`` exactly, because Step 2's search matches on it:
+
+```markdown
+**Change ID:** `<change-id>` · **Source:** standalone change (no roadmap item)
+
+**Summary:** <plan-brief.md "What & Why" first paragraph; if there is no plan-brief, the first line under `## Notes` in change.md; if neither, the title>
+
+**Phases:**
+1. <phase 1 title>
+2. <phase 2 title>
+
+**Status:** <change.md status>
+
+Folder: `context/changes/<change-id>/` (after `/10x-archive`: `context/archive/<created>-<change-id>/`)
+```
+
+Omit **Phases** when there is no `plan.md`.
+
+Ask before creating (print title, label, milestone and the body first, so the user sees what will be created):
 
 ```
 AskUserQuestion:
@@ -135,18 +193,20 @@ AskUserQuestion:
   header: "GitHub"
   options:
     - label: "Stwórz issue (Recommended)"
-      description: "gh issue create z tytułem/treścią z roadmap.md, etykietą <foundation|slice>, i aktualnym milestone."
+      description: "gh issue create z tytułem/treścią z roadmap.md lub change.md, etykietą <foundation|slice|enhancement>, i milestone (tylko dla pozycji roadmapy)."
+    - label: "Stwórz jako bug"            # source change only; omit for source roadmap
+      description: "To samo, ale z etykietą bug zamiast enhancement."
     - label: "Nie, pomiń"
       description: "Nic nie twórz."
 ```
 
-**On "Stwórz issue":**
+**On "Stwórz issue" / "Stwórz jako bug":**
 
 ```bash
-gh issue create --repo "$REPO" --title "<title>" --label "<foundation|slice>" --milestone "<milestone title, if resolved>" --body "<body>"
+gh issue create --repo "$REPO" --title "<title>" --label "<label>" --milestone "<milestone title, if resolved>" --body "<body>"
 ```
 
-Capture the returned URL, extract the issue number, and **write back** `**GitHub:** #<N>` into the item's block in `roadmap.md` (one `Edit`, immediately after that item's `**Status:**` line). Print the URL, then go to Step 4 with the new issue.
+Omit `--label` / `--milestone` when none applies. Capture the returned URL, extract the issue number, and **write the number back** as described under "Where the number is written back" (Step 2). Print the URL, then go to Step 4 with the new issue.
 
 **On "Nie, pomiń":** do nothing. Report that no issue was created.
 
@@ -176,13 +236,13 @@ gh project field-list <number> --owner "$OWNER" --format json
 - Field = the single-select field named `Status`; keep its `id` and its `options` (`id`, `name`). No such field → print `ℹ Tablica nie ma pola Status — pomijam.` and STOP.
 - Card not found → ask `AskUserQuestion` "Issue #<N> nie jest na tablicy \"<title>\". Dodać?" with options `Dodaj na tablicę (Recommended)` / `Nie, pomiń`. On add: `gh project item-add <number> --owner "$OWNER" --url <issue url>`, take the returned item id, and treat its current status as empty. On skip: STOP.
 
-**4c. Pick the recommended status.** Map by what just happened and the roadmap `Status` from Step 0, then match to the closest real option name (case-insensitive; never invent an option):
+**4c. Pick the recommended status.** Map by what just happened and the `Status` from Step 0 (roadmap item, or `change.md` for source change), then match to the closest real option name (case-insensitive; never invent an option):
 
 | Situation | Recommended option |
 | --- | --- |
-| Issue is closed, or roadmap status is `done` | the "done" option (e.g. `Done`) |
-| Roadmap status is `in-progress` or `planning` | the "in progress" option (e.g. `In Progress`) |
-| anything else (`proposed`, `ready`, new issue) | the first / "todo" option (e.g. `Todo`) |
+| Issue is closed, or status is `done` / `archived` / `implemented` / `impl_reviewed` | the "done" option (e.g. `Done`) |
+| Status is `in-progress`, `planning` or `implementing` | the "in progress" option (e.g. `In Progress`) |
+| anything else (`proposed`, `ready`, `planned`, `plan_reviewed`, new issue) | the first / "todo" option (e.g. `Todo`) |
 
 If the card's current status already equals the recommended option, print `ℹ Tablica: #<N> już ma status "<status>".` and STOP — nothing to offer.
 
@@ -214,8 +274,10 @@ Re-read the card (`gh project item-list ... --format json`, same filter) and pri
 ## What this skill does NOT do
 
 - Never closes or creates an issue without the corresponding `AskUserQuestion` confirmation above — no silent action in either direction.
-- Never writes to `roadmap.md`'s `Status` field. The only field it ever adds or reads there is `**GitHub:** #N`.
+- Never writes to `roadmap.md`'s `Status` field or to `change.md`'s `status`. The only things it ever adds are `**GitHub:** #N` (roadmap) and `github_issue: N` (`change.md`, live folders only).
+- Never writes anything under `context/archive/` — an archived change folder is read-only, so no backfill happens there (see "Where the number is written back").
 - Never guesses when more than one open issue matches a Change ID — lists them and stops.
+- Never assigns the open milestone to a standalone change (source change) on its own; milestones are for roadmap items.
 - Never runs any part of its logic if `gh` is unavailable or unauthenticated (Step 1) — fails soft, never blocks `/10x-archive` or any other workflow.
 - Never moves a card on the Project board, and never adds an issue to a board, without the matching `AskUserQuestion` in Step 4. It does not create, rename or reconfigure projects or their fields, and it does not rely on a hardcoded project number or ids. The Project's own "Item closed → Status: Done" automation, if enabled, still works independently of this skill.
-- Does not run automatically after `/10x-archive` or any other skill — always a separate, explicit invocation.
+- Does not run automatically after `/10x-plan`, `/10x-archive` or any other skill — always a separate, explicit invocation. It deliberately is not wired into `/10x-plan`: that skill is managed by `10x-cli` and a `10x sync` would overwrite the hook, whereas this file survives sync.
