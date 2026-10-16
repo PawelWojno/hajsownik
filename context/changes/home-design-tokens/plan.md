@@ -240,12 +240,12 @@ Brak migracji. Wycofanie: revert commitów zmiany (`git revert -m 1 <merge>` po 
 
 #### Automated
 
-- [x] 3.1 Skrypt „po" potwierdza fokus i hover CTA oraz zapisuje zrzuty (`home-after-390.png`, `home-after-1280.png` w `screenshots/`)
-- [x] 3.2 Kontrola tokenów przechodzi z obiema stronami w `CLEAN_PATHS`: `npm run check:ui`
-- [x] 3.3 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build`
-- [x] 3.4 Smoke test przechodzi: `npm run smoke`
+- [x] 3.1 Skrypt „po" potwierdza fokus i hover CTA oraz zapisuje zrzuty (`home-after-390.png`, `home-after-1280.png` w `screenshots/`) — 04a58e8
+- [x] 3.2 Kontrola tokenów przechodzi z obiema stronami w `CLEAN_PATHS`: `npm run check:ui` — 04a58e8
+- [x] 3.3 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build` — 04a58e8
+- [x] 3.4 Smoke test przechodzi: `npm run smoke` — 04a58e8
 
 #### Manual
 
-- [x] 3.5 Zrzuty „po" na 390 i 1280 px zaakceptowane względem zrzutów „przed" (zamierzone różnice: tekst 80%, 2-stopniowy tytuł, wypełnienie outline, karty 10%)
-- [x] 3.6 Fokus klawiatury jest widoczny na obu CTA (zrzut ze stanu fokusu)
+- [x] 3.5 Zrzuty „po" na 390 i 1280 px zaakceptowane względem zrzutów „przed" (zamierzone różnice: tekst 80%, 2-stopniowy tytuł, wypełnienie outline, karty 10%) — 04a58e8
+- [x] 3.6 Fokus klawiatury jest widoczny na obu CTA (zrzut ze stanu fokusu) — 04a58e8

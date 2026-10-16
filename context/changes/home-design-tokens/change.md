@@ -1,7 +1,7 @@
 ---
 change_id: home-design-tokens
 title: Strona główna na tokenach stylów
-status: implementing
+status: implemented
 github_issue: 29
 created: 2026-10-16
 updated: 2026-10-16
