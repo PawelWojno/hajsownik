@@ -104,7 +104,7 @@ Jedna zmiana w `Welcome.astro`: usunięcie dekoracji, migracja kolorów na token
 
 **Intent**: zamienić literały na tokeny i oprzeć CTA o istniejący komponent, zachowując geometrię hero.
 
-**Contract**: `h1` używa `from-title-from to-title-to` (jak `MonthScreen.tsx:47`) zamiast `from-blue-200 via-purple-200 to-pink-200`; akapit `text-muted-foreground`; oba CTA to `<a>` ze `class={cn(buttonVariants({ variant }), cta)}` (wariant `default` dla „Zaloguj się", `outline` dla „Załóż konto"), gdzie `cta` zachowuje dzisiejszą geometrię (zob. „Critical Implementation Details"). Importy `buttonVariants` z `@/components/ui/button` i `cn` z `@/lib/utils` w frontmatter.
+**Contract**: `h1` używa `from-title-from to-title-to` (jak `MonthScreen.tsx:47`) zamiast `from-blue-200 via-purple-200 to-pink-200`; akapit `text-muted-foreground`; oba CTA to `<a>` ze `class={cn(buttonVariants({ variant }), cta)}` (wariant `default` dla „Zaloguj się", `outline` dla „Załóż konto"), gdzie `cta` zachowuje dzisiejszą geometrię (zob. „Critical Implementation Details"). Importy `buttonVariants` z `@/components/ui/button` i `cn` z `@/lib/utils` w frontmatter. Adaptacja w implementacji: klasy są liczone we frontmatter (`primaryCta`/`secondaryCta`) i podawane jako `class:list={[...]}`, bo reguła `astro/prefer-class-list-directive` flaguje `class={...}`.
 
 #### 3. Karty funkcji z jednej tablicy
 
@@ -112,7 +112,7 @@ Jedna zmiana w `Welcome.astro`: usunięcie dekoracji, migracja kolorów na token
 
 **Intent**: zastąpić trzy skopiowane bloki jedną kartą `ui/card` renderowaną z tablicy w frontmatter.
 
-**Contract**: tablica `features` z trzema pozycjami (`title`, `text`, `icon` = wnętrze SVG jako stała string renderowana przez `set:html` na `<svg>`); każda karta to `<Card className="gap-0 p-6 shadow-none backdrop-blur-xl">` (precedens `MonthScreen.tsx:56`), tytuł `text-foreground`, tekst `text-muted-foreground text-sm leading-relaxed`, ikona `text-link mb-4`. Siatka `grid ... sm:grid-cols-3` bez zmian. `Card` (React) bez dyrektywy `client:*`, tak jak inne statyczne użycia w `.astro`.
+**Contract**: tablica `features` z trzema pozycjami (`title`, `text`, `icon` = wnętrze SVG jako stała string renderowana przez `set:html` na `<svg>`); każda karta to `<Card className="gap-0 p-6 shadow-none backdrop-blur-xl">` (precedens `MonthScreen.tsx:56`), tytuł `text-foreground`, tekst `text-muted-foreground text-sm leading-relaxed`, ikona `text-link mb-4`. Siatka `grid ... sm:grid-cols-3` bez zmian. `Card` (React) bez dyrektywy `client:*`, tak jak inne statyczne użycia w `.astro`. Adaptacja w implementacji: zamiast `icon` + `set:html` pozycje mają `paths` (dane ścieżek SVG) renderowane jako `<path d=...>`, bo `astro/no-set-html-directive` zabrania `set:html`.
 
 #### 4. `index.astro`
 
