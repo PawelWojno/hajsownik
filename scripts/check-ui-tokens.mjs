@@ -9,6 +9,8 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const CLEAN_PATHS = [
+  "src/pages/index.astro",
+  "src/components/Welcome.astro",
   "src/pages/dashboard.astro",
   "src/pages/dev/dashboard-states.astro",
   "src/components/Topbar.astro",

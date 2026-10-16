@@ -229,23 +229,23 @@ Brak migracji. Wycofanie: revert commitów zmiany (`git revert -m 1 <merge>` po 
 
 #### Automated
 
-- [x] 2.1 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build`
-- [x] 2.2 Skan wartości na widoku daje 0 trafień (komenda grep z `10x-ui` na `Welcome.astro` i `index.astro`)
+- [x] 2.1 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build` — 9b06859
+- [x] 2.2 Skan wartości na widoku daje 0 trafień (komenda grep z `10x-ui` na `Welcome.astro` i `index.astro`) — 9b06859
 
 #### Manual
 
-- [x] 2.3 Strona `/` na dev serwerze (390 i 1280 px) wygląda poprawnie: bez orbów i gwiazd, tytuł z gradientem, dwa CTA, trzy karty, konsola bez błędów
+- [x] 2.3 Strona `/` na dev serwerze (390 i 1280 px) wygląda poprawnie: bez orbów i gwiazd, tytuł z gradientem, dwa CTA, trzy karty, konsola bez błędów — 9b06859
 
 ### Phase 3: Stany, bramka wizualna i zabezpieczenie
 
 #### Automated
 
-- [ ] 3.1 Skrypt „po" potwierdza fokus i hover CTA oraz zapisuje zrzuty (`home-after-390.png`, `home-after-1280.png` w `screenshots/`)
-- [ ] 3.2 Kontrola tokenów przechodzi z obiema stronami w `CLEAN_PATHS`: `npm run check:ui`
-- [ ] 3.3 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build`
-- [ ] 3.4 Smoke test przechodzi: `npm run smoke`
+- [x] 3.1 Skrypt „po" potwierdza fokus i hover CTA oraz zapisuje zrzuty (`home-after-390.png`, `home-after-1280.png` w `screenshots/`)
+- [x] 3.2 Kontrola tokenów przechodzi z obiema stronami w `CLEAN_PATHS`: `npm run check:ui`
+- [x] 3.3 Lint, typy i build przechodzą: `npm run lint && npx astro check && npm run build`
+- [x] 3.4 Smoke test przechodzi: `npm run smoke`
 
 #### Manual
 
-- [ ] 3.5 Zrzuty „po" na 390 i 1280 px zaakceptowane względem zrzutów „przed" (zamierzone różnice: tekst 80%, 2-stopniowy tytuł, wypełnienie outline, karty 10%)
-- [ ] 3.6 Fokus klawiatury jest widoczny na obu CTA (zrzut ze stanu fokusu)
+- [x] 3.5 Zrzuty „po" na 390 i 1280 px zaakceptowane względem zrzutów „przed" (zamierzone różnice: tekst 80%, 2-stopniowy tytuł, wypełnienie outline, karty 10%)
+- [x] 3.6 Fokus klawiatury jest widoczny na obu CTA (zrzut ze stanu fokusu)
