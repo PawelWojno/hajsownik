@@ -1,11 +1,11 @@
 ---
 change_id: home-design-tokens
 title: Strona główna na tokenach stylów
-status: impl_reviewed
+status: archived
 github_issue: 29
 created: 2026-10-16
 updated: 2026-10-16
-archived_at: null
+archived_at: 2026-10-16T19:49:46Z
 ---
 
 ## Notes
