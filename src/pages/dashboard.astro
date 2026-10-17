@@ -2,7 +2,7 @@
 import MonthScreen from "@/components/month/MonthScreen";
 import Topbar from "@/components/Topbar.astro";
 import Layout from "@/layouts/Layout.astro";
-import { currentMonthStart, formatMonthLabel, monthParam, todayInWarsaw } from "@/lib/dates";
+import { currentMonthStart, formatMonthTitle, monthParam, todayInWarsaw } from "@/lib/dates";
 import { listActiveCategories } from "@/lib/services/categories";
 import { getMonthSummary } from "@/lib/services/month";
 import { listRecurringExpenses } from "@/lib/services/recurring-expenses";
@@ -31,8 +31,7 @@ if (supabase) {
   }
 }
 
-const label = formatMonthLabel(todayInWarsaw());
-const monthLabel = label.charAt(0).toUpperCase() + label.slice(1);
+const monthLabel = formatMonthTitle(todayInWarsaw());
 const historyHref = `/history?month=${monthParam(currentMonthStart())}`;
 ---
 

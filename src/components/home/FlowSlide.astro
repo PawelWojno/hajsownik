@@ -1,0 +1,85 @@
+---
+import { Card } from "@/components/ui/card";
+import { formatZl, sample } from "@/lib/home-sample";
+
+// Geometry of the flow in viewBox units. Ribbon heights follow the amounts; the right column is laid out in slots of
+// at least MIN_SLOT so a two-line label (name, amount below) never touches its neighbours, however thin the ribbon.
+const WIDTH = 264;
+const SOURCE_TOP = 44;
+const SOURCE_HEIGHT = 300;
+const BAR_WIDTH = 8;
+// The source bar sits right of the income heading so the first ribbon (it rises above the bar) never covers the amount.
+const SOURCE_X = 48;
+const NODE_X = 172;
+const LABEL_X = NODE_X + BAR_WIDTH + 8;
+const MIN_SLOT = 38;
+const SLOT_GAP = 6;
+const midX = (SOURCE_X + BAR_WIDTH + NODE_X) / 2;
+const scale = SOURCE_HEIGHT / sample.income;
+
+const items = [...sample.categories, { name: "Zostaje", amount: sample.left, fill: "fill-success" }];
+
+let sourceY = SOURCE_TOP;
+let slotY = 0;
+const flows = items.map((item) => {
+  const height = item.amount * scale;
+  const slot = Math.max(height, MIN_SLOT);
+  const targetY = slotY + (slot - height) / 2;
+  const flow = {
+    ...item,
+    isLeft: item.name === "Zostaje",
+    height,
+    sourceY,
+    targetY,
+    centerY: slotY + slot / 2,
+    // Ribbon from the source bar to the node: top edge there, bottom edge back.
+    path: `M${SOURCE_X + BAR_WIDTH},${sourceY} C${midX},${sourceY} ${midX},${targetY} ${NODE_X},${targetY} L${NODE_X},${targetY + height} C${midX},${targetY + height} ${midX},${sourceY + height} ${SOURCE_X + BAR_WIDTH},${sourceY + height} Z`,
+  };
+  sourceY += height;
+  slotY += slot + SLOT_GAP;
+  return flow;
+});
+const viewHeight = Math.max(slotY - SLOT_GAP, SOURCE_TOP + SOURCE_HEIGHT);
+const description = `Przepływ pieniędzy: przychody ${formatZl(sample.income)} rozchodzą się do kategorii wydatków (${sample.categories
+  .map((category) => `${category.name} ${formatZl(category.amount)}`)
+  .join(", ")}) i do pozycji Zostaje ${formatZl(sample.left)} (dane przykładowe)`;
+---
+
+<Card className="h-full w-full gap-3 p-4 shadow-none">
+  <p class="text-lg font-bold">Gdzie trafiają pieniądze</p>
+  <svg viewBox={`0 0 ${WIDTH} ${viewHeight}`} role="img" aria-label={description} class="min-h-0 w-full flex-1">
+    <text x="0" y="12" class="fill-muted-foreground" font-size="11" letter-spacing="1.4">
+      PRZYCHODY
+    </text>
+    <text x="0" y="32" class="fill-foreground" font-size="14" font-weight="700">
+      {formatZl(sample.income)}
+    </text>
+    <rect x={SOURCE_X} y={SOURCE_TOP} width={BAR_WIDTH} height={SOURCE_HEIGHT} rx="3" class="fill-success"></rect>
+    {flows.map((flow) => (
+      <>
+        <path d={flow.path} class:list={[flow.fill]} fill-opacity={flow.isLeft ? 0.6 : 0.42}></path>
+        <rect x={NODE_X} y={flow.targetY} width={BAR_WIDTH} height={flow.height} rx="3" class:list={[flow.fill]}></rect>
+        {flow.isLeft ? (
+          <>
+            <text x={LABEL_X} y={flow.centerY - 2} class="fill-success" font-size="14" font-weight="700">
+              {flow.name}
+            </text>
+            <text x={LABEL_X} y={flow.centerY + 16} class="fill-success" font-size="14" font-weight="600">
+              {formatZl(flow.amount)}
+            </text>
+          </>
+        ) : (
+          <>
+            <text x={LABEL_X} y={flow.centerY - 2} class="fill-foreground" font-size="12">
+              {flow.name}
+            </text>
+            <text x={LABEL_X} y={flow.centerY + 14} class="fill-muted-foreground" font-size="12">
+              {formatZl(flow.amount)}
+            </text>
+          </>
+        )}
+      </>
+    ))}
+  </svg>
+  <p class="text-muted-foreground text-xs">Dane przykładowe</p>
+</Card>

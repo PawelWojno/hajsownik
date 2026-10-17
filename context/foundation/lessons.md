@@ -36,3 +36,10 @@
 - **Problem**: Aplikacja jest ciemna przez `<html class="dark">`, a jasne `:root` czeka na przełącznik motywu. Obecnie `:root` łączy białe `--background`/`--card` z ciemnymi `--cosmic-*` (tło `bg-cosmic`) i neutralnym `--muted-foreground`, więc usunięcie klasy `dark` dałoby nieczytelny miks. Jasne wartości nie były nigdy oglądane.
 - **Rule**: Każdy nowy lub zmieniony token dostaje wartość w `:root` i w `.dark` w tej samej zmianie. Zmiana, która włącza jasny motyw lub przełącznik, najpierw sprawdza całe `:root` na stronie `/dev/dashboard-states` w obu motywach.
 - **Applies to**: plan, implement, impl-review (każda zmiana w `src/styles/global.css`)
+
+## Nowy wariant lub klasa responsywna Tailwinda sprawdzaj w przeglądarce, nie tylko bramkami
+
+- **Context**: Każda zmiana UI w Tailwind 4, która dodaje wariant responsywny lub kontenerowy (breakpoint, `@container`, `@min-*`, `@max-*`, własny rozmiar kontenera). Przykład: src/components/home/PhoneSlide.astro (zmiana ui-home-page).
+- **Problem**: Klasa, której Tailwind nie rozpoznaje (np. `@min-56:grid-cols-3`), jest po cichu pomijana: nie powstaje żadne CSS, a `npm run lint`, `check:ui` i `astro check` przechodzą. Układ po prostu nie reaguje na szerokość i błąd wychodzi dopiero przy oglądaniu strony (kategorie w telefonie były zawsze w 2 kolumnach, także na desktopie).
+- **Rule**: Po dodaniu każdego nowego wariantu responsywnego lub kontenerowego sprawdź w przeglądarce (Playwright, computed style, np. `grid-template-columns`) co najmniej dwie szerokości po obu stronach progu; zielone bramki nie są dowodem, że klasa działa. Jeśli klasa nie działa, zdefiniuj nazwany rozmiar w `global.css` (np. `--container-*`) zamiast wartości arbitralnej, którą blokuje `check:ui`.
+- **Applies to**: implement, impl-review, plan-review

@@ -3,7 +3,7 @@ import HistoryList from "@/components/history/HistoryList";
 import MonthPicker from "@/components/history/MonthPicker";
 import Topbar from "@/components/Topbar.astro";
 import Layout from "@/layouts/Layout.astro";
-import { currentMonthStart, formatMonthLabel, monthParam, shiftMonth } from "@/lib/dates";
+import { currentMonthStart, formatMonthTitle, monthParam, shiftMonth } from "@/lib/dates";
 import { parseHistoryParams, toHistoryQuery } from "@/lib/history-params";
 import { listCategories } from "@/lib/services/categories";
 import { listHistory } from "@/lib/services/entries";
@@ -29,8 +29,7 @@ if (supabase) {
   }
 }
 
-const label = formatMonthLabel(params.month);
-const monthLabel = label.charAt(0).toUpperCase() + label.slice(1);
+const monthLabel = formatMonthTitle(params.month);
 
 // Month arrows and tabs keep the rest of the query (tab, and the category filter on the expenses tab).
 function historyHref(month: string, typ = params.typ): string {

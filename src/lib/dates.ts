@@ -39,6 +39,12 @@ export function formatMonthLabel(date: string): string {
   return monthNames.format(new Date(`${monthStartOf(date)}T00:00:00Z`));
 }
 
+/** "Październik 2026": the month label with a capital letter, for titles. */
+export function formatMonthTitle(date: string): string {
+  const label = formatMonthLabel(date);
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 /** Years accepted in `?month=` (and offered by the month picker). */
 export const MIN_MONTH_YEAR = 2000;
 export const MAX_MONTH_YEAR = 2100;

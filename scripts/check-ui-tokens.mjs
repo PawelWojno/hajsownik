@@ -14,6 +14,7 @@ const CLEAN_PATHS = [
   "src/pages/dashboard.astro",
   "src/pages/dev/dashboard-states.astro",
   "src/components/Topbar.astro",
+  "src/components/home",
   "src/components/auth/ServerError.tsx",
   "src/components/dev",
   "src/components/month",

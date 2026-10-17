@@ -1,81 +1,73 @@
 ---
+import HeroCarousel from "@/components/home/HeroCarousel.astro";
 import Topbar from "@/components/Topbar.astro";
 import { buttonVariants } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-// Hero CTA geometry, kept from the page before it moved to tokens. cn() (tailwind-merge) lets it win over the
-// size classes in buttonVariants; cva alone does not resolve conflicting utilities.
-const cta = "h-auto px-6 py-3 text-base rounded-lg shadow-none";
-const primaryCta = cn(buttonVariants({ variant: "default" }), cta);
-const secondaryCta = cn(buttonVariants({ variant: "outline" }), cta);
+// Hero CTA geometry. cn() (tailwind-merge) lets it win over the size classes in buttonVariants; cva alone does not
+// resolve conflicting utilities.
+const cta = cn(buttonVariants({ variant: "default" }), "h-auto rounded-lg px-10 py-4 text-lg shadow-none");
 
-// Icons as SVG path data (24x24 viewBox, stroke icons); rendered as <path>, no set:html.
-const features = [
-  {
-    title: "Szybki wpis",
-    text: "Kwota, kategoria, zapisz. Reszta, jak data czy opis, jest opcjonalna.",
-    paths: ["M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z", "M7 11V7a5 5 0 0 1 10 0v4"],
-  },
-  {
-    title: "Ile zostaje",
-    text: "Przychody minus wydatki w tym miesiącu, odświeżane po każdym wpisie.",
-    paths: ["M12 2 2 7l10 5 10-5-10-5Z", "m2 17 10 5 10-5", "m2 12 10 5 10-5"],
-  },
-  {
-    title: "Jeden dom, jedne dane",
-    text: "Dane należą do gospodarstwa domowego i są niewidoczne dla innych użytkowników.",
-    paths: ["m16 18 6-6-6-6", "m8 6-6 6 6 6"],
-  },
-];
+const features = ["Czynsz, raty i subskrypcje wpisujesz raz i zapominasz.", "Historia wydatków zawsze pod ręką."];
+
+// Visible keyboard focus, the same ring as ui/button.tsx and Topbar.
+const focusClass = "outline-none focus-visible:ring-3 focus-visible:ring-ring/50";
+const signinLink = cn(
+  "flex min-h-11 items-center rounded-lg px-3 text-base font-medium text-link transition-colors hover:text-link-hover",
+  focusClass,
+);
 ---
 
 <div class="bg-cosmic relative min-h-screen w-full overflow-hidden">
   <div class="relative z-10 p-4 sm:p-8">
     <Topbar />
 
-    <!-- Hero section -->
-    <div class="mx-auto flex max-w-4xl flex-col items-center justify-center px-4 py-24 text-center sm:py-32 lg:py-40">
-      <h1 class="from-title-from to-title-to mb-6 bg-gradient-to-r bg-clip-text text-5xl leading-tight font-bold text-transparent sm:text-6xl lg:text-7xl">
-        Hajsownik
-      </h1>
-      <p class="text-muted-foreground mb-10 max-w-2xl text-lg sm:text-xl">
-        Budżet domowy bez wysiłku: wpisz wydatek w kilka sekund i od razu zobacz, ile zostaje w tym miesiącu.
-      </p>
-      <div class="flex flex-col gap-4 sm:flex-row">
-        <a href="/auth/signin" class:list={[primaryCta]}>
-          Zaloguj się
-        </a>
-        <a href="/auth/signup" class:list={[secondaryCta]}>
-          Załóż konto
-        </a>
+    <div class="mx-auto flex max-w-6xl flex-col gap-12 px-4 py-16 sm:py-20 lg:grid lg:grid-cols-2 lg:items-center lg:gap-16 lg:py-24">
+      <div class="text-center lg:text-left">
+        <h1 class="from-title-from to-title-to mb-4 bg-gradient-to-r bg-clip-text text-5xl leading-tight font-bold text-transparent sm:text-6xl lg:text-7xl">
+          Hajsownik
+        </h1>
+        <p class="text-foreground mb-4 text-2xl font-semibold sm:text-3xl">Wiesz, ile zostaje w tym miesiącu.</p>
+        <p class="text-muted-foreground mb-8 text-lg">
+          Wpisz wydatek w kilka sekund: kwota, kategoria, zapisz. Hajsownik od razu pokaże, ile zostaje z Twoich
+          przychodów.
+        </p>
+        <ul class="mb-6 inline-flex flex-col gap-3 text-left text-base">
+          {features.map((feature) => (
+            <li class="text-foreground flex items-start gap-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                class="text-success mt-0.5 shrink-0"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              {feature}
+            </li>
+          ))}
+        </ul>
+        <p class="text-muted-foreground mb-10 text-sm">
+          Dane Twojego gospodarstwa są prywatne. Nikt spoza Twojego konta ich nie zobaczy.
+        </p>
+        <div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
+          <a href="/auth/signup" class:list={[cta]}>
+            Załóż konto
+          </a>
+          <a href="/auth/signin" class:list={[signinLink]}>
+            Zaloguj się
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- Feature cards -->
-    <div class="mx-auto grid max-w-4xl grid-cols-1 gap-6 px-4 pb-24 sm:grid-cols-3">
-      {features.map((feature) => (
-        <Card className="gap-0 p-6 shadow-none backdrop-blur-xl">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="text-link mb-4"
-          >
-            {feature.paths.map((d) => (
-              <path d={d} />
-            ))}
-          </svg>
-          <h3 class="text-foreground mb-2 text-lg font-semibold">{feature.title}</h3>
-          <p class="text-muted-foreground text-sm leading-relaxed">{feature.text}</p>
-        </Card>
-      ))}
+      <HeroCarousel />
     </div>
   </div>
 </div>
