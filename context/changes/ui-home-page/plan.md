@@ -250,28 +250,28 @@ SVG i HTML renderowane na serwerze, ok. 20 linii JS; bez zewnętrznych bibliotek
 
 #### Automated
 
-- [x] 2.1 Kontrola UI przechodzi i obejmuje nowe pliki (`src/components/home` w `CLEAN_PATHS`): `npm run check:ui`
-- [x] 2.2 Lint i typy przechodzą: `npm run lint && npx astro check`
+- [x] 2.1 Kontrola UI przechodzi i obejmuje nowe pliki (`src/components/home` w `CLEAN_PATHS`): `npm run check:ui` — 2bbf973
+- [x] 2.2 Lint i typy przechodzą: `npm run lint && npx astro check` — 2bbf973
 
 #### Manual
 
-- [x] 2.3 Slajdy 2 i 3 mieszczą się między strzałkami na 390 px i na desktopie
-- [x] 2.4 Kwoty w przepływie nie nachodzą na siebie ani na etykiety sąsiednich kategorii
-- [x] 2.5 W kafelku „Zostaje" widać „Przychody − Wydatki" z wyraźnym minusem
-- [x] 2.6 Strzałki, paski i klawisze ←/→ działają, fokus jest widoczny
+- [x] 2.3 Slajdy 2 i 3 mieszczą się między strzałkami na 390 px i na desktopie — 2bbf973
+- [x] 2.4 Kwoty w przepływie nie nachodzą na siebie ani na etykiety sąsiednich kategorii — 2bbf973
+- [x] 2.5 W kafelku „Zostaje" widać „Przychody − Wydatki" z wyraźnym minusem — 2bbf973
+- [x] 2.6 Strzałki, paski i klawisze ←/→ działają, fokus jest widoczny — 2bbf973
 
 ### Phase 3: Strona `/`
 
 #### Automated
 
-- [ ] 3.1 Kontrola UI: `npm run check:ui`
-- [ ] 3.2 Lint i typy: `npm run lint && npx astro check`
-- [ ] 3.3 Build: `npm run build`
+- [x] 3.1 Kontrola UI: `npm run check:ui`
+- [x] 3.2 Lint i typy: `npm run lint && npx astro check`
+- [x] 3.3 Build: `npm run build`
 
 #### Manual
 
-- [ ] 3.4 Nazwa aplikacji widoczna jako gradientowy nagłówek; opis i linia o prywatności akceptowane przez użytkownika
-- [ ] 3.5 Poniżej 1024 px jedna kolumna, od 1024 px dwie
+- [x] 3.4 Nazwa aplikacji widoczna jako gradientowy nagłówek; opis i linia o prywatności akceptowane przez użytkownika
+- [x] 3.5 Poniżej 1024 px jedna kolumna, od 1024 px dwie
 
 ### Phase 4: Weryfikacja
 
