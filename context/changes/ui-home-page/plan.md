@@ -237,14 +237,14 @@ SVG i HTML renderowane na serwerze, ok. 20 linii JS; bez zewnętrznych bibliotek
 
 #### Automated
 
-- [x] 1.1 Lint przechodzi: `npm run lint`
-- [x] 1.2 Kontrola UI przechodzi: `npm run check:ui`
-- [x] 1.3 Typy przechodzą: `npx astro check`
+- [x] 1.1 Lint przechodzi: `npm run lint` — 652f59f
+- [x] 1.2 Kontrola UI przechodzi: `npm run check:ui` — 652f59f
+- [x] 1.3 Typy przechodzą: `npx astro check` — 652f59f
 
 #### Manual
 
-- [x] 1.4 Na `/dev/dashboard-states` ekran miesiąca i istniejące tokeny bez zmian; pasek niezalogowany traci „Załóż konto"
-- [x] 1.5 Pasek na `/` pokazuje tylko „Zaloguj się"
+- [x] 1.4 Na `/dev/dashboard-states` ekran miesiąca i istniejące tokeny bez zmian; pasek niezalogowany traci „Załóż konto" — 652f59f
+- [x] 1.5 Pasek na `/` pokazuje tylko „Zaloguj się" — 652f59f
 
 ### Phase 2: Karuzela
 
