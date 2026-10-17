@@ -16,6 +16,9 @@ const CLEAN_PATHS = [
   "src/components/Topbar.astro",
   "src/components/home",
   "src/components/auth/ServerError.tsx",
+  "src/components/auth/FormField.tsx",
+  "src/components/auth/SubmitButton.tsx",
+  "src/components/auth/PasswordToggle.tsx",
   "src/components/dev",
   "src/components/month",
 ];

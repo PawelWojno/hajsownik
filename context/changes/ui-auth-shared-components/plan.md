@@ -195,25 +195,25 @@ Po `npm run build` serwer dev trzeba zrestartować i odświeżyć stronę twardo
 
 #### Automated
 
-- [x] 2.1 Strona dev buduje się i lintuje: `npm run lint` i `npx astro check`
-- [x] 2.5 `npm run check:ui` przechodzi (strona dev jest już w `CLEAN_PATHS`)
+- [x] 2.1 Strona dev buduje się i lintuje: `npm run lint` i `npx astro check` — 26d9979
+- [x] 2.5 `npm run check:ui` przechodzi (strona dev jest już w `CLEAN_PATHS`) — 26d9979
 
 #### Manual
 
-- [x] 2.2 Zrzuty desktop i 390 px: wszystkie 7 komórek pokazane lub N/A z powodem
-- [x] 2.3 Tło pola w dark (`dark:bg-card`) akceptowalne wobec dotychczasowego `bg-white/10`
-- [x] 2.4 Prawdziwy hover i Tab sprawdzone na `/auth/signin`
+- [x] 2.2 Zrzuty desktop i 390 px: wszystkie 7 komórek pokazane lub N/A z powodem — 26d9979
+- [x] 2.3 Tło pola w dark (`dark:bg-card`) akceptowalne wobec dotychczasowego `bg-white/10` — 26d9979
+- [x] 2.4 Prawdziwy hover i Tab sprawdzone na `/auth/signin` — 26d9979
 
 ### Phase 3: Zabezpieczenie i bramki
 
 #### Automated
 
-- [ ] 3.1 `npm run check:ui` przechodzi
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Type checking passes: `npx astro check`
-- [ ] 3.4 Production build: `npm run build`
-- [ ] 3.5 Smoke test auth: `npm run smoke` (przy działającym serwerze)
+- [x] 3.1 `npm run check:ui` przechodzi
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Type checking passes: `npx astro check`
+- [x] 3.4 Production build: `npm run build`
+- [x] 3.5 Smoke test auth: `npm run smoke` (przy działającym serwerze)
 
 #### Manual
 
-- [ ] 3.6 Wstawienie `bg-purple-600` do `FormField.tsx` powoduje błąd `check:ui` (po sprawdzeniu cofnąć)
+- [x] 3.6 Wstawienie `bg-purple-600` do `FormField.tsx` powoduje błąd `check:ui` (po sprawdzeniu cofnąć)
