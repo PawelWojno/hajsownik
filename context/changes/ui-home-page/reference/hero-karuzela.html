@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hajsownik — szkic strony głównej</title>
+<style>
+  /* Tokeny skopiowane z src/styles/global.css (tryb ciemny). */
+  :root {
+    --background: oklch(0.166 0.026 269.371);
+    --cosmic-mid: oklch(0.201 0.041 269.806);
+    --foreground: oklch(1 0 0);
+    --card: oklch(1 0 0 / 10%);
+    --popover: oklch(0.208 0.042 265.755);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 20%);
+    --muted-foreground: oklch(0.932 0.032 255.585 / 80%);
+    --primary: oklch(0.558 0.288 302.321);
+    --primary-hover: oklch(0.627 0.265 303.9);
+    --ring: oklch(0.714 0.203 305.504);
+    --success: oklch(0.845 0.143 164.978);
+    --title-from: oklch(0.882 0.059 254.128);
+    --title-to: oklch(0.902 0.063 306.703);
+    --link: oklch(0.827 0.119 306.383);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--foreground);
+    background: linear-gradient(to bottom, var(--background), var(--cosmic-mid), var(--background));
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .page { max-width: 1080px; margin: 0 auto; padding: 16px 16px 56px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
+  .brand, .grad {
+    background: linear-gradient(to right, var(--title-from), var(--title-to));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .brand { font-weight: 700; font-size: 20px; }
+  .toplink { color: var(--link); text-decoration: none; font-size: 15px; padding: 10px 4px; }
+
+  .hero {
+    display: grid; gap: 28px; padding-top: 24px;
+    grid-template-areas: "text" "cta" "phone";
+  }
+  .text { grid-area: text; text-align: center; }
+  .carousel { grid-area: phone; justify-self: center; width: 100%; max-width: 420px; }
+  .stage { position: relative; }
+  .track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; border-radius: 28px; outline-offset: 4px; }
+  .track::-webkit-scrollbar { display: none; }
+  .slide { flex: 0 0 100%; scroll-snap-align: center; display: flex; align-items: center; justify-content: center; height: 620px; padding: 0; }
+  .slide .phone { margin: 0; }
+  .slide:first-child { background: radial-gradient(ellipse 58% 52% at 50% 52%, oklch(0.558 0.288 302 / 36%), transparent 74%); }
+  .svg-slide { height: 620px; width: auto; max-width: 100%; display: block; }
+  .svg-slide .panel { fill: var(--card); stroke: var(--border); }
+  .svg-slide .listbg { fill: oklch(1 0 0 / 8%); stroke: var(--border); }
+  .svg-slide .glass { fill: oklch(0.208 0.042 265.755); }
+  .svg-slide .okbox { fill: oklch(0.845 0.143 164.978 / 10%); stroke: var(--success); stroke-width: 2; }
+  .svg-slide .track-bar { fill: oklch(1 0 0 / 14%); }
+  .svg-slide .rule { stroke: var(--border); }
+  .svg-slide .t { fill: var(--foreground); }
+  .svg-slide .m { fill: var(--muted-foreground); }
+  .svg-slide .h { fill: var(--foreground); font-weight: 700; }
+  .svg-slide .ok { fill: var(--success); }
+  .svg-slide .cap { letter-spacing: .14em; }
+  .nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 6; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--input); background: oklch(0.166 0.026 269.371 / 70%); backdrop-filter: blur(6px); color: var(--foreground); display: grid; place-items: center; cursor: pointer; padding: 0; }
+  .nav:hover { background: var(--card); }
+  .nav:focus-visible, .bar:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .nav.prev { left: 2px; } .nav.next { right: 2px; }
+  .bars { display: flex; justify-content: center; gap: 4px; margin-top: 10px; }
+  .bar { width: 36px; height: 20px; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+  .bar::before { content: ""; position: absolute; left: 0; right: 0; top: 8px; height: 4px; border-radius: 2px; background: var(--input); transition: background .2s; }
+  .bar[aria-current="true"]::before { background: var(--link); }
+  @media (prefers-reduced-motion: reduce) { .bar::before { transition: none; } }
+  .eq-wrap { grid-area: eq; }
+  .cta-wrap { grid-area: cta; align-self: start; }
+
+  h1 { font-size: clamp(32px, 8vw, 56px); line-height: 1.1; margin: 0 0 16px; font-weight: 800; }
+  .sub { color: var(--muted-foreground); font-size: clamp(16px, 4vw, 19px); line-height: 1.5; margin: 0 auto 24px; max-width: 34em; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 24px; border-radius: 12px; font-weight: 600; font-size: 16px; text-decoration: none; }
+  .btn.primary { background: var(--primary); color: #fff; min-height: 58px; padding: 0 40px; font-size: 19px; border-radius: 14px; box-shadow: 0 12px 32px oklch(0.558 0.288 302 / 40%); }
+  .btn.outline { min-height: 40px; padding: 0 14px; font-size: 14px; font-weight: 500; color: var(--link); background: transparent; border: 0; }
+
+  /* Równanie */
+  .eq { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.15fr); align-items: center; gap: 6px; }
+  .chip { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 7px 8px 9px; min-width: 0; }
+  .chip .lbl { display: block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 6px; }
+  .chip strong { font-size: clamp(13px, 3.8vw, 20px); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted-foreground); font-weight: 600; }
+  .chip.ok { border: 1px solid oklch(0.845 0.143 164.978 / 35%); background: var(--card); }
+  .chip.ok .lbl { color: var(--success); }
+  .chip.ok strong { color: var(--foreground); font-size: clamp(14px, 4vw, 22px); font-weight: 700; }
+  .op { font-size: 20px; color: var(--muted-foreground); font-weight: 300; }
+  .eq-note { margin: 12px 0 0; text-align: center; font-size: 13px; color: var(--muted-foreground); }
+
+  /* Telefon */
+  .phone {
+    position: relative; width: min(290px, calc(100% - 76px)); height: 620px; overflow: hidden;
+    border-radius: 44px; border: 9px solid oklch(0.27 0.03 270);
+    background: linear-gradient(to bottom, var(--background), var(--cosmic-mid), var(--background));
+    box-shadow: 0 0 0 1px oklch(1 0 0 / 8%);
+    margin: 0 auto;
+  }
+  .notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 76px; height: 20px; border-radius: 12px; background: oklch(0.12 0.02 270); z-index: 5; }
+  .screen { padding: 44px 16px 0; }
+  .screen h2 { margin: 0 0 16px; text-align: center; font-size: 26px; font-weight: 700; }
+  .month { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+  .row dt { color: var(--muted-foreground); font-size: 15px; }
+  .row dd { margin: 0; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .row.total { border-top: 1px solid var(--border); padding-top: 10px; margin: 0; }
+  .row.total dt { color: var(--foreground); font-size: 16px; font-weight: 600; }
+  .row.total dd { color: var(--success); font-size: 22px; font-weight: 700; }
+  dl { margin: 0; }
+  .scrim { position: absolute; inset: 0; background: oklch(0.12 0.02 270 / 30%); z-index: 2; }
+  .drawer { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; background: var(--popover); border-top: 1px solid var(--border); border-radius: 24px 24px 0 0; padding: 10px 16px 18px; }
+  .handle { width: 38px; height: 4px; border-radius: 2px; background: var(--input); margin: 0 auto 12px; }
+  .drawer h3 { margin: 0 0 12px; font-size: 17px; }
+  .amount { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--input); border-radius: 12px; padding: 8px 14px; margin-bottom: 12px; }
+  .amount small { display: block; font-size: 11px; color: var(--muted-foreground); }
+  .amount b { font-size: 26px; font-variant-numeric: tabular-nums; }
+  .amount span { color: var(--muted-foreground); font-size: 16px; }
+  .cats-label { font-size: 12px; color: var(--muted-foreground); margin-bottom: 6px; }
+  .cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .cat { min-height: 38px; display: flex; align-items: center; justify-content: center; text-align: center; border: 1px solid var(--input); background: var(--card); color: var(--muted-foreground); border-radius: 10px; font-size: 12.5px; }
+  .cat.sel { background: var(--primary); border-color: var(--ring); color: #fff; }
+  .save { width: 100%; min-height: 46px; border: 0; border-radius: 12px; background: var(--primary); color: #fff; font-weight: 600; font-size: 16px; }
+
+  @media (min-width: 900px) {
+    .page { padding-top: 24px; }
+    .hero { grid-template-columns: minmax(0, 1fr) 420px; grid-template-areas: "text phone" "cta phone"; gap: 12px 72px; align-items: center; padding-top: 48px; }
+    .text { text-align: left; align-self: end; }
+    .sub { margin-left: 0; }
+    .cta { justify-content: flex-start; }
+    .eq-wrap { align-self: start; }
+    .eq-note { text-align: left; }
+    .chip { padding: 9px 14px 11px; }
+    .chip .lbl { font-size: 11px; letter-spacing: .12em; }
+    .op { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="topbar">
+    <span class="brand">Hajsownik</span>
+    <a class="toplink" href="#">Zaloguj się</a>
+  </header>
+
+  <main class="hero">
+    <section class="text">
+      <h1 class="grad">Wiesz, ile zostaje w tym miesiącu.</h1>
+      <p class="sub">Wpisz wydatek w kilka sekund: kwota, kategoria, gotowe. Hajsownik od razu pokaże, ile zostaje z Twoich przychodów.</p>
+    </section>
+
+    <div class="carousel" role="region" aria-roledescription="karuzela" aria-label="Podgląd aplikacji">
+      <div class="stage">
+        <button class="nav prev" type="button" aria-label="Poprzedni widok"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+        <div class="track" id="track" tabindex="0">
+          <div class="slide" role="group" aria-roledescription="slajd" aria-label="1 z 3: wpisywanie wydatku"><div class="phone" role="img" aria-label="Ekran miesiąca w aplikacji Hajsownik z otwartym formularzem dodawania wydatku">
+        <div class="notch"></div>
+        <div class="screen">
+          <h2 class="grad" id="month-label">Październik 2026</h2>
+          <div class="month">
+            <dl>
+              <div class="row"><dt>Przychody</dt><dd>12&nbsp;500,00&nbsp;zł</dd></div>
+              <div class="row"><dt>Wydatki</dt><dd>8&nbsp;200,00&nbsp;zł</dd></div>
+              <div class="row total"><dt>Zostaje</dt><dd>4&nbsp;300,00&nbsp;zł</dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="scrim"></div>
+        <div class="drawer">
+          <div class="handle"></div>
+          <h3>Dodaj wydatek</h3>
+          <div class="amount"><div><small>Kwota</small><b>150,00</b></div><span>zł</span></div>
+          <div class="cats-label">Kategoria</div>
+          <div class="cats">
+            <div class="cat">Żywność</div><div class="cat">Samochód</div><div class="cat">Mieszkanie</div>
+            <div class="cat sel">Rozrywka</div><div class="cat">Dzieci</div><div class="cat">Zdrowie</div>
+          </div>
+          <button class="save" type="button">Zapisz</button>
+        </div>
+      </div></div>
+          <div class="slide" role="group" aria-roledescription="slajd" aria-label="2 z 3: przepływ pieniędzy"><svg class="svg-slide" viewBox="0 0 360 620" role="img" aria-label="Przepływ pieniędzy: przychody rozchodzą się do kategorii wydatków i do pozycji Zostaje (dane przykładowe)"><rect x=".5" y=".5" width="359" height="619" rx="28" class="panel"/><text x="34" y="56" class="h" font-size="20">Gdzie trafiają pieniądze</text><text x="34" y="124" class="m cap" font-size="10">PRZYCHODY</text><text x="34" y="146" class="t" font-size="15" font-weight="700">12 500 zł</text><rect x="34" y="198.0" width="10" height="330" rx="3" fill="#2dd4bf"/><path d="M44,198.0 C120.0,198.0 120.0,168.0 196,168.0 L196,247.2 C120.0,247.2 120.0,277.2 44,277.2 Z" fill="#7c8cff" fill-opacity="0.42"/><rect x="196" y="168.0" width="10" height="79.2" rx="3" fill="#7c8cff"/><text x="214" y="211.6" class="t" font-size="12">Mieszkanie <tspan class="m">3 000 zł</tspan></text><path d="M44,277.2 C120.0,277.2 120.0,257.2 196,257.2 L196,310.0 C120.0,310.0 120.0,330.0 44,330.0 Z" fill="#a78bfa" fill-opacity="0.42"/><rect x="196" y="257.2" width="10" height="52.8" rx="3" fill="#a78bfa"/><text x="214" y="287.6" class="t" font-size="12">Żywność <tspan class="m">2 000 zł</tspan></text><path d="M44,330.0 C120.0,330.0 120.0,320.0 196,320.0 L196,357.0 C120.0,357.0 120.0,367.0 44,367.0 Z" fill="#38bdf8" fill-opacity="0.42"/><rect x="196" y="320.0" width="10" height="37.0" rx="3" fill="#38bdf8"/><text x="214" y="342.5" class="t" font-size="12">Samochód <tspan class="m">1 400 zł</tspan></text><path d="M44,367.0 C120.0,367.0 120.0,367.0 196,367.0 L196,390.7 C120.0,390.7 120.0,390.7 44,390.7 Z" fill="#f59e0b" fill-opacity="0.42"/><rect x="196" y="367.0" width="10" height="23.8" rx="3" fill="#f59e0b"/><text x="214" y="382.8" class="t" font-size="12">Dzieci <tspan class="m">900 zł</tspan></text><path d="M44,390.7 C120.0,390.7 120.0,400.7 196,400.7 L196,413.9 C120.0,413.9 120.0,403.9 44,403.9 Z" fill="#f472b6" fill-opacity="0.42"/><rect x="196" y="400.7" width="10" height="13.2" rx="3" fill="#f472b6"/><text x="214" y="411.3" class="t" font-size="12">Rozrywka <tspan class="m">500 zł</tspan></text><path d="M44,403.9 C120.0,403.9 120.0,423.9 196,423.9 L196,434.5 C120.0,434.5 120.0,414.5 44,414.5 Z" fill="#94a3b8" fill-opacity="0.42"/><rect x="196" y="423.9" width="10" height="10.6" rx="3" fill="#94a3b8"/><text x="214" y="433.2" class="t" font-size="12">Inne <tspan class="m">400 zł</tspan></text><path d="M44,414.5 C120.0,414.5 120.0,444.5 196,444.5 L196,558.0 C120.0,558.0 120.0,528.0 44,528.0 Z" fill="oklch(0.845 0.143 164.978)" fill-opacity="0.6"/><rect x="196" y="444.5" width="10" height="113.5" rx="3" fill="oklch(0.845 0.143 164.978)"/><text x="214" y="499.2" class="ok" font-size="15" font-weight="700">Zostaje</text><text x="214" y="518.2" class="ok" font-size="14" font-weight="600">4 300 zł</text><text x="34" y="596" class="m" font-size="11">Dane przykładowe</text></svg></div>
+          <div class="slide" role="group" aria-roledescription="slajd" aria-label="3 z 3: wgląd w budżet"><svg class="svg-slide" viewBox="0 0 360 620" role="img" aria-label="Lupa nad listą wydatków pokazuje podział wydatków według kategorii (dane przykładowe)"><defs><filter id="lblur"><feGaussianBlur stdDeviation="2.6"/></filter><clipPath id="llens"><circle cx="170" cy="250" r="115"/></clipPath><linearGradient id="lring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c8cff"/><stop offset="1" stop-color="#a78bfa"/></linearGradient></defs><rect x=".5" y=".5" width="359" height="619" rx="28" class="panel"/><text x="34" y="56" class="h" font-size="20">Wgląd w budżet</text><g filter="url(#lblur)" opacity=".55"><rect x="30" y="84" width="300" height="330" rx="16" class="listbg"/><line x1="46" y1="140" x2="314" y2="140" class="rule"/><circle cx="52" cy="118" r="5" fill="#a78bfa"/><text x="68" y="123" class="t" font-size="13">Zakupy spożywcze</text><text x="314" y="123" class="t" font-size="13" font-weight="600" text-anchor="end">−250 zł</text><line x1="46" y1="192" x2="314" y2="192" class="rule"/><circle cx="52" cy="170" r="5" fill="#38bdf8"/><text x="68" y="175" class="t" font-size="13">Paliwo</text><text x="314" y="175" class="t" font-size="13" font-weight="600" text-anchor="end">−180 zł</text><line x1="46" y1="244" x2="314" y2="244" class="rule"/><circle cx="52" cy="222" r="5" fill="#7c8cff"/><text x="68" y="227" class="t" font-size="13">Czynsz</text><text x="314" y="227" class="t" font-size="13" font-weight="600" text-anchor="end">−1 800 zł</text><line x1="46" y1="296" x2="314" y2="296" class="rule"/><circle cx="52" cy="274" r="5" fill="#2dd4bf"/><text x="68" y="279" class="t" font-size="13">Wynagrodzenie</text><text x="314" y="279" class="t" font-size="13" font-weight="600" text-anchor="end">+10 000 zł</text><line x1="46" y1="348" x2="314" y2="348" class="rule"/><circle cx="52" cy="326" r="5" fill="#f59e0b"/><text x="68" y="331" class="t" font-size="13">Kieszonkowe</text><text x="314" y="331" class="t" font-size="13" font-weight="600" text-anchor="end">−100 zł</text><line x1="46" y1="400" x2="314" y2="400" class="rule"/><circle cx="52" cy="378" r="5" fill="#f472b6"/><text x="68" y="383" class="t" font-size="13">Kino</text><text x="314" y="383" class="t" font-size="13" font-weight="600" text-anchor="end">−60 zł</text></g><g clip-path="url(#llens)"><circle cx="170" cy="250" r="120" class="glass"/><text x="170" y="172" class="m" font-size="9.5" letter-spacing="1.5" text-anchor="middle">WYDATKI WG KATEGORII</text><text x="95" y="206" class="t" font-size="12" font-weight="600">Mieszkanie</text><text x="245" y="206" class="m" font-size="12" text-anchor="end">3 000 zł</text><rect x="95" y="213" width="150" height="8" rx="4" class="track-bar"/><rect x="95" y="213" width="150.0" height="8" rx="4" fill="#7c8cff"/><text x="95" y="242" class="t" font-size="12" font-weight="600">Żywność</text><text x="245" y="242" class="m" font-size="12" text-anchor="end">2 000 zł</text><rect x="95" y="249" width="150" height="8" rx="4" class="track-bar"/><rect x="95" y="249" width="100.0" height="8" rx="4" fill="#a78bfa"/><text x="95" y="278" class="t" font-size="12" font-weight="600">Samochód</text><text x="245" y="278" class="m" font-size="12" text-anchor="end">1 400 zł</text><rect x="95" y="285" width="150" height="8" rx="4" class="track-bar"/><rect x="95" y="285" width="70.0" height="8" rx="4" fill="#38bdf8"/><text x="95" y="314" class="t" font-size="12" font-weight="600">Dzieci</text><text x="245" y="314" class="m" font-size="12" text-anchor="end">900 zł</text><rect x="95" y="321" width="150" height="8" rx="4" class="track-bar"/><rect x="95" y="321" width="45.0" height="8" rx="4" fill="#f59e0b"/></g><g transform="translate(255,335) rotate(45)"><rect x="0" y="-11" width="96" height="22" rx="11" fill="url(#lring)"/></g><circle cx="170" cy="250" r="120" fill="none" stroke="url(#lring)" stroke-width="10"/><rect x="30" y="446" width="300" height="132" rx="16" class="okbox"/><text x="52" y="480" class="ok" font-size="12" letter-spacing="2">ZOSTAJE</text><text x="52" y="524" class="ok" font-size="34" font-weight="700">4 300 zł</text><text x="52" y="556" class="m" font-size="12">Przychody 12 500 zł · Wydatki 8 200 zł</text><text x="34" y="602" class="m" font-size="11">Dane przykładowe</text></svg></div>
+        </div>
+        <button class="nav next" type="button" aria-label="Następny widok"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+      <div class="bars">
+        <button type="button" class="bar" aria-label="Widok 1 z 3: wpisywanie wydatku" aria-current="true"></button>
+        <button type="button" class="bar" aria-label="Widok 2 z 3: przepływ pieniędzy"></button>
+        <button type="button" class="bar" aria-label="Widok 3 z 3: wgląd w budżet"></button>
+      </div>
+    </div>
+
+    <div class="cta-wrap">
+      <div class="cta">
+        <a class="btn primary" href="#">Załóż konto</a>
+        <a class="btn outline" href="#">Zaloguj się</a>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+(function () {
+  var label = document.getElementById('month-label');
+  try {
+    var s = new Intl.DateTimeFormat('pl-PL', { month: 'long', year: 'numeric', timeZone: 'Europe/Warsaw' }).format(new Date());
+    if (label && s) label.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+  } catch (e) {}
+  var track = document.getElementById('track');
+  var bars = Array.prototype.slice.call(document.querySelectorAll('.bar'));
+  var n = bars.length;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function index() { return Math.round(track.scrollLeft / track.clientWidth); }
+  function go(i) { i = (i + n) % n; track.scrollTo({ left: i * track.clientWidth, behavior: reduce ? 'auto' : 'smooth' }); }
+  function sync() { var i = index(); bars.forEach(function (b, j) { b.setAttribute('aria-current', j === i ? 'true' : 'false'); }); }
+  track.addEventListener('scroll', function () { window.requestAnimationFrame(sync); }, { passive: true });
+  document.querySelector('.prev').addEventListener('click', function () { go(index() - 1); });
+  document.querySelector('.next').addEventListener('click', function () { go(index() + 1); });
+  bars.forEach(function (b, j) { b.addEventListener('click', function () { go(j); }); });
+  track.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(index() - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(index() + 1); }
+  });
+  window.addEventListener('resize', function () { track.scrollTo({ left: index() * track.clientWidth, behavior: 'auto' }); });
+})();
+</script>
+</body>
+</html>

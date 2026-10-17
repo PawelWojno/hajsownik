@@ -41,6 +41,12 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+  --category-housing: oklch(0.511 0.23 275);
+  --category-food: oklch(0.541 0.25 293);
+  --category-car: oklch(0.588 0.158 242);
+  --category-kids: oklch(0.6 0.16 60);
+  --category-fun: oklch(0.592 0.22 350);
+  --category-other: oklch(0.554 0.046 257);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -88,6 +94,12 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+  --category-housing: oklch(0.681 0.169 275);
+  --category-food: oklch(0.709 0.159 293.5);
+  --category-car: oklch(0.754 0.139 232.7);
+  --category-kids: oklch(0.769 0.165 70.1);
+  --category-fun: oklch(0.725 0.175 349.8);
+  --category-other: oklch(0.711 0.035 256.8);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -138,6 +150,12 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-category-housing: var(--category-housing);
+  --color-category-food: var(--category-food);
+  --color-category-car: var(--category-car);
+  --color-category-kids: var(--category-kids);
+  --color-category-fun: var(--category-fun);
+  --color-category-other: var(--category-other);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
