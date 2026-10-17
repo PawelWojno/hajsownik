@@ -1,11 +1,11 @@
 ---
 change_id: ui-home-page
 title: Projekt strony startowej
-status: impl_reviewed
+status: archived
 github_issue: 31
 created: 2026-10-16
 updated: 2026-10-17
-archived_at: null
+archived_at: 2026-10-17T18:52:15Z
 ---
 
 ## Notes
