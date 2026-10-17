@@ -1,7 +1,8 @@
 ---
 change_id: ui-auth-shared-components
 title: Wspólne komponenty auth na tokenach i komponentach ui
-status: implemented
+status: impl_reviewed
+github_issue: 33
 created: 2026-10-17
 updated: 2026-10-17
 archived_at: null

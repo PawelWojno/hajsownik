@@ -46,7 +46,7 @@ Podmiana klas palety na tokeny i `ui/*` w trzech plikach, plus `aria` i prop `pe
 
 **Intent**: Użyć `ui/input` i `ui/label` zamiast ręcznego `<input>`/`<label>`, wszystkie kolory z tokenów, błąd powiązany z polem.
 
-**Contract**: Interfejs `FormFieldProps` rośnie addytywnie o opcjonalne `disabled?: boolean` i `inputClassName?: string` (przekazywane do `Input`, łączone przez `cn`); formularze ich nie przekazują. `Input` dostaje `className` z `pl-10` i `dark:bg-card`, `aria-invalid={Boolean(error)}` oraz `aria-describedby="<id>-error"` tylko przy błędzie. `Label` zachowuje odstęp `mb-1` i `text-muted-foreground`, plus `font-normal` (domyślny `font-medium leading-none` z `ui/label` pogrubiłby etykietę); ikona `text-muted-foreground`; `<p>` błędu dostaje `id="<id>-error"` i `text-destructive`. Wywalić `inputBase`.
+**Contract**: Interfejs `FormFieldProps` rośnie addytywnie o opcjonalne `disabled?: boolean` i `inputClassName?: string` (przekazywane do `Input`, łączone przez `cn`); formularze ich nie przekazują. `Input` dostaje `className` z `pl-10` i `dark:bg-card`, `aria-invalid={Boolean(error)}` oraz `aria-describedby="<id>-error"` tylko przy błędzie. `Label` zachowuje odstęp `mb-1` i `text-muted-foreground`, plus `font-normal` (domyślny `font-medium leading-none` z `ui/label` pogrubiłby etykietę); ikona `text-muted-foreground`; `<p>` błędu dostaje `id="<id>-error"` i `text-destructive`. Wywalić `inputBase`. Implementacja nadpisuje domyślne `h-9`/14 px z `ui/input` na `h-10.5 md:text-base` (i `leading-5 block` w `Label`), żeby zachować dotychczasową wysokość pola i tekst 16 px.
 
 #### 2. SubmitButton
 
@@ -54,7 +54,7 @@ Podmiana klas palety na tokeny i `ui/*` w trzech plikach, plus `aria` i prop `pe
 
 **Intent**: Zostawić kolory i hover wariantowi `default` z `ui/button`, spinner na tokenach, dodać możliwość wymuszenia loading w demo.
 
-**Contract**: Dodać opcjonalny `pending?: boolean`, który nadpisuje wartość z `useFormStatus()`; `className="w-full"` bez klas koloru. Spinner `border-primary-foreground/30 border-t-primary-foreground`. Dodać też opcjonalne `className?: string` (łączone przez `cn` z `w-full`), żeby demo mogło wymusić hover. Formularze nie przekazują nowych propów.
+**Contract**: Dodać opcjonalny `pending?: boolean`, który nadpisuje wartość z `useFormStatus()`; `className="w-full"` bez klas koloru. Spinner `border-primary-foreground/30 border-t-primary-foreground`. Dodać też opcjonalne `className?: string` (łączone przez `cn` z `w-full`), żeby demo mogło wymusić hover. Formularze nie przekazują nowych propów. Wysokość `h-10` zamiast domyślnego `h-9`, w parze z polem.
 
 #### 3. PasswordToggle
 
@@ -96,6 +96,12 @@ Dowód wizualny w istniejącej stronie `/dev/dashboard-states`, bez nowej strony
 **Intent**: Dodać do istniejących sekcji 1-7 kontrolki auth: `FormField` (default, focus wymuszony, disabled, error), `SubmitButton` (default, hover, disabled, loading przez `pending`), `PasswordToggle` (focus wymuszony).
 
 **Contract**: Statyczny render bez hydracji, wymuszone stany klasami jak `forcedFocus` (linia 56). Stan empty oznaczyć N/A z powodem (formularz nie ma stanu pustych danych) w akapicie N/A (linie 68-71).
+
+#### 2. Komponenty demo (addendum z implementacji)
+
+**File**: `src/components/dev/AuthStatesDemo.tsx`
+
+**Intent**: `AuthFieldDemo`, `AuthButtonDemo`, `AuthToggleDemo` renderują kontrolki auth dla strony dev, bo `.astro` nie przekaże reactowych `icon`/`endContent` (ReactNode) do `FormField`. Plik jest w `src/components/dev`, więc `check:ui` już go skanuje.
 
 ### Success Criteria:
 
