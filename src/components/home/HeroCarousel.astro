@@ -21,7 +21,14 @@ const arrowClass = `border-input bg-background/70 text-foreground hover:bg-accen
 >
   {/* px-10: room for the 32 px arrows plus a gap on both sides, so slides never sit under them. */}
   <div class="relative px-10">
-    <button type="button" data-carousel-prev aria-label="Poprzedni widok" class:list={[arrowClass, "left-0"]}>
+    <button
+      type="button"
+      hidden
+      data-carousel-control
+      data-carousel-prev
+      aria-label="Poprzedni widok"
+      class:list={[arrowClass, "left-0"]}
+    >
       <svg
         viewBox="0 0 24 24"
         width="18"
@@ -42,11 +49,10 @@ const arrowClass = `border-input bg-background/70 text-foreground hover:bg-accen
     {/* eslint-disable astro/jsx-a11y/no-noninteractive-tabindex */}
     <div
       data-carousel-track
+      role="group"
+      aria-label="Slajdy"
       tabindex="0"
-      class:list={[
-        "flex snap-x snap-mandatory overflow-x-auto rounded-3xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        focusClass,
-      ]}
+      class:list={["flex snap-x snap-mandatory no-scrollbar overflow-x-auto rounded-xl", focusClass]}
     >
       <div role="group" aria-roledescription="slajd" aria-label={label(0)} class:list={[slideClass]}>
         <PhoneSlide />
@@ -60,7 +66,14 @@ const arrowClass = `border-input bg-background/70 text-foreground hover:bg-accen
     </div>
     {/* eslint-enable astro/jsx-a11y/no-noninteractive-tabindex */}
 
-    <button type="button" data-carousel-next aria-label="Następny widok" class:list={[arrowClass, "right-0"]}>
+    <button
+      type="button"
+      hidden
+      data-carousel-control
+      data-carousel-next
+      aria-label="Następny widok"
+      class:list={[arrowClass, "right-0"]}
+    >
       <svg
         viewBox="0 0 24 24"
         width="18"
@@ -77,7 +90,7 @@ const arrowClass = `border-input bg-background/70 text-foreground hover:bg-accen
     </button>
   </div>
 
-  <div class="mt-2 flex justify-center gap-1">
+  <div hidden data-carousel-control class="mt-2 flex justify-center gap-1">
     {titles.map((title, index) => (
       <button
         type="button"
@@ -99,30 +112,57 @@ const arrowClass = `border-input bg-background/70 text-foreground hover:bg-accen
     const track = root.querySelector<HTMLElement>("[data-carousel-track]");
     const bars = [...root.querySelectorAll<HTMLElement>("[data-carousel-bar]")];
     if (!track || bars.length === 0) continue;
+    // The controls only work with this script, so they stay hidden (and out of the tab order) until it runs.
+    root.querySelectorAll("[data-carousel-control]").forEach((control) => {
+      control.removeAttribute("hidden");
+    });
 
     const count = bars.length;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const index = () => Math.round(track.scrollLeft / track.clientWidth);
-    const go = (target: number) => {
-      track.scrollTo({
-        left: ((target + count) % count) * track.clientWidth,
-        behavior: reduceMotion.matches ? "auto" : "smooth",
-      });
-    };
+    // `current` is the slide shown, or the one a running scroll is heading to, so a fast second click builds on the
+    // target instead of a half-scrolled position. `pending` is that running scroll's target.
     let current = 0;
-    const sync = () => {
-      current = index();
+    let pending: number | null = null;
+    let resizing = false;
+    const render = () => {
       bars.forEach((bar, i) => {
         bar.setAttribute("aria-current", i === current ? "true" : "false");
       });
     };
+    const go = (target: number) => {
+      if (!track.clientWidth) return;
+      pending = (target + count) % count;
+      current = pending;
+      render();
+      track.scrollTo({ left: pending * track.clientWidth, behavior: reduceMotion.matches ? "auto" : "smooth" });
+    };
+    const sync = () => {
+      if (resizing || !track.clientWidth) return;
+      const shown = Math.round(track.scrollLeft / track.clientWidth);
+      if (pending !== null) {
+        if (shown !== pending) return;
+        pending = null;
+      }
+      current = shown;
+      render();
+    };
 
     track.addEventListener("scroll", () => window.requestAnimationFrame(sync), { passive: true });
+    // A touch or wheel gesture takes over from a running scroll.
+    for (const type of ["pointerdown", "wheel"]) {
+      track.addEventListener(
+        type,
+        () => {
+          pending = null;
+        },
+        { passive: true },
+      );
+    }
     root.querySelector("[data-carousel-prev]")?.addEventListener("click", () => {
-      go(index() - 1);
+      go(current - 1);
     });
     root.querySelector("[data-carousel-next]")?.addEventListener("click", () => {
-      go(index() + 1);
+      go(current + 1);
     });
     bars.forEach((bar, i) => {
       bar.addEventListener("click", () => {
@@ -132,11 +172,16 @@ const arrowClass = `border-input bg-background/70 text-foreground hover:bg-accen
     track.addEventListener("keydown", (event) => {
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
       event.preventDefault();
-      go(index() + (event.key === "ArrowLeft" ? -1 : 1));
+      go(current + (event.key === "ArrowLeft" ? -1 : 1));
     });
-    // A resize changes the slide width: snap back to the current slide instead of stopping between two.
+    // A resize changes the slide width: snap back to the current slide instead of stopping between two. The browser's
+    // own re-snap fires scroll events with the old offset, so sync ignores them for a moment.
     window.addEventListener("resize", () => {
+      resizing = true;
       track.scrollTo({ left: current * track.clientWidth, behavior: "auto" });
+      window.setTimeout(() => {
+        resizing = false;
+      }, 150);
     });
   }
 </script>

@@ -1,4 +1,5 @@
 ---
+import { Card } from "@/components/ui/card";
 import { formatZl, sample } from "@/lib/home-sample";
 
 // Lens and list geometry in viewBox units (260 x 270). Everything inside the lens is clipped to its circle, so the
@@ -22,8 +23,8 @@ const description = `Lupa nad listą wydatków pokazuje podział wydatków wedł
   .join(", ")}); dane przykładowe`;
 ---
 
-<div class="border-border bg-card flex h-full w-full flex-col gap-3 rounded-3xl border p-4">
-  <h3 class="text-lg font-bold">Wgląd w budżet</h3>
+<Card className="h-full w-full gap-3 p-4 shadow-none">
+  <p class="text-lg font-bold">Wgląd w budżet</p>
   <svg viewBox="0 0 260 270" role="img" aria-label={description} class="min-h-0 w-full flex-1">
     <defs>
       <filter id="lens-blur">
@@ -56,7 +57,7 @@ const description = `Lupa nad listą wydatków pokazuje podział wydatków wedł
 
     <g clip-path="url(#lens-clip)">
       <circle cx={LENS.x} cy={LENS.y} r={LENS.r} class="fill-popover"></circle>
-      <text x={LENS.x} y="78" class="fill-muted-foreground" font-size="9" letter-spacing="1.4" text-anchor="middle">
+      <text x={LENS.x} y="78" class="fill-muted-foreground" font-size="10" letter-spacing="0.8" text-anchor="middle">
         WYDATKI WG KATEGORII
       </text>
       {lensRows.map((row) => (
@@ -79,7 +80,7 @@ const description = `Lupa nad listą wydatków pokazuje podział wydatków wedł
     <circle cx={LENS.x} cy={LENS.y} r={LENS.r} fill="none" stroke="url(#lens-ring)" stroke-width="8"></circle>
   </svg>
 
-  <div class="border-success/35 bg-success/10 rounded-2xl border p-3">
+  <div class="border-success/35 bg-success/10 rounded-xl border p-3">
     <p class="text-success text-xs font-semibold tracking-widest uppercase">Zostaje</p>
     <p class="text-success text-3xl font-bold tabular-nums">{formatZl(sample.left)}</p>
     <div class="mt-2 flex items-center gap-2">
@@ -98,4 +99,4 @@ const description = `Lupa nad listą wydatków pokazuje podział wydatków wedł
     </div>
   </div>
   <p class="text-muted-foreground text-xs">Dane przykładowe</p>
-</div>
+</Card>

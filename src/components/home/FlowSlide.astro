@@ -1,4 +1,5 @@
 ---
+import { Card } from "@/components/ui/card";
 import { formatZl, sample } from "@/lib/home-sample";
 
 // Geometry of the flow in viewBox units. Ribbon heights follow the amounts; the right column is laid out in slots of
@@ -44,10 +45,10 @@ const description = `Przepływ pieniędzy: przychody ${formatZl(sample.income)} 
   .join(", ")}) i do pozycji Zostaje ${formatZl(sample.left)} (dane przykładowe)`;
 ---
 
-<div class="border-border bg-card flex h-full w-full flex-col gap-3 rounded-3xl border p-4">
-  <h3 class="text-lg font-bold">Gdzie trafiają pieniądze</h3>
+<Card className="h-full w-full gap-3 p-4 shadow-none">
+  <p class="text-lg font-bold">Gdzie trafiają pieniądze</p>
   <svg viewBox={`0 0 ${WIDTH} ${viewHeight}`} role="img" aria-label={description} class="min-h-0 w-full flex-1">
-    <text x="0" y="12" class="fill-muted-foreground" font-size="9" letter-spacing="1.4">
+    <text x="0" y="12" class="fill-muted-foreground" font-size="11" letter-spacing="1.4">
       PRZYCHODY
     </text>
     <text x="0" y="32" class="fill-foreground" font-size="14" font-weight="700">
@@ -81,4 +82,4 @@ const description = `Przepływ pieniędzy: przychody ${formatZl(sample.income)} 
     ))}
   </svg>
   <p class="text-muted-foreground text-xs">Dane przykładowe</p>
-</div>
+</Card>

@@ -115,6 +115,11 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  /* The phone mockup on the home page keeps its device shape whatever --radius is. */
+  --radius-phone: 2rem;
+  --radius-phone-sheet: 1.5rem;
+  /* Phone content box wide enough for three category columns (variant: @phone-wide:). */
+  --container-phone-wide: 14rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -171,6 +176,13 @@
 }
 
 /* Soft glow behind the phone on the home page, from --primary (both themes get it through the token). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @utility bg-glow-primary {
   background-image: radial-gradient(
     ellipse 58% 52% at 50% 52%,
