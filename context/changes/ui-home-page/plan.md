@@ -250,15 +250,15 @@ SVG i HTML renderowane na serwerze, ok. 20 linii JS; bez zewnętrznych bibliotek
 
 #### Automated
 
-- [ ] 2.1 Kontrola UI przechodzi i obejmuje nowe pliki (`src/components/home` w `CLEAN_PATHS`): `npm run check:ui`
-- [ ] 2.2 Lint i typy przechodzą: `npm run lint && npx astro check`
+- [x] 2.1 Kontrola UI przechodzi i obejmuje nowe pliki (`src/components/home` w `CLEAN_PATHS`): `npm run check:ui`
+- [x] 2.2 Lint i typy przechodzą: `npm run lint && npx astro check`
 
 #### Manual
 
-- [ ] 2.3 Slajdy 2 i 3 mieszczą się między strzałkami na 390 px i na desktopie
-- [ ] 2.4 Kwoty w przepływie nie nachodzą na siebie ani na etykiety sąsiednich kategorii
-- [ ] 2.5 W kafelku „Zostaje" widać „Przychody − Wydatki" z wyraźnym minusem
-- [ ] 2.6 Strzałki, paski i klawisze ←/→ działają, fokus jest widoczny
+- [x] 2.3 Slajdy 2 i 3 mieszczą się między strzałkami na 390 px i na desktopie
+- [x] 2.4 Kwoty w przepływie nie nachodzą na siebie ani na etykiety sąsiednich kategorii
+- [x] 2.5 W kafelku „Zostaje" widać „Przychody − Wydatki" z wyraźnym minusem
+- [x] 2.6 Strzałki, paski i klawisze ←/→ działają, fokus jest widoczny
 
 ### Phase 3: Strona `/`
 

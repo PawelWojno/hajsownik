@@ -170,6 +170,15 @@
   background-image: linear-gradient(to bottom, var(--cosmic-edge), var(--cosmic-mid), var(--cosmic-edge));
 }
 
+/* Soft glow behind the phone on the home page, from --primary (both themes get it through the token). */
+@utility bg-glow-primary {
+  background-image: radial-gradient(
+    ellipse 58% 52% at 50% 52%,
+    color-mix(in oklab, var(--primary) 36%, transparent),
+    transparent 74%
+  );
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -1,0 +1,76 @@
+---
+import { Card } from "@/components/ui/card";
+import { currentMonthStart, formatMonthLabel } from "@/lib/dates";
+import { sample } from "@/lib/home-sample";
+import { formatMinor } from "@/lib/money";
+
+// Rendered on the server, so the month is never hardcoded (same helpers as the dashboard).
+const label = formatMonthLabel(currentMonthStart());
+const monthLabel = label.charAt(0).toUpperCase() + label.slice(1);
+
+const rows = [
+  { label: "Przychody", value: formatMinor(sample.income * 100) },
+  { label: "Wydatki", value: formatMinor(sample.expense * 100) },
+];
+---
+
+<div class="bg-glow-primary flex h-full w-full flex-col items-center justify-center gap-2">
+  <div
+    role="img"
+    aria-label="Ekran miesiąca w aplikacji Hajsownik z otwartym formularzem dodawania wydatku (dane przykładowe)"
+    class="border-secondary relative h-132 w-64 overflow-hidden rounded-4xl border-8 bg-cosmic"
+  >
+    {/* Frame, notch and scrim assume the dark theme (<html class="dark">); review them when the light look lands. */}
+    <div class="bg-background absolute top-1.5 left-1/2 z-10 h-4 w-16 -translate-x-1/2 rounded-xl"></div>
+
+    <div class="px-3 pt-9">
+      <h2 class="from-title-from to-title-to mb-3 bg-gradient-to-r bg-clip-text text-center text-xl font-bold text-transparent">
+        {monthLabel}
+      </h2>
+      <Card className="gap-0 rounded-2xl p-3 shadow-none">
+        <dl class="space-y-2 text-sm">
+          {rows.map((row) => (
+            <div class="flex items-baseline justify-between gap-2">
+              <dt class="text-muted-foreground">{row.label}</dt>
+              <dd class="tabular-nums">{row.value}</dd>
+            </div>
+          ))}
+          <div class="border-border flex items-baseline justify-between gap-2 border-t pt-2">
+            <dt class="text-foreground font-semibold">Zostaje</dt>
+            <dd class="text-success text-base font-bold tabular-nums">{formatMinor(sample.left * 100)}</dd>
+          </div>
+        </dl>
+      </Card>
+    </div>
+
+    <div class="bg-background/40 absolute inset-0 z-20"></div>
+
+    <div class="border-border bg-popover absolute inset-x-0 bottom-0 z-30 rounded-t-3xl border-t px-3 pt-2.5 pb-4">
+      <div class="bg-input mx-auto mb-2.5 h-1 w-10 rounded-sm"></div>
+      <p class="mb-2.5 text-base font-semibold">Dodaj wydatek</p>
+      <div class="border-input mb-2.5 rounded-lg border px-3 py-1.5">
+        <p class="text-muted-foreground text-xs">Kwota</p>
+        <p class="text-xl tabular-nums">{sample.draft.amount}</p>
+      </div>
+      <p class="text-muted-foreground mb-1.5 text-xs">Kategoria</p>
+      <div class="mb-3 grid grid-cols-3 gap-1.5">
+        {sample.categories.map((category) => (
+          <div
+            class:list={[
+              "flex min-h-8 items-center justify-center rounded-md border px-1 text-center text-xs",
+              category.name === sample.draft.category
+                ? "border-ring bg-primary text-primary-foreground"
+                : "border-input bg-card text-muted-foreground",
+            ]}
+          >
+            {category.name}
+          </div>
+        ))}
+      </div>
+      <div class="bg-primary text-primary-foreground flex min-h-10 items-center justify-center rounded-lg font-semibold">
+        Zapisz
+      </div>
+    </div>
+  </div>
+  <p class="text-muted-foreground text-xs">Dane przykładowe</p>
+</div>
