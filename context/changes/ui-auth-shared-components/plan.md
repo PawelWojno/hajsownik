@@ -208,12 +208,12 @@ Po `npm run build` serwer dev trzeba zrestartować i odświeżyć stronę twardo
 
 #### Automated
 
-- [x] 3.1 `npm run check:ui` przechodzi
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Type checking passes: `npx astro check`
-- [x] 3.4 Production build: `npm run build`
-- [x] 3.5 Smoke test auth: `npm run smoke` (przy działającym serwerze)
+- [x] 3.1 `npm run check:ui` przechodzi — 877cd50
+- [x] 3.2 Linting passes: `npm run lint` — 877cd50
+- [x] 3.3 Type checking passes: `npx astro check` — 877cd50
+- [x] 3.4 Production build: `npm run build` — 877cd50
+- [x] 3.5 Smoke test auth: `npm run smoke` (przy działającym serwerze) — 877cd50
 
 #### Manual
 
-- [x] 3.6 Wstawienie `bg-purple-600` do `FormField.tsx` powoduje błąd `check:ui` (po sprawdzeniu cofnąć)
+- [x] 3.6 Wstawienie `bg-purple-600` do `FormField.tsx` powoduje błąd `check:ui` (po sprawdzeniu cofnąć) — 877cd50
