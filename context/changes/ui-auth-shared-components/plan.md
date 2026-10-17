@@ -182,27 +182,27 @@ Po `npm run build` serwer dev trzeba zrestartować i odświeżyć stronę twardo
 
 #### Automated
 
-- [x] 1.1 Skan hardcode (grep z 10x-ui SKILL.md:123) na trzech plikach zwraca 0 trafień
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Type checking passes: `npx astro check`
+- [x] 1.1 Skan hardcode (grep z 10x-ui SKILL.md:123) na trzech plikach zwraca 0 trafień — 8ac5fb3
+- [x] 1.2 Linting passes: `npm run lint` — 8ac5fb3
+- [x] 1.3 Type checking passes: `npx astro check` — 8ac5fb3
 
 #### Manual
 
-- [x] 1.4 `/auth/signin` i `/auth/signup` wyglądają poprawnie (wysokość pola, tekst 14 px, waga etykiety), błąd walidacji podświetla pole i pokazuje komunikat
-- [x] 1.5 Tab: fokus widoczny na polu i na ikonie oka
+- [x] 1.4 `/auth/signin` i `/auth/signup` wyglądają poprawnie (wysokość pola, tekst 14 px, waga etykiety), błąd walidacji podświetla pole i pokazuje komunikat — 8ac5fb3
+- [x] 1.5 Tab: fokus widoczny na polu i na ikonie oka — 8ac5fb3
 
 ### Phase 2: Demo 7 stanów i zrzuty
 
 #### Automated
 
-- [ ] 2.1 Strona dev buduje się i lintuje: `npm run lint` i `npx astro check`
-- [ ] 2.5 `npm run check:ui` przechodzi (strona dev jest już w `CLEAN_PATHS`)
+- [x] 2.1 Strona dev buduje się i lintuje: `npm run lint` i `npx astro check`
+- [x] 2.5 `npm run check:ui` przechodzi (strona dev jest już w `CLEAN_PATHS`)
 
 #### Manual
 
-- [ ] 2.2 Zrzuty desktop i 390 px: wszystkie 7 komórek pokazane lub N/A z powodem
-- [ ] 2.3 Tło pola w dark (`dark:bg-card`) akceptowalne wobec dotychczasowego `bg-white/10`
-- [ ] 2.4 Prawdziwy hover i Tab sprawdzone na `/auth/signin`
+- [x] 2.2 Zrzuty desktop i 390 px: wszystkie 7 komórek pokazane lub N/A z powodem
+- [x] 2.3 Tło pola w dark (`dark:bg-card`) akceptowalne wobec dotychczasowego `bg-white/10`
+- [x] 2.4 Prawdziwy hover i Tab sprawdzone na `/auth/signin`
 
 ### Phase 3: Zabezpieczenie i bramki
 
