@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DisabledSelectDemo } from "@/components/dev/DisabledSelectDemo";
+import { AuthButtonDemo, AuthFieldDemo, AuthToggleDemo } from "@/components/dev/AuthStatesDemo";
 import Layout from "@/layouts/Layout.astro";
 import type { Category, MonthSummary, RecurringExpense, RecurringIncome } from "@/types";
 
@@ -67,7 +68,8 @@ const forcedFocus = "border-ring ring-ring/50 ring-3";
       </p>
       <p class="text-muted-foreground mx-auto mb-8 max-w-2xl text-center text-sm">
         N/A: zalogowany Topbar (wymaga sesji), pusta siatka kategorii (widoczna tylko w otwartym panelu), fokus na polu
-        „Źródło” i „Więcej opcji” (wymaga interakcji, sprawdzić Tabem na /dashboard).
+        „Źródło” i „Więcej opcji” (wymaga interakcji, sprawdzić Tabem na /dashboard). Kontrolki auth w stanie 6: N/A
+        (formularz nie ma stanu pustych danych).
       </p>
 
       <div class="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
@@ -97,6 +99,10 @@ const forcedFocus = "border-ring ring-ring/50 ring-3";
             recurring={[]}
             recurringIncomes={[]}
           />
+          <p class="text-muted-foreground text-sm">Kontrolki auth:</p>
+          <AuthFieldDemo state="default" />
+          <AuthToggleDemo />
+          <AuthButtonDemo state="default" />
         </section>
 
         <div class="flex flex-col gap-8">
@@ -114,6 +120,7 @@ const forcedFocus = "border-ring ring-ring/50 ring-3";
                 Dodaj przychód
               </Button>
             </div>
+            <AuthButtonDemo state="hover" />
           </section>
 
           <section aria-labelledby="st-focus" class="flex flex-col gap-3">
@@ -133,6 +140,8 @@ const forcedFocus = "border-ring ring-ring/50 ring-3";
               </Label>
               <Input id="focus-amount" placeholder="0,00" className={`dark:bg-card ${forcedFocus}`} />
             </div>
+            <AuthFieldDemo state="focus" />
+            <AuthToggleDemo focus />
           </section>
 
           <section aria-labelledby="st-disabled" class="flex flex-col gap-3">
@@ -157,6 +166,11 @@ const forcedFocus = "border-ring ring-ring/50 ring-3";
               </Label>
               <DisabledSelectDemo />
             </div>
+            <AuthFieldDemo state="disabled" />
+            <p class="text-muted-foreground text-sm">
+              SubmitButton wyłącza się tylko w trakcie wysyłki: disabled = pending (ten sam wygląd co stan 7).
+            </p>
+            <AuthButtonDemo state="disabled" />
           </section>
 
           <section aria-labelledby="st-error" class="flex flex-col gap-3">
@@ -176,6 +190,7 @@ const forcedFocus = "border-ring ring-ring/50 ring-3";
             >
               Nie udało się wczytać danych miesiąca. Odśwież stronę.
             </p>
+            <AuthFieldDemo state="error" />
           </section>
 
           <section aria-labelledby="st-empty" class="flex flex-col gap-3">
@@ -203,6 +218,7 @@ const forcedFocus = "border-ring ring-ring/50 ring-3";
             <Button disabled className="min-h-11 w-full rounded-lg">
               Zapisuję…
             </Button>
+            <AuthButtonDemo state="loading" />
           </section>
         </div>
       </div>
