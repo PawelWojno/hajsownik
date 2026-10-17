@@ -264,24 +264,24 @@ SVG i HTML renderowane na serwerze, ok. 20 linii JS; bez zewnętrznych bibliotek
 
 #### Automated
 
-- [x] 3.1 Kontrola UI: `npm run check:ui`
-- [x] 3.2 Lint i typy: `npm run lint && npx astro check`
-- [x] 3.3 Build: `npm run build`
+- [x] 3.1 Kontrola UI: `npm run check:ui` — bbd5e6b
+- [x] 3.2 Lint i typy: `npm run lint && npx astro check` — bbd5e6b
+- [x] 3.3 Build: `npm run build` — bbd5e6b
 
 #### Manual
 
-- [x] 3.4 Nazwa aplikacji widoczna jako gradientowy nagłówek; opis i linia o prywatności akceptowane przez użytkownika
-- [x] 3.5 Poniżej 1024 px jedna kolumna, od 1024 px dwie
+- [x] 3.4 Nazwa aplikacji widoczna jako gradientowy nagłówek; opis i linia o prywatności akceptowane przez użytkownika — bbd5e6b
+- [x] 3.5 Poniżej 1024 px jedna kolumna, od 1024 px dwie — bbd5e6b
 
 ### Phase 4: Weryfikacja
 
 #### Automated
 
-- [ ] 4.1 Smoke przechodzi: `npm run smoke`
-- [ ] 4.2 Lint, typy, build, `check:ui` przechodzą
+- [x] 4.1 Smoke przechodzi: `npm run smoke`
+- [x] 4.2 Lint, typy, build, `check:ui` przechodzą
 
 #### Manual
 
-- [ ] 4.3 Zrzuty 390 px i desktop wyglądają zgodnie z ustaleniami
-- [ ] 4.4 Fokus klawiaturą widoczny na wszystkich elementach interaktywnych
-- [ ] 4.5 Przewijanie dotykiem działa (scroll-snap) także bez JS
+- [x] 4.3 Zrzuty 390 px i desktop wyglądają zgodnie z ustaleniami
+- [x] 4.4 Fokus klawiaturą widoczny na wszystkich elementach interaktywnych
+- [x] 4.5 Przewijanie dotykiem działa (scroll-snap) także bez JS
