@@ -277,11 +277,11 @@ SVG i HTML renderowane na serwerze, ok. 20 linii JS; bez zewnętrznych bibliotek
 
 #### Automated
 
-- [x] 4.1 Smoke przechodzi: `npm run smoke`
-- [x] 4.2 Lint, typy, build, `check:ui` przechodzą
+- [x] 4.1 Smoke przechodzi: `npm run smoke` — a3cd079
+- [x] 4.2 Lint, typy, build, `check:ui` przechodzą — a3cd079
 
 #### Manual
 
-- [x] 4.3 Zrzuty 390 px i desktop wyglądają zgodnie z ustaleniami
-- [x] 4.4 Fokus klawiaturą widoczny na wszystkich elementach interaktywnych
-- [x] 4.5 Przewijanie dotykiem działa (scroll-snap) także bez JS
+- [x] 4.3 Zrzuty 390 px i desktop wyglądają zgodnie z ustaleniami — a3cd079
+- [x] 4.4 Fokus klawiaturą widoczny na wszystkich elementach interaktywnych — a3cd079
+- [x] 4.5 Przewijanie dotykiem działa (scroll-snap) także bez JS — a3cd079

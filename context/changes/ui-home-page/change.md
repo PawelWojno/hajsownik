@@ -1,7 +1,7 @@
 ---
 change_id: ui-home-page
 title: Projekt strony startowej
-status: implementing
+status: implemented
 github_issue: 31
 created: 2026-10-16
 updated: 2026-10-17
